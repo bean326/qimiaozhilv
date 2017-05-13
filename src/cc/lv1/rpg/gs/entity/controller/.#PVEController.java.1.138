@@ -1,0 +1,1146 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+import cc.lv1.rpg.gs.entity.ext.ReviseBaseInfo;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Mail;
+import cc.lv1.rpg.gs.entity.impl.Monster;
+import cc.lv1.rpg.gs.entity.impl.MonsterDropProp;
+import cc.lv1.rpg.gs.entity.impl.battle.MonsterBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.PlayerBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.SpriteBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.net.impl.NoticeJob;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * 玩家 vs 敌人
+ * @author dxw
+ *
+ */
+public class PVEController extends BattleController
+{
+
+	private PlayerController [] players = null;
+
+	private MonsterController [] monsters = null;
+	
+	private int playerLength;
+	
+	private int monsterLength;
+	
+	private boolean isBoss = false;
+	
+	private boolean isNoticed = false;
+
+	public boolean isBoss()
+	{
+		return isBoss;
+	}
+
+	public void setBoss(boolean isBoss)
+	{
+		this.isBoss = isBoss;
+	}
+	
+
+	public void update(long timeMillis)
+	{
+		if(timeMillis - endTime > 8800 && isMonsterDead())
+		{
+			uninit();
+		}
+		super.update(timeMillis);
+		
+		int monsterSize = monsters.length;
+		for(int i = 0 ; i < monsterSize ; i ++)
+		{
+			if(monsters[i] == null)
+				continue;
+			monsters[i].update(timeMillis);
+		}
+	}
+	
+	public PlayerController getAnyonePlayer()
+	{
+		for (int i = 0; i < players.length; i++)
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			else
+				return players[i];
+		}
+		return null;
+	}
+	
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		if(isFinish)
+		{
+			return;
+		}
+		int type = msg.getType();
+
+		if(type == SMsg.C_BATTLE_ACTION_COMMAND)
+		{
+			if(!target.isOnline())
+				return;
+			if(target.getAttachment().isDead())
+				return;
+			if(!target.isSkillMaybeUse())
+				return;
+			
+			int actionType = msg.getBuffer().readByte();
+			
+			if(actionType == BattleController.SKILLPROCESSOR) //释放技能
+			{
+				processSkill(target,msg);
+			}
+			else if(actionType ==2) //释放道具
+			{
+				processGoods(target,msg);
+			}
+			else if(actionType == 3) //逃跑
+			{
+				removePlayer(target);
+			}
+			else
+				return;
+		}
+		else if(type == SMsg.C_BATTLE_PLAYER_BATTLEEND)
+		{
+			if(!isPlayerDead() && !isMonsterDead())
+				return;
+			uninit();
+		}
+		else if(type == SMsg.C_BATTLE_PLAYER_RESET_COMMAND)
+		{
+			resetChoose(target, msg.getBuffer());
+		}
+		else
+		{
+			super.clientMessageChain(target, msg);
+		}
+	}
+	
+
+
+	
+	protected void processSkill(PlayerController target, AppMessage msg)
+	{
+		int skillId = msg.getBuffer().readInt(); //发送技能的id
+		int targetIndex = msg.getBuffer().readByte(); //发送目标的index
+
+		if(targetIndex < 0 || targetIndex > 9)
+			return;
+
+		SkillTome skillTome= (SkillTome)target.getPlayer().getExtPlayerInfo("skillTome");
+		ActiveSkill skill  = skillTome.getActiveSkill(skillId);
+		if(skill == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_SKILL_NOT_EXIST);
+			return;
+		}
+		if(skill.profession[0] != 0)
+		{
+			if(skill.profession[0] == 15 || skill.profession[0]-4 != target.getPlayer().upProfession)
+				return;
+		}
+
+		if(!skill.isProcessSkill(target))
+			return;
+		if(!target.isSkillUse(skill))
+			return;
+
+		EquipSet equipSet = (EquipSet) target.getPlayer().getExtPlayerInfo("equipSet");
+		if(!equipSet.checkEquip(skill.weaponType))
+		{
+			target.sendGetGoodsInfo(1, false,"\u4f60\u6ca1\u6709\u6280\u80fd\u6240\u9700\u6b66\u5668");
+			return;
+		}
+
+		if(!skill.checkMagicEnough(target))
+		{
+			target.sendGetGoodsInfo(1, false, "\u4F60\u7684\u9B54\u529B\u503C\u4E0D\u591F\u4E86");
+			return;
+		}
+
+		SpriteBattleTmp sbt = target.getAttachment();
+		
+		if(sbt == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_INIT_BATTLE_FAIL);
+			return;
+		}
+		
+		if(sbt.isLocked())
+		{
+			target.sendAlert(ErrorCode.ALERT_PLAYER_IS_LOCKED);
+			return;
+		}
+		
+		MonsterBattleTmp mbt = null;
+		int monsterBeforeHP = 0,monsterAfterHP = 0;
+		
+		if(skill.targetType[0] == ActiveSkill.TARGET_TYPE_PLAYERS) //己方
+		{
+		    if(targetIndex >= players.length)
+		    {
+				return;
+		    }
+		    if(players[targetIndex] == null)
+		    {
+		    	return;
+		    }
+		    sbt.setSkillTarget(players[targetIndex]);
+		   
+		}
+		else if(skill.targetType[0] == ActiveSkill.TARGET_TYPE_MONSTERS) //2：敌方
+		{
+		
+			if(targetIndex >= monsterLength)
+			{
+				return;
+			}
+		    if(monsters[targetIndex] == null)
+		    {
+		    	return;
+		    }
+		    if(monsters[targetIndex].getAttachment().isDead())
+		    {
+		    	for (int i = 0; i < monsters.length; i++)
+		    	{
+		    		if(monsters[i] != null && !monsters[i].getAttachment().isDead())
+		    		{
+		    			targetIndex = i;
+		    			break;
+		    		}
+				}
+		    }
+		    if(monsters[targetIndex].getAttachment().isDead())
+		    	return;
+		    mbt = (MonsterBattleTmp) monsters[targetIndex].getAttachment();
+			sbt.setSkillTarget(monsters[targetIndex]);
+			
+			monsterBeforeHP = mbt.getMonster().hitPoint;
+		}	
+		else if(skill.targetType[0] == ActiveSkill.TARGET_TYPE_ONESELF)//3.自己
+		{
+			sbt.setSkillTarget(target);
+		}
+		else
+		{
+			System.out.println("PVEController 240 other target Object");
+			return;
+		}
+
+		boolean result = sbt.processActiveSkill(skill);
+
+		if(mbt != null)
+		{
+			monsterAfterHP = mbt.getMonster().hitPoint;
+			//设置怪物仇恨值
+			if(mbt.isDead() || target.isDead() || !target.isOnline())
+				mbt.initHatred(getPlayerIndex(target));
+			else
+			{
+				mbt.setHatred(monsterBeforeHP - monsterAfterHP, skill, getPlayerIndex(target), 0, 0);
+			}
+		}
+		
+		if(result)
+		{
+			skill.processTime = target.getNetConnection().getLastReadTime();
+			target.skillStartTime = skill.processTime;
+			target.skillNeedTime = skill.CDTimer==0?4800:skill.CDTimer;
+		}
+
+	}
+	
+	public int getPlayerIndex(PlayerController target)
+	{
+		for (int i = 0; i < players.length; i++)
+		{
+			if(players[i] == null)
+				continue;
+			if(players[i].getName().equals(target.getName()))
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+
+	public void setFighters(PlayerController[] players, SpriteController [] sprite)
+	{
+		 MonsterController [] monsters = (MonsterController[])sprite;
+		 super.setFighters(players, monsters);
+		 
+		 this.players = players;
+		 this.monsters = monsters;
+		 playerLength = players.length;
+		 monsterLength = monsters.length;
+		 
+		 PlayerBattleTmp pt = null;
+		  
+		 int length = players.length;
+		 int i = 0;
+		 for( ; i < length ; i ++)
+		 {
+			 if(isTargetNull(players[i]))
+				continue;
+
+			 pt = new PlayerBattleTmp();
+			 pt.setBattle(this);
+			 pt.setPlayer(players[i]);
+			 pt.setTeamNo(BattleController.TEAM1);
+			 pt.setIndex(i);
+			 players[i].setAttachment(pt);
+			 addPlayer(players[i]);
+		 }
+		 
+		 
+		 MonsterBattleTmp mt = null;
+		 
+		 length = monsters.length;
+		 for( i = 0 ; i < length ; i ++)
+		 {
+			 if(monsters[i] == null)
+				 continue;
+			 
+			 mt = new MonsterBattleTmp();
+			 mt.setBattle(this);
+			 mt.setMonster(monsters[i]);
+			 mt.setTeamNo(BattleController.TEAM2);
+			 mt.setIndex(i);
+			 monsters[i].setAttachment(mt);
+			 monsters[i].setParent(this);
+		 }
+	}
+	
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeByte(BattleController.TEAM1);
+//System.out.println("send one team info:");
+		int playerLength = players.length;
+//System.out.println("length "+playerLength);
+		buffer.writeByte(playerLength);
+		
+		for(int i = 0 ; i < playerLength ; i ++)
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			
+			buffer.writeByte(i);
+			buffer.writeInt(players[i].getID());
+			players[i].sendAlwaysValue();
+//System.out.println("   player index"+i+" id:"+players[i].getID()+" name:"+players[i].getName());
+		}
+		
+		buffer.writeByte(BattleController.TEAM2);
+//System.out.println("send two team info:");
+		int monsterLength = monsters.length;
+		
+		buffer.writeByte(monsterLength);
+//System.out.println("length "+monsterLength);
+		for(int i = 0 ; i < monsterLength ; i ++)
+		{
+			if(monsters[i] == null)
+				continue;
+			
+			buffer.writeByte(i);
+			monsters[i].getMonster().writeBattleTo(buffer);
+//System.out.println("   monster index"+i+" id:"+monsters[i].getID()+" name:"+monsters[i].getName());
+		}
+	}
+	
+	public MonsterController[] getMonsters()
+	{
+		return monsters;
+	}
+
+	public PlayerController[] getPlayers()
+	{
+		return players;
+	}
+	
+	
+	/**
+	 * 复活选择
+	 * @param buffer
+	 */
+	public void resetChoose(PlayerController target,ByteBuffer buffer)
+	{
+		if(!(target.getParent() instanceof BattleController))
+			return;
+		if(!isPlayerDead() && !isMonsterDead())
+			return;
+		
+		int type = buffer.readByte();
+		
+		if(isPlayerDead())
+		{
+			int playerCount = getPlayerCount();
+
+			if(playerCount <= 0)
+				return;
+			
+			if(type == 1)
+			{
+				Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+				if(bag.money < RESETMONEY)
+				{
+					target.sendAlert(ErrorCode.ALERT_SHOP_NO_MONEY);
+					return;
+				}
+				
+				bag.money -= RESETMONEY;
+
+				for(int i = 0 ; i < playerCount ; i ++)
+				{
+					PlayerController everyone = (PlayerController)playerList.get(i);
+					if(isTargetNull(everyone))
+						continue;
+					PlayerBattleTmp pbt = (PlayerBattleTmp) everyone.getAttachment();
+					removeEffect(pbt.getEffectList(),pbt);
+//					removeHaloEffect(pbt.getBuffBox().getHaloList(), pbt);
+					List list = pbt.getBuffBox().getEffectList();
+					removeHaloEffect(list, everyone);
+					room.setParentPlayer(everyone);
+					everyone.setParent(room);
+				}
+				
+				ByteBuffer endBattleBuff = new ByteBuffer(1);
+				endBattleBuff.writeBoolean(true);
+				dispatchMsg(SMsg.S_BATTLE_PLAYER_BATTLEEND, endBattleBuff);
+				
+				sendEquipMoney(target);
+				
+				sendResetInfo(target);
+				
+				fixPlayerBaseInfo(players,true);
+			}
+			else if(type == 2)
+			{
+				super.uninit(1);
+				
+				fixPlayerBaseInfo(players,false);
+				
+				if(players.length < 1)
+					return;
+				int roomId = room.getRebirthId(players[0].getPlayer().camp);
+				if(roomId == 0)
+					return;
+				Object obj = DataFactory.getInstance().getGameObject(roomId);
+				if(obj == null || !(obj instanceof RoomController))
+					return;
+				RoomController rc = (RoomController) obj;
+				if(rc.id == room.id)
+					return;
+
+				room.sendPlayerMove(rc, players);
+			}
+			else
+			{
+				System.out.println("PVEController 481 error:type=="+type);
+				return;
+			}
+			
+			isFinish = true;
+		}
+	}
+
+	/**
+	 * 通知战斗结束
+	 */
+	public void uninit()
+	{
+		for (int i = 0; i < monsterLength; i++)
+		{
+			monsters[i].setParent(room);
+		}
+		
+		if(isMonsterDead())
+		{
+			isWin = true;
+				
+			for(int i = 0 ; i < players.length ; i ++)
+			{
+				if(isTargetNull(players[i]))
+					continue;
+				PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+				removeEffect(pbt.getEffectList(),pbt);
+				removeHaloEffect(pbt.getBuffBox().getHaloList(),players[i]);
+			}
+
+			
+			PlayerController player = null;
+			StringBuffer sb = null;
+			
+			for (int i = 0; i < players.length; i++) 
+			{
+				if(isTargetNull(players[i]))
+					continue;
+				PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+//				if(pbt.isDead())
+//					continue;
+				
+				for (int j = 0; j < monsterLength; j++) 
+				{
+					players[i].onPlayerKillMonster(monsters[j]);//这个方法一定要放在checkVisibleExit()前面;
+				}
+
+				Bag bag = (Bag) players[i].getPlayer().getExtPlayerInfo("bag");
+				bag.point += pbt.battlePoint;
+				bag.sendAddGoods(players[i], null);
+				sb = new StringBuffer();
+				sb.append("\u83b7\u5f97\u94DC\u5e01: ");
+				sb.append(pbt.battlePoint);
+				players[i].sendGetGoodsInfo(1, false, sb.toString());
+				
+				players[i].addExp(pbt.battleExp);
+				boolean flag = false;
+				if(players[i].getTeam() != null)
+				{
+					if(players[i].getTeam().isLeader(players[i]))
+						flag = true;
+				}
+				
+				sb = new StringBuffer();
+				sb.append("\u83b7\u5f97\u7ecf\u9a8c: ");
+				sb.append(pbt.battleExp);
+				
+				if(flag)
+				{
+					sb.append("(\u961f\u957f\u52a0\u6210)");//队长加成
+				}
+				if(players[i].getFamilyPlayers(players) > 0)
+				{
+					sb.append("(\u5BB6\u65CF\u52A0\u6210)");//家族加成
+				}
+				if(players[i].getTeam() != null)
+				{
+					sb.append("(\u961F\u4F0D\u52A0\u6210)");//队伍加成
+				}
+				players[i].sendGetGoodsInfo(1,false,sb.toString());
+				
+				player = players[i];
+				
+				players[i].sendAlwaysValue();
+			}
+			
+			if(player != null)
+				player.checkVisibleExit();
+			battleGoods();
+
+			isFinish = true;
+			
+			if(isBoss())
+			{
+				for(int i = 0 ; i < players.length ; i ++)
+				{
+					if(isTargetNull(players[i]))
+						continue;
+//					players[i].setParent(room);
+//					players[i].setExtLifeAndMagic();
+//					players[i].sendAlwaysValue();
+					
+					ByteBuffer endBattleBuff = new ByteBuffer(1);
+					endBattleBuff.writeBoolean(true);
+					players[i].getNetConnection().sendMessage(new SMsg(SMsg.S_BATTLE_PLAYER_BATTLEEND,endBattleBuff));
+				}
+				
+				for(int i = 0 ; i < players.length ; i ++)
+				{
+					if(isTargetNull(players[i]))
+						continue;
+					players[i].moveToRoom(DataFactory.INITROOM);
+					break;
+				}
+			}
+			else
+			{
+				for(int i = 0 ; i < players.length ; i ++)
+				{
+					if(isTargetNull(players[i]))
+						continue;
+					players[i].setParent(room);
+//					players[i].setExtLifeAndMagic();
+					
+					ByteBuffer endBattleBuff = new ByteBuffer(1);
+					endBattleBuff.writeBoolean(true);
+					players[i].getNetConnection().sendMessage(new SMsg(SMsg.S_BATTLE_PLAYER_BATTLEEND,endBattleBuff));
+				}
+			}
+			
+			PlayerController pc = getAnyonePlayer();
+			if(pc != null)
+			{
+				pc.getWorldManager().getJobObserver().addJob(GameServer.JOB_GAME1, new NoticeJob(this));
+			}
+			
+			fixPlayerBaseInfo(players,false);
+			
+		}
+		else if(isPlayerDead())
+		{
+			PlayerController p = getAnyOnePlayer(players);
+			if(p == null)
+			{
+				isFinish = true;
+				return;
+			}
+			int roomId = room.getRebirthId(p.getPlayer().camp);
+			
+			if(isReturn())
+			{
+				super.uninit(0);
+				
+				fixPlayerBaseInfo(players,false);
+				
+				p.moveToRoom(roomId==0?DataFactory.INITROOM:roomId);
+				isFinish = true;
+			}
+			else
+			{
+				if(roomId == 0)
+				{
+					int playerCount = getPlayerCount();
+
+					if(playerCount <= 0)
+						return;
+					
+					for(int i = 0 ; i < playerCount ; i ++)
+					{
+						PlayerController everyone = (PlayerController)playerList.get(i);
+						if(isTargetNull(everyone))
+							continue;
+						PlayerBattleTmp pbt = (PlayerBattleTmp) everyone.getAttachment();
+						removeEffect(pbt.getEffectList(),pbt);
+						removeHaloEffect(pbt.getBuffBox().getEffectList(),everyone);
+						everyone.setParent(room);
+//						everyone.setExtLifeAndMagic();
+						//everyone.sendAlwaysValue();
+					}
+					
+					ByteBuffer endBattleBuff = new ByteBuffer(1);
+					endBattleBuff.writeBoolean(true);
+					dispatchMsg(SMsg.S_BATTLE_PLAYER_BATTLEEND, endBattleBuff);
+					isFinish = true;
+					
+					fixPlayerBaseInfo(players,false);
+
+				}
+				else  //弹出回城复活还是原地复活
+				{
+					Object obj = DataFactory.getInstance().getGameObject(roomId);
+					if(obj == null || !(obj instanceof RoomController))
+					{
+						MainFrame.println("PVEController uninit roomId error:"+roomId);
+						return;
+					}
+					RoomController rc = (RoomController) obj;
+//					if(room.id == rc.id)
+//						return;
+					for (int i = 0; i < players.length; i++)
+					{
+						rc.setParentPlayer(players[i]);
+						players[i].isReset = true;
+					}
+					
+					for (int i = 0; i < players.length; i++) 
+					{
+						if(isTargetNull(players[i]))
+							continue;
+						ByteBuffer buffer = new ByteBuffer(1);
+						if(players[i].getTeam() == null)
+							buffer.writeBoolean(true);
+						else 
+						{
+							if(players[i].getTeam().isLeader(players[i]))
+								buffer.writeBoolean(true);
+							else
+								buffer.writeBoolean(false);
+						}	
+						players[i].getNetConnection().sendMessage(new SMsg(SMsg.S_BATTLE_PLAYER_RESET_COMMAND, buffer));
+					}
+				}
+
+			}
+		}
+		
+		
+		
+
+	}
+	
+	/**
+	 * 打死怪物后是否要送玩家回城
+	 * @return
+	 */
+	private boolean isReturn()
+	{
+		for (int i = 0; i < monsters.length; i++) 
+		{
+			if(monsters[i].getMonster().bodyType == 1)
+				return true;
+		}
+		return false;
+	}
+	
+	private void battleGoods()
+	{
+		if(isFinish)
+			return;
+		for (int i = 0; i < players.length; i++) 
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+//			if(pbt.isDead())
+//				continue;
+			if(pbt.battleGoods.length == 0 || pbt.battleGoods == null)
+				continue;
+			Bag bag = (Bag) players[i].getPlayer().getExtPlayerInfo("bag");
+			for (int j = 0; j < pbt.battleGoods.length; j++) 
+			{
+				Goods goods = pbt.battleGoods[j];
+				if(goods == null)
+					continue;
+				if(!bag.isCanAddGoodsToBag(goods))
+					return;
+				bag.sendBattleAddGoods(players[i], goods);
+				
+				String objectIndex = goods.objectIndex+"";
+				if(goods.repeatNumber > 1)
+				{
+					Goods g = bag.getGoodsById(goods.id);
+					if(g != null)
+						objectIndex = g.objectIndex+"";
+				}
+				
+				StringBuffer sb = new StringBuffer();
+				sb.append(players[i].getName());
+				sb.append(" \u83b7\u5f97: |[");
+				sb.append(goods.name);
+				sb.append("]#p:");
+				sb.append(objectIndex);
+				sb.append(":");
+				sb.append(goods.quality);
+				sb.append(":");
+				sb.append(players[i].getID());
+				players[i].sendGetGoodsInfo(2,false,sb.toString());
+			}
+			
+			pbt.battleGoods = new Goods[0];
+		}
+		
+		sendBossBoxToPlayer();
+	}
+	
+	/**
+	 * 给玩家宝箱
+	 */
+	private void sendBossBoxToPlayer()
+	{
+		for (int i = 0; i < players.length; i++)
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			
+			int count = 0;
+			Mail mail = new Mail("\u7CFB\u7EDF\u5B9D\u8D1D");
+			mail.setTitle("BOSS\u5B9D\u7BB1\u8D60\u9001");
+			boolean flag = false;
+			for (int j = 0; j < monsterLength; j++) 
+			{
+				if(monsters[j] == null)
+					continue;
+				int boxId = monsters[j].getMonster().boxId;
+				if(boxId <= 0)
+					continue;
+				Object obj = DataFactory.getInstance().getGameObject(boxId);
+				if(obj == null || !(obj instanceof Goods))
+				{
+					System.out.println("PVEController sendBox error:boxId:"+boxId);
+					continue;
+				}
+				count++;
+				Goods box = (Goods) obj;
+				Goods newGoods = (Goods) Goods.cloneObject(box);
+				if(count > 2)
+					break;
+				newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+				
+				StringBuffer sb = new StringBuffer();
+				sb.append("\u606D\u559C\u4F60\u5728\u4E0E");
+				sb.append(monsters[j].getName());
+				sb.append("\u7684\u640F\u6597\u4E2D\u80DC\u5229，\u5E76\u4E14\u83B7\u5F97[");
+				sb.append(newGoods.name);
+				sb.append("]");
+				mail.setContent(sb.toString());
+				mail.addAttach(newGoods);
+				
+				sb = new StringBuffer();
+				sb.append("[");
+				sb.append(newGoods.name);
+				sb.append("]\u901A\u8FC7\u90AE\u4EF6\u7CFB\u7EDF\u53D1\u9001\u7ED9\u4F60!");
+				players[i].sendGetGoodsInfo(1,false,sb.toString());
+			
+				flag = true;
+			}
+			if(flag)
+			{
+				if(players[i].isOnline())
+					mail.send(players[i]);
+			}
+		}
+		
+	}
+	
+	
+	/**
+	 * 战斗结束分配战利品(暂时还不加到背包中)
+	 * @param goodsList
+	 */
+	private void disBattleGoods(List goodsList)
+	{
+		for (int j = 0; j < goodsList.size(); j++) 
+		{
+			Goods goods = (Goods) goodsList.get(j);
+			if(goods == null)
+				continue;
+			PlayerController player = getPlayerRandom();
+			if(isTargetNull(player))
+				continue;
+			PlayerBattleTmp pbt = (PlayerBattleTmp) player.getAttachment();
+			if(pbt.isDisGoods)
+			{
+				player = getPlayerByDisGoods();
+			}
+			if(player == null)
+			{
+				setPlayerDisGoods();
+				player = getPlayerRandom();
+			}
+			if(player == null)
+				continue;
+			if(!player.isOnline())
+				continue;
+			pbt = (PlayerBattleTmp) player.getAttachment();
+//			if(pbt.isDead())
+//				continue;
+			goods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+			Bag bag = (Bag) player.getPlayer().getExtPlayerInfo("bag");
+			if(!bag.isCanAddGoodsToBag(player, goods))
+				continue;
+			int count = goods.getGoodsCount();
+			TaskInfo taskInfo = (TaskInfo) player.getPlayer().getExtPlayerInfo("taskInfo"); 
+
+			if(taskInfo.getCurrentTaskSize() > 0)
+			{
+				boolean result = taskInfo.onPlayerGotItem(goods.id,count, player);
+
+				if(!result && goods.type == 3)
+					continue;
+			}	
+			else
+			{
+				if(goods.type == 3)
+					continue;
+			}	
+			pbt.setBattleGoods(goods);
+
+			pbt.isDisGoods = true;
+		}
+		goodsList.clear();
+	}
+	
+	private PlayerController getPlayerRandom()
+	{
+		for (int i = 0; i < players.length; i++) 
+		{
+			int random = (int) (Math.random() * players.length);
+			PlayerController player = players[random];
+			if(isTargetNull(players[i]))
+				continue;
+			PlayerBattleTmp pbt = (PlayerBattleTmp) player.getAttachment();
+			if(pbt.isDead())
+				continue;
+			return player;
+		}
+		return null;
+	}
+	
+	private void setPlayerDisGoods()
+	{
+		for (int i = 0; i < players.length; i++)
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+			pbt.isDisGoods = false;
+		}
+	}
+	
+	private PlayerController getPlayerByDisGoods()
+	{
+		for (int i = 0; i < players.length; i++)
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+			if(pbt.isDead())
+				continue;
+			if(!pbt.isDisGoods)
+				return players[i];
+		}
+		return null;
+	}
+	
+
+	
+	public void checkDeadState()
+	{
+		if(!isMonsterDead() && !isPlayerDead())
+			return;
+		if(isMonsterDead())
+		{
+			if(isCheckDrop)
+				return;
+			for (int j = 0; j < monsters.length; j++)
+			{
+				monsters[j].getAttachment().loserMercy(monsters[j].getAttachment());
+			}
+			if(battleGoods.length > 0)
+			{
+				List goodsList = new ArrayList(battleGoods.length);
+				for (int j = 0; j < battleGoods.length; j++) 
+				{
+					if(battleGoods[j] != null)
+					{
+						goodsList.add(battleGoods[j]);
+					}
+				}
+				disBattleGoods(goodsList);
+				
+				battleGoods = new Goods[0];
+			}
+			int levelCount = 0 ;
+			for (int i = 0; i < players.length; i++) 
+			{
+				if(players[i] != null && players[i].isOnline())
+					levelCount += players[i].getPlayer().level;
+			}
+			
+			long allExp = 0;//怪物掉落总经验
+			int monsterLevelCount = 0;//怪物总等级
+			for (int i = 0; i < monsters.length; i++) 
+			{
+				allExp += monsters[i].getMonster().experience;
+				monsterLevelCount += monsters[i].getMonster().level;
+			}
+			int monsterLevel = monsterLevelCount / monsters.length;//怪物平均等级
+			
+			int everyOnePoint = battlePoint;
+			for (int i = 0; i < players.length; i++)
+			{
+				if(isTargetNull(players[i]))
+					continue;
+				PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+//				if(pbt.isDead())
+//					continue;
+				pbt.setBattlePoint(everyOnePoint);
+				long getExp = players[i].teamExp(allExp,levelCount,monsterLevel,1);
+				pbt.setBattleExp(getExp);
+			}
+			
+			isCheckDrop = true;
+			
+		}
+		
+		boolean result = false;
+		if(isMonsterDead())
+			result = true;
+		else if(isPlayerDead())
+			result = false;
+		
+		for (int i = 0; i < players.length; i++) 
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			PlayerBattleTmp pbt = (PlayerBattleTmp) players[i].getAttachment();
+			
+			ByteBuffer buffer = new ByteBuffer();
+			buffer.writeBoolean(result);
+			buffer.writeByte(getCatType(pbt));
+			String name = getBossBox();
+			if(!name.isEmpty() && result)
+			{
+				/************以下数据暂时用不到，PVE时用来发送获得的经验，金钱，物品名，是否有BOSS宝箱，客户端好播放动画**************************/
+				buffer.writeBoolean(true);
+				buffer.writeUTF(name);
+				buffer.writeInt((int) pbt.battleExp);
+				buffer.writeInt((int) pbt.battlePoint);
+				/*********************************************/
+			}
+			else
+				buffer.writeBoolean(false);
+			players[i].getNetConnection().sendMessage(new SMsg(SMsg.S_BATTLE_PLAYER_BATTLERESULT,buffer));
+			
+			
+			
+			BuffBox buffBox = (BuffBox)players[i].getPlayer().getExtPlayerInfo("buffBox");
+			buffBox.pveCDtime = 3000; //设置3秒钟避免快速发消息请求
+		}
+		
+		endTime = System.currentTimeMillis();
+	}
+	
+	private String getBossBox()
+	{
+		for (int i = 0; i < monsters.length; i++)
+		{
+			int boxId = monsters[i].getMonster().boxId;
+			if(boxId == 0)
+				continue;
+			Object obj = DataFactory.getInstance().getGameObject(boxId);
+			if(obj == null || !(obj instanceof Goods))
+				continue;
+			return ((Goods)obj).name;
+		}
+		return "";
+	}
+	
+	public byte getCatType(PlayerBattleTmp pbt)
+	{
+		if(pbt.battleGoods.length == 0 || pbt.battleGoods == null)
+			return 1;
+		else
+		{
+			for (int i = 0; i < pbt.battleGoods.length; i++) 
+			{
+				if(pbt.battleGoods[i] == null)
+					continue;
+				if(pbt.battleGoods[i].type == 6)
+					return 3;
+			}
+		}
+		return 2;
+	}
+	
+	
+	public boolean isPlayerDead()
+	{
+		int playerLength = players.length;
+		for (int i = 0; i < playerLength; i++)
+		{
+			if(isTargetNull(players[i]))
+				continue;
+			if(!players[i].getAttachment().isDead())
+				return false;
+		}
+		return true;
+	}
+	public boolean isMonsterDead()
+	{
+		int monsterLength = monsters.length;
+		for (int i = 0; i < monsterLength; i++)
+		{
+			if(!monsters[i].getAttachment().isDead() || monsters[i].getMonster().hitPoint > 0)
+				return false;
+		}
+		return true;
+	}
+	
+	public void dispatchIsBattleWithoutRoom(boolean isBattle,PlayerController target)
+	{
+		if(target == null)
+		{	
+			PlayerController player = null;
+			int length = players.length;
+			for(int i = 0 ; i < length ; i ++)
+			{
+				if(players[i] != null)
+				{
+					player = players[i];
+					break;
+				}
+			}
+			
+			if(player == null)
+				return;
+			
+			super.dispatchIsBattleWithoutRoom(isBattle,player);
+		}
+		else
+		{
+			super.dispatchIsBattleWithoutRoom(isBattle, target);
+		}
+	}
+
+	
+	public void sendNoticeInfo()
+	{
+		if(isNoticed)
+			return;
+		
+		for (int i = 0; i < monsters.length; i++)
+		{
+			if(monsters[i].getMonster().bodyType == 1)
+			{
+				PlayerController leader = null;
+				PlayerController pc = getAnyonePlayer();
+				if(pc == null)
+					return;
+				if(pc.getTeam() != null)
+				{
+					leader = pc.getTeam().getLeader();
+				}
+				else 
+					leader = pc;
+				/**
+				 * 号外!!号外!!在XXXXXXX队伍的强力攻击和完美防御的威慑下,YYYYYYY应声倒地。
+				 */
+				StringBuffer sb = new StringBuffer();
+				sb.append("\u53F7\u5916!!\u53F7\u5916!!\u5728|");
+				sb.append(leader.getName());
+				sb.append("#u:");
+				sb.append(leader.getName());
+				sb.append("|\u961F\u4F0D\u7684\u5F3A\u529B\u653B\u51FB\u548C");
+				sb.append("\u5B8C\u7F8E\u9632\u5FA1\u7684\u5A01\u6151\u4E0B,");
+				sb.append("|[");
+				String[] strs = Utils.split(name, "-vs-");
+				sb.append(strs[0]);
+				sb.append("]#p:");
+				sb.append(0);
+				sb.append(":");
+				sb.append(1);
+				sb.append(":");
+				sb.append(0);
+				sb.append("|\u5E94\u58F0\u5012\u5730");		
+				leader.sendGetGoodsInfo(3, true, sb.toString());
+				break;
+			}
+		}
+		
+		isNoticed = true;
+	}
+}

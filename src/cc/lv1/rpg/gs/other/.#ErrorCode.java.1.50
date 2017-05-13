@@ -1,0 +1,419 @@
+package cc.lv1.rpg.gs.other;
+
+/**
+ * 错误指令
+ * @author balan
+ *
+ */
+public class ErrorCode {
+	
+	/** 玩家没在游戏中 */
+	public static final int EXCEPTION_LOGIN_PLAYERNOTATGAME = 100;  
+	/** 非法登陆 */
+	public static final int EXCEPTION_LOGIN_ERROR = 101;  
+	/** 玩家未登陆游戏 */
+	public static final int EXCEPTION_LOGIN_NOTINGAME = 102;  
+	/** 已经有这个名字 */
+	public static final int EXCEPTION_LOGIN_SAMENAME = 103;  
+	/** 读取玩家信息错误 */
+	public static final int EXCEPTION_LOGIN_PLAYINFOERROR = 104;  
+	/** 角色名不能为空 */
+	public static final int ALERT_ROLENAME_NULL_ERROR = 105;
+	/** 类型错误 */
+	public static final int EXCEPTION_CLASS_ERROR = 106;
+	/** 你的等级不够 */
+	public static final int ALERT_PLAYER_LEVEL_LACK = 107;
+	/** 没有这个阵营 */
+	public static final int ALERT_NOT_THE_CAMP = 108;
+	/** 你不能转这个职业 */
+	public static final int ALERT_UP_PROFESSION_ERROR = 109;
+	/** 你已经转过职了 */
+	public static final int ALERT_PLAYER_HASBEEN_UP_PROFESSION = 110;
+	/** 玩家拒绝加入您的家族 */
+	public static final int ALERT_PLAYER_REFUSE_IN_FAMILY = 111;
+	/** 邀请的玩家加入另外的家族了 */
+	public static final int ALERT_PLAYER_IN_OTHER_FAMILY = 112;
+	/** 玩家答应你加入家族了 */
+	public static final int ALERT_PLAYER_AGREE_IN_FAMILY = 113;
+	/** 对方取消邀请或超时 */
+	public static final int ALERT_PLAYER_CANCEL = 114;
+	/** 转让的人员不是本家族人员 */
+	public static final int EXCEPTION_PLAYER_CHANGENOT = 115;
+	/** 目标玩家不在线  */
+	public static final int EXCEPTION_PLAYER_OFFLINE = 116;
+	/** 您要创建的家族名已存在  */
+	public static final int EXCEPTION_PLAYER_FAMILYNAME_SAME = 117;
+	/** 目标玩家已有家族 */
+	public static final int EXCEPTION_PLAYER_HAS_FAMILY = 118;
+	/** 还没有家族 */
+	public static final int EXCEPTION_PLAYER_NOHAS_FAMILY = 119;
+	/** 当前家族人员已满 */
+	public static final int ALERT_FAMILY_ISFULL = 120;
+	/** 重复的邀请 */
+	public static final int ALERT_PLAYER_SAME_INVITATION = 121;
+	/** 邀请已发出 */
+	public static final int ALERT_PLAYER_INVITATION_SENDED = 122;
+	/** 目标玩家已在本家族中 */
+	public static final int EXCEPTION_PLAYER_ISIN_FAMILY = 123;
+	/** 好友已达上限 */
+	public static final int ALERT_FRIENDLIST_ISFULL = 124;
+	/** 玩家不在好友列表中 */
+	public static final int ALERT_PLAYER_NOT_FRIENDS = 125;
+	/** 玩家已在黑名单中 */
+	public static final int ALERT_PLAYER_ISIN_BLACK = 126;
+	/** 玩家不在黑名单中 */
+	public static final int ALERT_PLAYER_NOTIN_BLACK = 127;
+//	/** 重复的邀请 */
+//	public static final int ALERT_ITERANT_INVITEs = 128;
+	/** 邀请超时 */
+	public static final int ALERT_INVITE_TIME_OVERRUN = 129;
+	/** 错误的邀请类型 */
+	public static final int ALERT_INVITE_CLASS_ERROR = 130;
+	/** 家族已不存在 */
+	public static final int ALERT_FAMILY_NOT_EXIST = 131;
+	/** 选择阵营不能做其它事情 */
+	public static final int ALERT_CHOOSE_CAMP_ING = 132;
+	/** 创建家族条件不足 */
+	public static final int ALERT_FAMILY_NOT_CREATE = 133;
+	/** 没有这个职业 */
+	public static final int EXCEPTION_PROFESSION_NOT_EXIST = 134;
+	/** 性别错误 */
+	public static final int EXCEPTION_SEX_NOT_EXIST = 135;
+	/** 请结束战斗或者交易 */
+	public static final int ALERT_PLAYER_OVER_OTHER= 136;
+	/** 5秒钟内不能连续转换场景 */
+	public static final int ALERT_ROOM_FIVE_CHANGE= 137;
+	/** 正在保存刷新角色信息 */
+	public static final int ALERT_PLAYER_DATA_SAVE= 138;
+	/** 请选择跟家族一样的阵营 */
+	public static final int ALERT_FAMILY_CAMP_ERROR = 139;
+	/** 不符合领取宝箱的条件 */
+	public static final int ALERT_BOX_GET_ERROR = 140;
+	/** 不能同时开启两个宝箱 */
+	public static final int ALERT_BOX_OPEN_ERROR = 141;
+	/** 你没有小喇叭道具 */
+	public static final int ALERT_NO_SMALL_SPEAKER = 142;
+	/** 你没有大喇叭道具 */
+	public static final int ALERT_NO_BIG_SPEAKER = 143;
+	/** 你没有超级喇叭道具 */
+	public static final int ALERT_NO_SUPER_SPEAKER = 144;
+	/** 本功能只对会长和副会长开放" */
+	public static final int ALERT_CDR_CAN_USE = 145;
+	/** 创建帮会条件不足 */
+//	public static final int ALERT_CREATE_TONG_CON_ERROR = 146;
+	/** 创建帮会金钱不足 */
+//	public static final int ALERT_CREATE_TONG_MONEY_ERROR = 147;
+	/** 你没有家族，不能创建帮会 */
+	public static final int ALERT_NO_FAMILY_ERROR = 148;
+	/** 你已经有帮会了，不能创建帮会了 */
+//	public static final int ALERT_TONG_NOT_NULL = 149;
+	/** 你创建的帮会名已经存在 */
+//	public static final int ALERT_TONG_NAME_EXISTS = 150;
+	/** 你们的族长已经创建了帮会 */
+//	public static final int ALERT_SHANKH_CREATE_TONG = 151;
+	/** 你的等级还不能加入阵营 */
+	public static final int ALERT_LEVEL_LESS_CAMP_LEVEL = 152;
+	/** 你已经有了阵营了 */
+	public static final int ALERT_PLAYER_CAMP_NOT_NULL = 153;
+	/** 任命的对象不是族长 */
+	public static final int ALERT_OBJECT_NO_SHAIKH = 154;
+	/** 任命的对象不是本家族成员 */
+	public static final int ALERT_OBJECT_NO_SAME_FAMILY = 155;
+	/** 开宝箱元宝不够 */
+	public static final int ALERT_BOX_MONEY_NO_ENOUGH = 156;
+	/** 战斗中不能开宝箱 */
+	public static final int ALERT_CANNOT_BOX_ERROR = 157;
+	/** 这个不是宠物食物 */
+	public static final int ALERT_GOODS_NOT_PETFOOD = 158;
+	/** 今天喂养次数已达最大 */
+	public static final int ALERT_FEED_PET_COUNT_OVER = 159;
+	/** 为了你的号码安全，密码必须大于6位 */
+	public static final int ALERT_PWD_LESS = 160;
+	/** "玩家阵营和家族阵营不一样，不能加入" */
+	public static final int ALERT_CAMP_FAMILY_NOT_SAME = 161;
+	/** 玩家位置已记忆！ */
+	public static final int ALERT_PLAYER_INDEX_SAVED = 162;
+	/** 你的宠物今天出行次数已达最大 */
+	public static final int ALERT_RUNNING_PET_COUNT_OVER = 163;
+	/** 你的队友等级不够 */
+	public static final int ALERT_TEAMER_LV_CANNOT = 164;
+	/** "你的队友行动条未满!" */
+	public static final int ALERT_TEAMER_ACTIVE_CANNOT = 165;
+	/** "你有队员的事件值不够，不能换房间" */
+	public static final int ALERT_TEAMER_EVENTPOINT_CANNOT = 166;
+	/** "你的事件值不够，不能换房间" */
+	public static final int ALERT_PLAYER_EVENTPOINT_CANNOT = 167;
+	/** 您领取的任务数量已达上限 */
+	public static final int ALERT_PLAYER_TASK_MAX_COUNT = 168;
+	/** 你使用大喇叭的等级不够 */
+	public static final int ALERT_PLAYER_LEVEL_SPEAKER = 169;
+	/** 你上一题还没答 */
+	public static final int ALERT_PRVQUESTION_NO_ANSWER = 170;
+	/** 你今天的答题机会已用完 */
+	public static final int ALERT_NO_ANSWER_DAY = 171;
+	/** 答题时间已过 */
+	public static final int ALERT_NO_ANSWER_TIME = 172;
+	
+	/** 交易邀请取消 */
+	public static final int ALERT_BUSINESS_INVITE_CANCEL = 200;
+	/**  交易已经关闭 */
+	public static final int ALERT_BUSINESS_HASBEEN_OVER = 201;
+	/** 玩家正在交易中 */
+	public static final int ALERT_BUSINESS_ING_PLAYER = 202;
+	/** 物品已绑定 不能交易 */
+	public static final int ALERT_GOODS_NOT_BUSINESS = 203;
+	/** 数量超出限制 */
+	public static final int ALERT_GOODSCOUNT_OVERRUN = 204;
+	/** 交易金钱数量超出限制 */
+	public static final int ALERT_BUSINESS_MONEY_OVERRUN = 205;
+	/** 战斗中不能交易 */
+	public static final int ALERT_NOT_BUSINESS_IN_BATTLE = 206;
+	/** 玩家拒绝和你交易 */
+	public static final int ALERT_PLAYER_REJECT_BUSINESS = 207;
+	
+	/** 已达到寄卖上限数量 */
+	public static final int ALERT_PLAYER_SHOPCENTER_FULL = 208;
+	
+	/** "寄卖中心没有该物品" */
+	public static final int ALERT_SHOPCENTER_GOODS_NULL = 209;
+	
+	/** 很遗憾,你已被族长T出家族了" */
+	public static final int ALERT_FAMILY_OUT = 210;
+	
+	/** PVP邀请取消 */
+	public static final int ALERT_PVP_INVITE_CANCEL = 300;
+	/** 玩家已经在战斗中 */
+	public static final int ALERT_PLAYER_IS_BATTLING = 301;
+	/** 不同阵营的人不能切磋,请选择恶意攻击 */
+	public static final int ALERT_NOT_INVITE_DIFF_CAMP = 302;
+	/** 16级以前不能PK */
+	public static final int ALERT_BEFORE_SIXTEEN_NOT_PK = 303;
+	/** 不能向非队长发出请求 */
+	public static final int ALERT_REQUEST_NOT_LEADER_ERROR = 304;
+	/** 此房间不允许战斗 */
+	public static final int ALERT_ROOM_ISNOT_BATTLE = 305;
+	/** 怪物不存在 */
+	public static final int ALERT_MONSTER_IS_NOTHING = 306;
+	/** 玩家血量少于1点 */
+	public static final int ALERT_PLAYER_NOT_LIFE = 307;
+	/** 你不是队长 */
+	public static final int ALERT_PLAYER_NOT_LEADER = 308;
+	/** 你的队伍中有玩家生命小于1点 */
+	public static final int ALERT_OHTER_PLAYER_NOT_LIFE = 309;
+	/** 怪物正在战斗 */
+	public static final int ALERT_MONSTER_IS_FIGHT = 310;
+	/** 玩家不在房间中 */
+	public static final int ALERT_PLAYER_ISNOT_ROOM = 311;
+	/** 魔力不够 */
+	public static final int ALERT_PLAYER_MAGIC_NOTENOUTH = 312;
+	/** 玩家中了混乱效果被锁住 */
+	public static final int ALERT_PLAYER_IS_LOCKED = 313;
+	/** 初始化战斗失败 */
+	public static final int ALERT_INIT_BATTLE_FAIL = 314;
+	/** 目标INDEX越界 */
+	public static final int ALERT_OBJECT_INDEX_OVERRUN = 315;
+	/** 目标为空 */
+	public static final int ALERT_OBJECT_IS_NULL = 316;
+	/** 效果对象不存在 */
+	public static final int ALERT_EFFECT_NOT_EXIST = 317;
+	/** 同组队员不能PK */
+	public static final int ALERT_SAME_TEAM_PLAYER = 318;
+	/** 队伍人数已达最大 */
+	public static final int ALERT_TEAM_PLAYERS_TOO_MUCH = 319;
+	/** 不能强行攻击同阵营的玩家 */
+	public static final int ALERT_PLAYER_SAME_CAMP = 320;
+	/** 请先退出队伍再来 */
+	public static final int ALERT_MUST_EXIT_TEAM = 321;
+	/** 你没有家族不能参加家族活动 */
+	public static final int ALERT_PLAYER_NO_FAMILY = 322;
+	/** 不能攻击同家族的玩家 */
+	public static final int ALERT_PLAYER_SAME_FAMILY = 323;
+	/** 休息室不能PK */
+	public static final int ALERT_REST_ROOM_NOPK = 324;
+	/** 活动还没开始 */
+	public static final int ALERT_PARTY_NO_START = 325;
+	/** 休息状态不能PK */
+	public static final int ALERT_NOPK_STATE = 326;
+	
+	/** 玩家不在同一个场景 */
+	public static final int ALERT_PLAYER_NOTAT_ROOM = 400;
+	/** 你已经在队伍中，并且你不是队长，所以你不能邀请对方！ */
+	public static final int ALERT_PLAYER_INVITE_ERROR = 401;
+	/** 你由于长时间没有操作，邀请已取消！ */
+	public static final int ALERT_TEAM_INVITE_CANCEL = 402;
+	/** 没有权限 */
+	public static final int ALERT_NOT_POWER_ERROR = 403;
+	/** 请选择除自己以外的队友 */
+	public static final int ALERT_NOT_TARGET_SELF= 404;
+	/** 玩家已经在队伍中 */
+	public static final int ALERT_PLAYER_IN_TEAM = 405;
+	/** 你已不在队伍中 */
+	public static final int ALERT_PLAYER_NOTIN_TEAM = 406;
+	/** 对方是红名不能和你组队 */
+	public static final int ALERT_TARGET_IS_REDNAME = 407;
+	/** 你是红名不能和对方组队 */
+	public static final int ALERT_PLAYER_IS_REDNAME = 408;
+	/** 不同阵营的人不能组队 */
+	public static final int ALERT_DIFF_CAMP_ERROR = 409;
+	/** 队伍中有玩家正在选择阵营 */
+	public static final int ALERT_PLAYER_CHOOSE_CAMPING = 410;
+	/** 不同家族不能组队 */
+	public static final int ALERT_DIFF_FAMILY_ERROR = 411;
+	
+	/** 该任务不能取消 */
+	public static final int ALERT_TASK_NOT_CANCEL = 500;
+	
+	/** 相同姓名玩家在游戏内 */
+	public static final int ALERT_LOGIN_SAMEPLAYERONLINE = 600;  
+	/** 有个家伙把你挤下线了 */
+	public static final int ALERT_LOGIN_OTHERPLAYERLOGIN = 601;  
+	
+	/** 两次密码不一致，请重新输入 */
+	public static final int ALERT_STORAGE_TWO_PASSWORD_NOSAME = 700;
+	/** 密码错误 */
+	public static final int ALERT_STORAGE_PASSWORD_ERROR = 701;
+	/** 仓库被锁住 */
+	public static final int ALERT_STORAGE_IS_LOCK = 702;
+	/** 密码错误三次,仓库将被锁24小时 */
+	public static final int ALERT_STORAGE_PASSWORD_ERROR_THRICE = 703;
+	/** 你输入的旧密码不对 */
+	public static final int ALERT_STORAGE_OLD_PASSWORD_ERROR = 704;
+	/** 仓库满了 */
+	public static final int ALERT_STORAGE_IS_FULL = 705;
+	/** 玩家要存入仓库的钱超过玩家自身的钱(游戏币) */
+	public static final int ALERT_STORAGE_SAVE_POINT_OVERRUN = 706;
+	/** 玩家要从仓库取的钱超过玩家仓库的钱(游戏币) */
+	public static final int ALERT_STORAGE_TAKE_POINT_OVERRUN = 707;
+	/** 你的仓库被锁的时间为 */
+	public static final int ALERT_STORAGE_LOCKED_TIME = 708;
+	
+	/** "行动条未满!" */
+	public static final int ALERT_ACTIVEPOINT_NOT_FULL = 709;
+	/** 仓库容量已达最大 */
+	public static final int ALERT_STORAGE_MAX_SIZE = 710;
+	
+	/** 物品不能丢弃 */
+	public static final int ALERT_GOODS_NOT_DELETE = 801;
+	/** 物品暂时无法使用 */
+	public static final int ALERT_GOODS_CANNET_USE = 802; 
+	/** 物品暂时无法取下 */
+	public static final int ALERT_GOODS_CANNET_REMOVE = 803;
+	/** 玩家等级太低 */
+	public static final int ALERT_GOODS_LEVEL_LOW = 804;
+	/** 玩家性别不符 */
+	public static final int ALERT_GOODS_SEX_ERROR = 805;
+	/** 此物品不存在 */
+	public static final int ALERT_GOODS_NOT_EXIST = 806;
+	/** 数量超出限制 */
+	public static final int ALERT_GOODS_COUNT_OVERRUN = 807;
+	/** 物品不能拆分 */
+	public static final int ALERT_GOODS_NOT_SPLIT = 808;
+	/** 物品不能叠加 */
+	public static final int ALERT_GOODS_NOT_SUPERPOSE = 809;
+	/** 装备不属于玩家这个职业 */
+	public static final int ALERT_GOODS_JOB_ERROR = 810;
+	/** 装备取下失败 */
+	public static final int ALERT_GOODSEQUIP_TAKEOFF_ERROR = 811;
+	/** 不能装此物品 */
+	public static final int ALERT_GOODS_TYPE_ERROR = 812;
+	/** 使用物品失败 */
+	public static final int ALERT_GOODS_USE_ERROR = 813;
+	/** 背包已满 */
+	public static final int ALERT_BAG_IS_FULL = 814; 
+	/** 位置错误 */
+	public static final int ALERT_GOODS_LOCATION_ERROR = 815;
+	/** 技能不存在 */
+	public static final int ALERT_SKILL_NOT_EXIST = 816;
+	/** 这个不是技能 */
+	public static final int ALERT_GOODS_NOT_SKILL = 817;
+	/** 职业错误 */
+	public static final int ALERT_PROFESSION_ERROR = 818;
+	/** 已经学习过该技能 */
+	public static final int ALERT_SKILL_IS_EXIST = 819;
+	/** 材料不足 */
+	public static final int ALERT_GOODS_ENOUGH = 820;
+	/** 绿色以下的装备不能拆解 */
+	public static final int ALERT_GREENDOWN_NOT_DS = 821;
+	/** 这里不能出售物品 */
+	public static final int ALERT_THIS_NOT_SALE_GOODS = 822;
+	/** 你还有更低等级的技能没学 */
+	public static final int ALERT_SKILL_LEVEL_ERROR = 823;
+	/** 不能学习该技能 */
+	public static final int ALERT_NOT_STUDY_SKILL = 824;
+	/** 你已经学习了更高等级的技能 */
+	public static final int ALERT_HASBEEN_HIGHER_SKILL = 825;
+	/** 你没有技能所需武器 */
+	public static final int ALERT_NO_SKILL_NEEDARM = 826;
+	/** 你还没学习这个装备所需的技能 */
+	public static final int ALERT_NO_EQUIP_NEEDSKILL = 827;
+	/** 战斗中不能使用此物品 */
+	public static final int ALERT_NOT_USE_GOODS_INBATTLE = 828;
+	/** 背包空间不足不能领取奖品 */
+	public static final int ALERT_TASK_AWA_BAG_NOT_ENOUGH = 829;
+	/** 组队状态不能使用传送 */
+	public static final int ALERT_TEAM_STATE_USEERROR  = 830;
+	/** 不能同时使用两个生命宝石或精力宝石 */
+	public static final int ALERT_NOT_USE_SAME_GOODS = 831;
+	/** 此操作将覆盖你已经使用的多倍经验卡 */
+	public static final int ALERT_EXP_ANOTHER_START = 832;
+	/** 你上一次多倍经验时间还未到 */
+	public static final int ALERT_MULTEXP_TIME_NOTEND = 833;
+	/** 此物品不能直接使用 */
+	public static final int ALERT_GOODS_NOT_USE = 834;
+	/** 玩家物品已经出售 */
+	public static final int ALERT_GOODS_SALED = 835;
+	/** 宠物等级太低 */
+	public static final int ALERT_PET_LEVEL_LOW = 836;
+	/** 你的宠物已学会改技能 */
+	public static final int ALERT_PET_STUDIED_SKILL = 837;
+	/** 宠物已学会更高等级的技能 */
+	public static final int ALERT_PET_STUDIED_HIGHER_SKILL = 838;
+	/** 宠物还有更低等级的技能没学 */
+	public static final int ALERT_PET_NOT_STUDY_LOW_SKILL = 839;
+	/** 同一层次的技能只能学习一个 */
+	public static final int ALERT_PET_SKILL_NO_STUDY = 840;
+	/** 行动值已满或者加超了 */
+	public static final int ALERT_FLYACTIVEPOINT_OVER = 841;
+	/** 活跃度已满或者加超了 */
+	public static final int ALERT_PETACTIVEPOINT_OVER = 842;
+	
+	
+	/** 你的金钱不够 */
+	public static final int ALERT_SHOP_NO_POINT = 901;
+	/** 你的荣誉值不够 */
+	public static final int ALERT_SHOP_NO_HONOUR = 902;
+	/** 物品不能出售 */
+	public static final int ALERT_SHOP_NOT_SALE = 904;
+	/** 物品已出售完 */
+	public static final int ALERT_SHOP_GOODS_NOT_HAVE = 905;
+	/** 请到恶人村药店买虚伪散消除你的红名 */
+	public static final int ALERT_PLAYER_ERR = 906;
+	/** 你的元宝不足 */
+	public static final int ALERT_SHOP_NO_MONEY = 907;
+	/** 该功能正在完善 */
+	public static final int ALERT_FUNCTION_NO_OPEN = 908;
+	
+	/** "邮件已满，未免造成损失请及时清理！" */
+	public static final int ALERT_MAILBOX_FULL_CLEARSOON = 909;
+	
+	/** "拆解失败" */
+	public static final int ALERT_DS_PROCESS_FAIL = 910;
+	
+	/** 修改邮件失败! */
+	public static final int ALERT_MAIL_ALTER_FAIL = 911;
+	
+	/** "修改密码失败!" */
+	public static final int ALERT_PWD_ALTER_FAIL = 912;
+	
+	/** 该用户已被封号 */
+	public static final int ALERT_ACCOUNT_CLOSED = 913;
+	
+	/** 账号密码错误，登陆失败 */
+	public static final int ALERT_LOGIN_FAIL = 914;
+	
+	/** 对不起，该装备不能进行拆解。 */
+	public static final int ALERT_DS_GOODS_NOT = 915;
+	
+	/** 封号先T玩家下线 */
+	public static final int ALERT_ACCOUNT_CLOSE_BEFORE = 916;
+}

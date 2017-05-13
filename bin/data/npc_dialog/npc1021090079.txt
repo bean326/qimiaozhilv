@@ -1,0 +1,2493 @@
+<dialog>
+
+<!--该NPC名为练级任务官 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="100000">//去普通地图战斗，相比于经验，大量的金钱和材料更为重要，因为它们是提升装备的必需品。|//战斗小窍门：选择和自己等级实力相近的地图。组队战斗既轻松省力，又能结交朋友。使用生命、精力宝石能解放双手。|//如果怪物等级高于人物1500级，就会释放强力攻击，选择地图的时候一定要注意啊！|//我这里有两种不同的任务，如果你战斗之前领取了对应地图的任务，完成以后，我会给你奖励的~</text>
+		</words>
+   		 <options>
+                        <item textId="1021090079">taskList</item>
+                 </options>
+	</s01>
+   </default>	
+
+
+
+
+	
+	<t1072000001>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000001">任务:刁蛮项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|初心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000001" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|初心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000001" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|初心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000001" />
+			</options>
+		 </s03>
+   </t1072000001>
+	
+	<t1072000002>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000002">任务:混沌项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|初心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000002" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|初心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000002" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|初心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000002" />
+			</options>
+		 </s03>
+   </t1072000002>
+
+<t1072000003>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000003">任务:妖姬项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|初心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000003" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|初心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000003" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|初心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000003" />
+			</options>
+		 </s03>
+   </t1072000003>
+
+<t1072000004>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000004">任务:地精王项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|初心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000004" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|初心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000004" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|初心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000004" />
+			</options>
+		 </s03>
+   </t1072000004>
+
+<t1072000005>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000005">任务:蛇妖项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|熟练；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000005" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|熟练；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000005" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|熟练；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000005" />
+			</options>
+		 </s03>
+   </t1072000005>
+
+<t1072000006>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000006">任务:嗜血项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|熟练；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000006" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|熟练；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000006" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|熟练；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000006" />
+			</options>
+		 </s03>
+   </t1072000006>
+
+<t1072000007>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000007">任务:炫丽项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|熟练；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000007" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|熟练；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000007" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|熟练；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000007" />
+			</options>
+		 </s03>
+   </t1072000007>
+
+<t1072000008>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000008">任务:鞭女王项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|熟练；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000008" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|熟练；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000008" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|熟练；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000008" />
+			</options>
+		 </s03>
+   </t1072000008>
+
+<t1072000009>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000009">任务:金蝙蝠项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|会心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000009" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|会心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000009" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|会心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000009" />
+			</options>
+		 </s03>
+   </t1072000009>
+
+<t1072000010>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000010">任务:天剑项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|会心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000010" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|会心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000010" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|会心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000010" />
+			</options>
+		 </s03>
+   </t1072000010>
+
+<t1072000011>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000011">任务:天狱项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|会心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000011" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|会心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000011" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|会心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000011" />
+			</options>
+		 </s03>
+   </t1072000011>
+
+<t1072000012>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000012">任务:致命项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|会心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000012" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|会心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000012" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|会心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000012" />
+			</options>
+		 </s03>
+   </t1072000012>
+
+<t1072000013>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000013">任务:黑衣项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|达人；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000013" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|达人；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000013" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|达人；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000013" />
+			</options>
+		 </s03>
+   </t1072000013>
+
+<t1072000014>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000014">任务:牛魔王项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|达人；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000014" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|达人；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000014" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|达人；渤岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000014" />
+			</options>
+		 </s03>
+   </t1072000014>
+
+<t1072000015>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000015">任务:邪树项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|达人；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000015" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|达人；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000015" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|达人；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000015" />
+			</options>
+		 </s03>
+   </t1072000015>
+
+<t1072000016>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1072000016">任务:卡哇伊项链·无双</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000001">想要吗？可以用来兑换统御项链·无双的哟！|达人；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000002" text="接受任务" command="accept:1072000016" />
+				<item textId="7000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000004">想要吗？可以用来兑换统御项链·无双的哟！|达人；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000016" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="7000005">想要吗？可以用来兑换统御项链·无双的哟！|达人；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="7000006" text="完成任务" command="finish:1072000016" />
+			</options>
+		 </s03>
+   </t1072000016>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
+	
+	
+	<t1073020109>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020109">任务:突破妖魔谷</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="130237">突破妖魔谷！|初心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="130238" text="接受任务" command="accept:1073020109" />
+				<item textId="130239" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300240">突破妖魔谷！|初心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020109" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300241">突破妖魔谷！|初心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="1300242" text="完成任务" command="finish:1073020109" />
+			</options>
+		 </s03>
+   </t1073020109>       
+	
+	
+	<t1073020110>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020110">任务:突破渤岛</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300101">突破渤岛！|初心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="130102" text="接受任务" command="accept:1073020110" />
+				<item textId="130103" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300104">突破渤岛！|初心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020110" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300105">突破渤岛！|初心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="1300106" text="完成任务" command="finish:1073020110" />
+			</options>
+		 </s03>
+   </t1073020110>
+	
+	
+	<t1073020111>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020111">任务：突破神异之岛</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300125">突破神异之岛！|初心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="130126" text="接受任务" command="accept:1073020111" />
+				<item textId="130127" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300128">突破神异之岛！|初心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020111" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300129">突破神异之岛！|初心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="1300130" text="完成任务" command="finish:1073020111" />
+			</options>
+		 </s03>
+   </t1073020111>
+	
+	
+	<t1073020112>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020112">任务：突破死亡征途</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300149">突破死亡征途！|初心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="130150" text="接受任务" command="accept:1073020112" />
+				<item textId="130151" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300152">突破死亡征途！|初心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020112" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300153">突破死亡征途！|初心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="1300154" text="完成任务" command="finish:1073020112" />
+			</options>
+		 </s03>
+   </t1073020112>
+	
+	
+	<t1073020121>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020121">任务：冲出妖魔谷</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300243">冲出妖魔谷！|熟练；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="130244" text="接受任务" command="accept:1073020121" />
+				<item textId="130245" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300246">冲出妖魔谷！|熟练；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020121" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300247">冲出妖魔谷！|熟练；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="1300248" text="完成任务" command="finish:1073020121" />
+			</options>
+		 </s03>
+   </t1073020121>
+	
+	
+	<t1073020122>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020122">任务：冲出渤岛</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300107">冲出渤岛！|熟练；渤岛。</text>
+			</words>
+			<options>
+				<item textId="130108" text="接受任务" command="accept:1073020122" />
+				<item textId="130109" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300110">冲出渤岛！|熟练；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020122" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300111">冲出渤岛！|熟练；渤岛。</text>
+			</words>
+			<options>
+				<item textId="1300112" text="完成任务" command="finish:1073020122" />
+			</options>
+		 </s03>
+   </t1073020122>
+	
+	
+	<t1073020123>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020123">任务：冲出神异之岛</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300131">冲出神异之岛！|熟练；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="130132" text="接受任务" command="accept:1073020123" />
+				<item textId="130133" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300134">冲出神异之岛！|熟练；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020123" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300135">冲出神异之岛！|熟练；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="1300136" text="完成任务" command="finish:1073020123" />
+			</options>
+		 </s03>
+   </t1073020123>
+	
+	
+	<t1073020124>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020124">任务：冲出死亡征途</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300155">冲出死亡征途！|熟练；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="130156" text="接受任务" command="accept:1073020124" />
+				<item textId="130157" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300158">冲出死亡征途！|熟练；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020124" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300159">冲出死亡征途！|熟练；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="1300160" text="完成任务" command="finish:1073020124" />
+			</options>
+		 </s03>
+   </t1073020124>	
+	
+	
+	<t1073020133>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020133">任务：妖魔谷的罪恶</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1200249">妖魔谷的罪恶！|会心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="120250" text="接受任务" command="accept:1073020133" />
+				<item textId="120251" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1200252">妖魔谷的罪恶！|会心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020133" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1200253">妖魔谷的罪恶！|会心；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="1200254" text="完成任务" command="finish:1073020133" />
+			</options>
+		 </s03>
+   </t1073020133>
+	
+	
+	<t1073020134>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020134">任务：渤岛的罪恶</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300113">渤岛的罪恶！|会心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="130114" text="接受任务" command="accept:1073020134" />
+				<item textId="130115" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300116">渤岛的罪恶！|会心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020134" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300117">渤岛的罪恶！|会心；渤岛。</text>
+			</words>
+			<options>
+				<item textId="1300118" text="完成任务" command="finish:1073020134" />
+			</options>
+		 </s03>
+   </t1073020134>
+	
+	
+	<t1073020135>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020135">任务：神异之岛的罪恶</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300137">神异之岛的罪恶！|会心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="130138" text="接受任务" command="accept:1073020135" />
+				<item textId="130139" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300140">神异之岛的罪恶！|会心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020135" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300141">神异之岛的罪恶！|会心；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="1300142" text="完成任务" command="finish:1073020135" />
+			</options>
+		 </s03>
+   </t1073020135>
+	
+	
+	<t1073020136>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020136">任务：死亡征途的罪恶</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300161">死亡征途的罪恶！|会心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="130162" text="接受任务" command="accept:1073020136" />
+				<item textId="130163" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300164">死亡征途的罪恶！|会心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020136" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300165">死亡征途的罪恶！|会心；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="1300166" text="完成任务" command="finish:1073020136" />
+			</options>
+		 </s03>
+   </t1073020136>
+	
+		
+	<t1073020145>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020145">任务：征服妖魔谷</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300255">征服妖魔谷！|达人；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="130256" text="接受任务" command="accept:1073020145" />
+				<item textId="130257" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300258">征服妖魔谷！|达人；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020145" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300259">征服妖魔谷！|达人；妖魔谷。</text>
+			</words>
+			<options>
+				<item textId="1300260" text="完成任务" command="finish:1073020145" />
+			</options>
+		 </s03>
+   </t1073020145>
+	
+	
+	<t1073020146>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020146">任务：征服渤岛</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300119">征服渤岛！|达人；渤岛。</text>
+			</words>
+			<options>
+				<item textId="130120" text="接受任务" command="accept:1073020146" />
+				<item textId="130121" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300122">征服渤岛！|达人；渤岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020146" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300123">征服渤岛！|达人；渤岛。</text>
+			</words>
+			<options>
+				<item textId="1300124" text="完成任务" command="finish:1073020146" />
+			</options>
+		 </s03>
+   </t1073020146>
+	
+	 
+	<t1073020147>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020147">任务：征服神异之岛</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300143">征服神异之岛！|达人；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="130144" text="接受任务" command="accept:1073020147" />
+				<item textId="130145" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300146">征服神异之岛！|达人；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020147" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300147">征服神异之岛！|达人；神异之岛。</text>
+			</words>
+			<options>
+				<item textId="1300148" text="完成任务" command="finish:1073020147" />
+			</options>
+		 </s03>
+   </t1073020147>
+	
+	
+	<t1073020148>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020148">任务：征服死亡征途</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300167">征服死亡征途！|达人；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="130168" text="接受任务" command="accept:1073020148" />
+				<item textId="130169" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300170">征服死亡征途！|达人；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020148" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300171">征服死亡征途！|达人；死亡征途。</text>
+			</words>
+			<options>
+				<item textId="1300172" text="完成任务" command="finish:1073020148" />
+			</options>
+		 </s03>
+   </t1073020148>   
+	
+	<t1073020150>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020150">任务：玩转长滩公园</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300179">玩转长滩公园！|专家；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="130180" text="接受任务" command="accept:1073020150" />
+				<item textId="130181" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300182">玩转长滩公园！|专家；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020150" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300183">玩转长滩公园！|专家；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="1300184" text="完成任务" command="finish:1073020150" />
+			</options>
+		 </s03>
+   </t1073020150>   
+	
+	<t1073020152>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020152">任务：玩转无尽之湖</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300191">玩转无尽之湖！|专家；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="130192" text="接受任务" command="accept:1073020152" />
+				<item textId="130193" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300194">玩转无尽之湖！|专家；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020152" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300195">玩转无尽之湖！|专家；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="1300196" text="完成任务" command="finish:1073020152" />
+			</options>
+		 </s03>
+   </t1073020152>   
+
+<t1073020154>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020154">任务：玩转绿野仙踪</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300203">玩转绿野仙踪！|专家；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="130204" text="接受任务" command="accept:1073020154" />
+				<item textId="130205" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300206">玩转绿野仙踪！|专家；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020154" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300207">玩转绿野仙踪！|专家；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="1300208" text="完成任务" command="finish:1073020154" />
+			</options>
+		 </s03>
+   </t1073020154>   
+
+<t1073020156>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020156">任务：玩转浩瀚雪山</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300215">玩转浩瀚雪山！|专家；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="130216" text="接受任务" command="accept:1073020156" />
+				<item textId="130217" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300218">玩转浩瀚雪山！|专家；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020156" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300219">玩转浩瀚雪山！|专家；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="1300220" text="完成任务" command="finish:1073020156" />
+			</options>
+		 </s03>
+   </t1073020156>  
+
+<t1073020158>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020158">任务：长滩公园的宴会</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300227">长滩公园的宴会！|教授；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="130228" text="接受任务" command="accept:1073020158" />
+				<item textId="130229" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300230">长滩公园的宴会！|教授；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020158" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300231">长滩公园的宴会！|教授；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="1300232" text="完成任务" command="finish:1073020158" />
+			</options>
+		 </s03>
+   </t1073020158>  
+
+<t1073020160>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020160">任务：无尽之湖的宴会</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300239">无尽之湖的宴会！|教授；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="130240" text="接受任务" command="accept:1073020160" />
+				<item textId="130241" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300242">无尽之湖的宴会！|教授；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020160" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300243">无尽之湖的宴会！|教授；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="1300244" text="完成任务" command="finish:1073020160" />
+			</options>
+		 </s03>
+   </t1073020160> 
+
+<t1073020162>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020162">任务：绿野仙踪的宴会</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300251">绿野仙踪的宴会！|教授；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="130252" text="接受任务" command="accept:1073020162" />
+				<item textId="130253" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300254">绿野仙踪的宴会！|教授；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020162" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300255">绿野仙踪的宴会！|教授；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="1300256" text="完成任务" command="finish:1073020162" />
+			</options>
+		 </s03>
+   </t1073020162>
+
+<t1073020164>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020164">任务：浩瀚雪山的宴会</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300263">浩瀚雪山的宴会！|教授；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="130264" text="接受任务" command="accept:1073020164" />
+				<item textId="130265" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300266">浩瀚雪山的宴会！|教授；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020164" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300267">浩瀚雪山的宴会！|教授；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="1300268" text="完成任务" command="finish:1073020164" />
+			</options>
+		 </s03>
+   </t1073020164>
+
+<t1073020168>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020168">任务：长滩公园的孽障</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300287">长滩公园的孽障！|大师；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="130288" text="接受任务" command="accept:1073020168" />
+				<item textId="130289" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300230">长滩公园的孽障！|大师；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020168" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300291">长滩公园的孽障！|大师；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="1300292" text="完成任务" command="finish:1073020168" />
+			</options>
+		 </s03>
+   </t1073020168>  
+
+<t1073020170>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020170">任务：无尽之湖的孽障</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300299">无尽之湖的孽障！|大师；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="130300" text="接受任务" command="accept:1073020170" />
+				<item textId="130301" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300302">无尽之湖的孽障！|大师；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020170" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300303">无尽之湖的孽障！|大师；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="1300304" text="完成任务" command="finish:1073020170" />
+			</options>
+		 </s03>
+   </t1073020170> 
+
+<t1073020172>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020172">任务：绿野仙踪的孽障</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300311">绿野仙踪的孽障！|大师；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="130312" text="接受任务" command="accept:1073020172" />
+				<item textId="130313" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300314">绿野仙踪的孽障！|大师；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020172" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300315">绿野仙踪的孽障！|大师；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="1300316" text="完成任务" command="finish:1073020172" />
+			</options>
+		 </s03>
+   </t1073020172>
+
+
+
+
+<t1073020181>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020181">任务：浩瀚雪山的孽障</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300365">浩瀚雪山的孽障！|大师；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="130366" text="接受任务" command="accept:1073020181" />
+				<item textId="130367" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300368">浩瀚雪山的孽障！|大师；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020181" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300369">浩瀚雪山的孽障！|大师；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="1300370" text="完成任务" command="finish:1073020181" />
+			</options>
+		 </s03>
+   </t1073020181>
+
+<t1073020183>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020183">任务：决战长滩公园</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300377">决战长滩公园！|宗师；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="130378" text="接受任务" command="accept:1073020183" />
+				<item textId="130379" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300380">决战长滩公园！|宗师；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020183" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300381">决战长滩公园！|宗师；长滩公园。</text>
+			</words>
+			<options>
+				<item textId="1300382" text="完成任务" command="finish:1073020183" />
+			</options>
+		 </s03>
+   </t1073020183>
+
+<t1073020185>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020185">任务：决战无尽之湖</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300389">决战无尽之湖！|宗师；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="130390" text="接受任务" command="accept:1073020185" />
+				<item textId="130391" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300392">决战无尽之湖！|宗师；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020185" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300393">决战无尽之湖！|宗师；无尽之湖。</text>
+			</words>
+			<options>
+				<item textId="1300394" text="完成任务" command="finish:1073020185" />
+			</options>0
+		 </s03>
+   	</t1073020185>
+
+
+
+	<t1073020205>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020205">任务：决战绿野仙踪</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300484">决战绿野仙踪！|宗师；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="130485" text="接受任务" command="accept:1073020205" />
+				<item textId="130486" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300487">决战绿野仙踪！|宗师；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020205" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300488">决战绿野仙踪！|宗师；绿野仙踪。</text>
+			</words>
+			<options>
+				<item textId="1300489" text="完成任务" command="finish:1073020205" />
+			</options>
+		 </s03>
+	</t1073020205>
+
+	<t1073020207>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020207">任务：决战浩瀚雪山</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300496">决战浩瀚雪山！|宗师；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="130497" text="接受任务" command="accept:1073020207" />
+				<item textId="130498" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300499">决战浩瀚雪山！|宗师；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020207" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300500">决战浩瀚雪山！|宗师；浩瀚雪山。</text>
+			</words>
+			<options>
+				<item textId="1300501" text="完成任务" command="finish:1073020207" />
+			</options>
+		 </s03>
+	</t1073020207>
+
+
+
+	<t1073020211>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020211">任务：解放海底世界</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300520">解放海底世界！|天上；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300521" text="接受任务" command="accept:1073020211" />
+				<item textId="1300522" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300523">解放海底世界！|天上；海底世界。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020211" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300524">解放海底世界！|天上；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300525" text="完成任务" command="finish:1073020211" />
+			</options>
+		 </s03>
+	</t1073020211>
+
+	<t1073020213>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020213">任务：保卫精灵之森</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300532">保卫精灵之森！|天上；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300533" text="接受任务" command="accept:1073020213" />
+				<item textId="1300534" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300535">保卫精灵之森！|天上；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020213" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300536">保卫精灵之森！|天上；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300537" text="完成任务" command="finish:1073020213" />
+			</options>
+		 </s03>
+	</t1073020213>
+
+	<t1073020215>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020215">任务：夺取水晶矿洞</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300550">夺取水晶矿洞！|天上；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="1300551" text="接受任务" command="accept:1073020215" />
+				<item textId="1300552" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300553">夺取水晶矿洞！|天上；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020215" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300554">夺取水晶矿洞！|天上；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="1300555" text="完成任务" command="finish:1073020215" />
+			</options>
+		 </s03>
+	</t1073020215>
+
+	<t1073020217>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020217">任务：清扫天空之城</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300562">清扫天空之城！|天上；天空之城。</text>
+			</words>
+			<options>
+				<item textId="1300563" text="接受任务" command="accept:1073020217" />
+				<item textId="1300564" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300565">清扫天空之城！|天上；天空之城。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020217" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300566">清扫天空之城！|天上；天空之城。</text>
+			</words>
+			<options>
+				<item textId="1300567" text="完成任务" command="finish:1073020217" />
+			</options>
+		 </s03>
+	</t1073020217>
+
+   
+   <t1073020221>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020221">任务：清扫海底世界！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300580">清扫海底世界！|天下；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300581" text="接受任务" command="accept:1073020221" />
+				<item textId="1300582" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300583">清扫海底世界！|天下；海底世界。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020221" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300584">清扫海底世界！|天下；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300585" text="完成任务" command="finish:1073020221" />
+			</options>
+		 </s03>
+   </t1073020221>
+  
+   <t1073020223>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020223">任务：清扫精灵之森！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300592">清扫精灵之森！|天下；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020223" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300595">清扫精灵之森！|天下；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020223" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300596">清扫精灵之森！|天下；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020223" />
+			</options>
+		</s03>
+	</t1073020223>
+	<t1073020225>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022501">任务：占领水晶矿洞！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022502">占领水晶矿洞！|天下；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020225" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022502">占领水晶矿洞！|天下；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020225" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022502">占领水晶矿洞！|天下；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020225" />
+			</options>
+		</s03>
+	</t1073020225>
+	<t1073020226>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022601">任务：占领天空之城！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022602">占领天空之城！|天下；天空之城。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020226" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022602">占领天空之城！|天下；天空之城。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020226" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022602">占领天空之城！|天下；天空之城。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020226" />
+			</options>
+		</s03>
+	</t1073020226>
+	<t1073020231>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023101">任务：大战海底世界！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023102">大战海底世界！|天地；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020231" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023102">大战海底世界！|天地；海底世界。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020231" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023102">大战海底世界！|天地；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020231" />
+			</options>
+		</s03>
+	</t1073020231>
+	<t1073020234>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023401">任务：大战精灵之森！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023402">大战精灵之森！|天地；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020234" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023402">大战精灵之森！|天地；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020234" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023402">大战精灵之森！|天地；精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020234" />
+			</options>
+		</s03>
+	</t1073020234>
+	<t1073020240>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024001">任务：大战水晶矿洞！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024002">大战水晶矿洞！|天地；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020240" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024002">大战水晶矿洞！|天地；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020240" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024002">大战水晶矿洞！|天地；水晶矿洞。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020240" />
+			</options>
+		</s03>
+	</t1073020240>
+	<t1073020241>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024101">任务：大战天空之城！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024102">大战天空之城！|天地；天空之城。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020241" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024102">大战天空之城！|天地；天空之城。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020241" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024102">大战天空之城！|天地；天空之城。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020241" />
+			</options>
+		</s03>
+	</t1073020241>
+
+	<t1073020277>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027701">任务：决战海底世界！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027702">决战海底世界！|无双；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020277" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027702">决战海底世界！|无双；海底世界。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020277" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027702">决战海底世界！|无双；海底世界。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020277" />
+			</options>
+		</s03>
+	</t1073020277>
+	<t1073020278>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027801">任务：决战精灵之森！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027802">决战海底世界！|无双；决战精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300593" text="接受任务" command="accept:1073020278" />
+				<item textId="1300594" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027802">决战海底世界！|无双；决战精灵之森。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020278" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027802">决战海底世界！|无双；决战精灵之森。</text>
+			</words>
+			<options>
+				<item textId="1300597" text="完成任务" command="finish:1073020278" />
+			</options>
+		</s03>
+	</t1073020278>
+</dialog>

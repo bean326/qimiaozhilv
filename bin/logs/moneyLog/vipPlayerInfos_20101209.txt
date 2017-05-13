@@ -1,0 +1,2 @@
+time	account	name	data
+2010-12-09-09:55:22	bean01	bean01	¶ªÆúÆæÃîÖ®ĞÄx10

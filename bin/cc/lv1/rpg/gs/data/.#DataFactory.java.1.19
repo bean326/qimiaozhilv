@@ -1,0 +1,274 @@
+package cc.lv1.rpg.gs.data;
+
+import java.util.Random;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.PetTome;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.impl.BoxDropProp;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Pet;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+/**
+ * 数据工厂.....
+ * @author dxw
+ *
+ */
+ 
+public class DataFactory
+{
+
+	private static DataFactory df = null;
+	
+	private static HashMap datasMap = new HashMap(1000);
+
+	private DataFactory()
+	{
+	}
+	
+	public static DataFactory getInstance()
+	{
+		if(df == null)
+			df = new DataFactory();
+		return df;
+	}
+	
+	public GameObject getGameObject(int id)
+	{
+		return (GameObject)datasMap.get(id);
+	}
+
+	public void putGameObject(GameObject obj)
+	{
+		datasMap.put(obj.id, obj); 
+	}
+	
+	public void setRoomObject(GameObject obj)
+	{
+		datasMap.remove(obj);
+		datasMap.put(obj.id, obj);
+	}
+	
+
+	/** 玩家出生 */
+	public final static int ATTACH_NATIVITY = 1;
+	
+	/** 玩家升级经验计算 */
+	public final static int ATTACH_EXP = 2;
+	
+	/** 宠物升级经验计算 */
+	public final static int ATTACH_PET_EXP = 3;
+	
+	/** NPC传送配置 */
+	public final static int ATTACH_NPC_FLYER = 4;
+	
+	private static HashMap attachMap = new HashMap(500);
+	
+	public void putAttachment(int attachType,Object obj)
+	{
+		attachMap.put(attachType, obj);
+	}
+	
+	public Object getAttachment(int attachType)
+	{
+		return attachMap.get(attachType);
+	}
+	
+	private List skillList = new ArrayList(500);
+	
+	public void addSkill(Skill skill)
+	{
+		skillList.add(skill);
+	}
+	
+	public List getSkillList()
+	{
+		return skillList;
+	}
+	
+	private List petSkillList = new ArrayList(100);
+	
+	public void addPetSkill(Skill skill)
+	{
+		petSkillList.add(skill);
+	}
+	
+	public List getPetSkillList()
+	{
+		return petSkillList;
+	}
+	
+	private List boxDropPropList = new ArrayList(200);
+	
+	public void addBoxDropProp(BoxDropProp bdp)
+	{
+		boxDropPropList.add(bdp);
+	}
+	
+	public List getBoxDropPropList()
+	{
+		return boxDropPropList;
+	}
+	
+
+	
+	/**
+	 * 设置出生点
+	 * @param player
+	 * @return
+	 */
+	public boolean setNativity(Player player)
+	{
+		ArrayList nativitys = (ArrayList)attachMap.get(ATTACH_NATIVITY);
+		Random random = new Random();
+		XMLNode points = (XMLNode) nativitys.get(0);
+		ArrayList pointss = points.getSubNodes();
+		int index = random.nextInt(pointss.size());
+		XMLNode point = (XMLNode) pointss.get(index);
+		if(point == null)
+			return false;
+		player.worldId = Integer.parseInt(point.getAttributeValue("worldId"));
+		player.areaId= Integer.parseInt(point.getAttributeValue("areaId"));
+		player.roomId= Integer.parseInt(point.getAttributeValue("roomId"));
+		player.x = Integer.parseInt(point.getAttributeValue("x"));
+		player.y = Integer.parseInt(point.getAttributeValue("y"));
+
+		int nativitySize = nativitys.size();
+		
+		for(int i = 0 ; i < nativitySize ; i ++)
+		{
+			XMLNode anyNode = (XMLNode)nativitys.get(i);
+			
+			if(anyNode.getName().equals("points"))
+			{
+				ArrayList pointList = anyNode.getSubNodes();
+				Random ran = new Random();
+				int indexx = ran.nextInt(pointList.size());
+				XMLNode pointO = (XMLNode)pointList.get(indexx);
+				
+				if(pointO != null)
+				{
+					player.worldId = Integer.parseInt(pointO.getAttributeValue("worldId"));
+					player.areaId= Integer.parseInt(pointO.getAttributeValue("areaId"));
+					player.roomId= Integer.parseInt(pointO.getAttributeValue("roomId"));
+					player.x = Integer.parseInt(pointO.getAttributeValue("x"));
+					player.y = Integer.parseInt(pointO.getAttributeValue("y"));
+				}
+				
+//				System.out.println("创建角色世界Id:"+player.worldId);
+//				System.out.println("创建区域世界Id:"+player.areaId);
+//				System.out.println("创建房间世界Id:"+player.roomId);
+//				System.out.println("创建玩家出生点-- x:"+player.x+" y:"+player.y);
+			}
+			else if(anyNode.getName().equals("skills"))
+			{
+				ArrayList skills = anyNode.getSubNodes();
+				int size = skills.size();
+				int [] ids = new int[size];
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode skill = (XMLNode)skills.get(j);
+					ids[j] = Integer.parseInt(skill.getAttributeValue("id"));
+				}
+				//初始化技能组
+				SkillTome skillTome = (SkillTome)player.getExtPlayerInfo("skillTome");
+				skillTome.initBaseSkill(ids,player);
+			}
+			else if(anyNode.getName().equals("goods"))
+			{
+				ArrayList list = anyNode.getSubNodes();
+				int size = list.size();
+
+				Bag bag = (Bag)player.getExtPlayerInfo("bag");
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode goodsNode = (XMLNode)list.get(j);
+					int goodsId = Integer.parseInt(goodsNode.getAttributeValue("id"));
+					int goodsCount = Integer.parseInt(goodsNode.getAttributeValue("count"));
+					int bindMode = Integer.parseInt(goodsNode.getAttributeValue("bind"));
+		
+					Goods goods = (Goods)DataFactory.getInstance().getGameObject(goodsId);
+
+					if(goods == null)
+						continue;
+
+					Goods newGoods = null;
+					if(goods instanceof GoodsEquip)
+					{
+						GoodsEquip equip = (GoodsEquip) goods;
+						newGoods = equip.makeNewBetterEquip(equip.quality);
+					}
+					else if(goods instanceof GoodsProp)
+					{
+						newGoods = (Goods) Goods.cloneObject(goods);
+						newGoods.goodsCount = goodsCount;
+						if(((GoodsProp)newGoods).boxType != 0)
+							((GoodsProp)newGoods).boxLevel = 1;
+					}
+					
+					newGoods.bindMode = bindMode;
+					newGoods.pickUpBind();
+					newGoods.objectIndex = GameServer.getInstance().getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					
+					//System.out.println(j+"  加入背包  "+newGoods.name +"  流水号 "+newGoods.objectIndex);
+					bag.getGoodsList()[j] = newGoods;
+
+				}
+			}
+			else if(anyNode.getName().equals("petSkills"))
+			{
+//				ArrayList skills = anyNode.getSubNodes();
+//				if(skills != null)
+//				{
+//					int size = skills.size();
+//					int [] ids = new int[size];
+//					for(int j = 0 ; j < size ; j ++)
+//					{
+//						XMLNode skill = (XMLNode)skills.get(j);
+//						ids[j] = Integer.parseInt(skill.getAttributeValue("id"));
+//					}
+//					//初始化宠物技能组
+//					Pet pet = (Pet)player.getExtPlayerInfo("pet");
+//					pet.initPetSkill(ids);
+//				}
+			}
+			else if(anyNode.getName().equals("pet"))
+			{
+				ArrayList skills = anyNode.getSubNodes();
+				int size = skills.size();
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode skill = (XMLNode)skills.get(j);
+					int id = Integer.parseInt(skill.getAttributeValue("id"));
+					GoodsProp prop = (GoodsProp) DataFactory.getInstance().getGameObject(id);
+					Pet pet = (Pet) DataFactory.getInstance().getGameObject(prop.petId);
+					prop.petIndex = GameServer.getInstance().getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					prop.objectIndex = GameServer.getInstance().getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					pet.objectIndex = prop.petIndex;
+					PetTome pets = (PetTome) player.getExtPlayerInfo("petTome");
+					pet.setPlayer(player);
+					pet.isActive = true;
+					pet.requireExp = pets.PETEXP;
+					pets.addPet(pet);
+					Bag bag = (Bag) player.getExtPlayerInfo("bag");
+					bag.addPetEggs(prop);
+					break;
+				}
+			}
+		}
+
+		return true;
+	}
+
+}

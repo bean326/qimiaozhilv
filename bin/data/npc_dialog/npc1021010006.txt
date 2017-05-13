@@ -1,0 +1,54 @@
+<dialog>
+
+<!--该NPC名为凤梨姐姐 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="100000">欢迎来到奇妙世界！</text>
+		</words>
+   		 <options>
+                 </options>
+	</s01>
+   </default> 
+	<t1071010106>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1071010106">任务：向前进发 </text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="110243">可怜的西瓜啊，她到现在也不知道爸妈是因为偷懒和不负责任，才给他起了那样一个名字。不过单纯的人确实容易幸福吧！ 你看起来也是这样的人，嘻嘻~|去比基尼海滩06找凤梨姐姐</text>
+			</words>
+			<options>
+				<item textId="110244" text="接受任务" command="accept:1071010106" />
+				<item textId="110245" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1100246">可怜的西瓜啊，她到现在也不知道爸妈是因为偷懒和不负责任，才给他起了那样一个名字。不过单纯的人确实容易幸福吧！ 你看起来也是这样的人，嘻嘻~|去比基尼海滩06找凤梨姐姐</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1071010106" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1100247">可怜的西瓜啊，她到现在也不知道爸妈是因为偷懒和不负责任，才给他起了那样一个名字。不过单纯的人确实容易幸福吧！ 你看起来也是这样的人，嘻嘻~|去比基尼海滩06找凤梨姐姐</text>
+			</words>
+			<options>
+				<item textId="1100248" text="完成任务" command="finish:1071010106" />
+			</options>
+		 </s03>
+   </t1071010106>                     
+</dialog>

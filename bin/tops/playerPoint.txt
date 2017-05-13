@@ -1,0 +1,10 @@
+id	accountName	playerName	value
+
+1	loky	loky	990669600
+2	twh11	TWh11	684755000
+3	zhongyukaishi	123456	411813767
+4	zjj2003	°¥Ó´Î¹	201592960
+5	twh22	dfd	97800000
+6	bean01	bean01	10797379
+7	bean02	bean02	450000
+8	bean03	bean03	300000

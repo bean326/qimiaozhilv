@@ -1,0 +1,70 @@
+package cc.lv1.rpg.gs.entity;
+
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.entity.controller.FamilyController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * 家族邀请
+ * @author dxw
+ *
+ */
+public class FamilyInvitation extends ConfirmJob
+{
+	private PlayerController inviter;
+	
+	
+	public FamilyInvitation(PlayerController inviter,PlayerController target)
+	{
+		this.inviter = inviter;
+		super.setSource(target);
+	}
+	
+	public void confirm(boolean accepted)
+	{
+		if (accepted)
+		{
+			addFamily();
+		}
+		else
+		{
+			inviter.sendAlert(ErrorCode.ALERT_PLAYER_REFUSE_IN_FAMILY);
+		}
+	}
+
+	private void addFamily()
+	{
+		FamilyController family = inviter.getFamily();
+		
+		if(family == null)
+			return;
+		
+		
+		if(source.getFamily() != null)
+		{
+			inviter.sendAlert(ErrorCode.ALERT_PLAYER_IN_OTHER_FAMILY);
+			return;
+		}
+		
+		source.getPlayer().familyId = family.id;
+		source.getPlayer().familyName = family.name;
+		family.addFamily(source.getName());
+		family.addPlayer(source);
+		source.setFamilyController(family);
+		
+		inviter.sendAlert(ErrorCode.ALERT_PLAYER_AGREE_IN_FAMILY);
+		
+		
+		source.getNetConnection().
+		sendMessage(new SMsg(SMsg.
+				C_PLAYER_FAMILYRESPONSE_COMMAND,new ByteBuffer(1)));
+	}
+	
+	public void cancel()
+	{
+		inviter.sendAlert(ErrorCode.ALERT_PLAYER_CANCEL);
+	}
+	
+}

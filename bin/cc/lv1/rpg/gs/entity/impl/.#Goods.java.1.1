@@ -1,0 +1,144 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+
+public abstract class Goods extends RPGameObject 
+{
+	/** 商品类别(1：装备 2：消耗品 3：任务道具 4：材料 5：价值物) */
+	public int type;
+	
+	/** 图片编号 */
+	public int iconId;
+	
+	/** 价格(游戏币) */
+	public int point;
+	
+	/** 价格(RMB) */
+	public int money;
+	
+	/** 可叠加数量 */
+	public int repeatNumber;
+
+	/** 最低品质(0.白色 1.绿色 2.蓝色 3.紫色) */
+	public int minQuality;
+	
+	/** 最高品质(0.白色 1.绿色 2.蓝色 3.紫色) */
+	public int maxQuality;
+	
+	/** 绑定模式(0.不绑定 1.不能交易 2.不能丢弃 3.不能摆摊) */
+	public int bindMode;
+	
+	/** 道具说明备注 */
+	public String remark;
+
+	/** 等级需求 */
+	public int level;
+
+	/** 购买时间 */
+	//public long createDate;
+	
+	/** 使用状态 (true：穿在身上  false：闲置在背包)*/
+	public boolean useFlag = false;
+	
+	public int goodsCount = 1;
+	
+	public int saleRate = 100;
+
+	public int buyRate = 100;
+	
+	public Goods() {}
+	
+	
+	/**
+	 * 使用物品
+	 * @param target 目标用户
+	 * @return 处理结果
+	 */
+	public abstract boolean onUseImpl(PlayerController target,ByteBuffer buffer);
+	
+	/**
+	 * 取下物品
+	 * @param target 目标用户
+	 * @return 处理结果
+	 */
+	public abstract boolean onRemoveImpl(PlayerController target);
+
+	/**
+	 * 删除物品
+	 * @param target 目标用户
+	 */
+	public abstract void onDeleteImpl(PlayerController target);
+
+
+	/**
+	 * 战斗中使用物品的处理
+	 * @param battleController 战斗控制器
+	 * @return 处理结果
+	 */
+	//public abstract boolean onBattleUseImpl(BattleController battleController);
+	
+	
+	/**
+	 * 
+	 */
+	public void writeTo(ByteBuffer buffer)
+	{
+		super.writeTo(buffer);
+		buffer.writeInt(type);
+		buffer.writeInt(iconId);
+		buffer.writeInt(point);
+		buffer.writeInt(money);
+		buffer.writeInt(repeatNumber);
+		buffer.writeInt(minQuality);
+		buffer.writeInt(maxQuality);
+		buffer.writeInt(bindMode);
+		buffer.writeInt(level);
+	}
+
+	
+	public void loadFrom(ByteBuffer buffer)
+	{
+		id = buffer.readInt();
+		name = buffer.readUTF();
+		objectIndex = Long.parseLong(buffer.readUTF());
+		type = buffer.readInt();
+		iconId = buffer.readInt();
+		point = buffer.readInt();
+		money = buffer.readInt();
+		repeatNumber = buffer.readInt();
+		minQuality = buffer.readInt();
+		maxQuality = buffer.readInt();
+		bindMode = buffer.readInt();
+		level = buffer.readInt();
+		goodsCount = buffer.readInt();
+	}
+	
+	
+	public void saveTo(ByteBuffer buffer)
+	{
+		writeTo(buffer);
+		buffer.writeInt(goodsCount);
+	}
+
+	public void copyTo(GameObject go)
+	{
+		super.copyTo(go);
+		Goods goods = (Goods)go;
+		goods.iconId = iconId;
+		goods.type = type;
+		goods.point = point;
+		goods.money = money;
+		goods.level = level;
+		goods.repeatNumber = repeatNumber;
+		goods.remark = remark;
+		goods.maxQuality = maxQuality;
+		goods.minQuality = minQuality;
+		goods.useFlag = useFlag;
+		goods.bindMode = bindMode;
+	}
+
+
+}

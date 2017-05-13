@@ -1,0 +1,230 @@
+package cc.lv1.rpg.gs;
+
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.job.JobObserver;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.dao.DatabaseAccessor;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.AreaController;
+import cc.lv1.rpg.gs.entity.controller.NpcController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.controller.RoomController;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.net.SMsg;
+/**
+ * 世界管理器，维护整个游戏世界
+ * @author dxw
+ *
+ */
+public class WorldManager extends RPGameObject
+{
+	private long currentTime = 0;
+	
+	private int areaLength ;
+	
+	private int npcLength;
+	
+	private GameServer gameServer;
+	
+	private JobObserver jobObserver;
+	
+	private DatabaseAccessor databaseAccessor;
+	
+	private List connections = new ArrayList(200);
+	
+	private HashMap playerMap = new HashMap(1000);
+	
+	private List playerList = new ArrayList(200);
+	
+	/** 区域 */
+	private AreaController [] areaControllers = null;
+
+	public synchronized void addPlayerConntroller(PlayerController controller)
+	{
+		controller.setWorldManager(this);
+		controller.setOnline(true);
+		playerMap.put(controller.getName(), controller);
+		playerList.add(controller);
+	}
+	
+	public synchronized void removePlayerController(PlayerController controller)
+	{
+		controller.setWorldManager(null);
+		controller.setOnline(false);
+		playerMap.remove(controller.getName());
+		playerList.remove(controller);
+	}
+	
+	public void onConnectionOpened(NetConnection conn)
+	{
+		synchronized(conn)
+		{
+			connections.add(conn);
+		}
+		
+	}
+	
+	public void onConnectionClosed(NetConnection conn)
+	{
+		Object controller = conn.getInfo();
+		if(controller instanceof PlayerController)
+		{
+			removePlayerController((PlayerController) controller);
+		}
+		
+		synchronized(conn)
+		{
+			connections.remove(conn);
+		}
+	}
+	
+	public void update()
+	{
+		long timeMillis = System.currentTimeMillis();
+		if(timeMillis - currentTime > 1000)
+		{
+			currentTime = System.currentTimeMillis();
+		}
+		
+		for(int i = 0 ; i < areaLength ; i ++)
+		{
+			areaControllers[i].update(timeMillis);
+		}
+	}
+
+	/**
+	 * 检查当前账号的用户是否在线，在返回当前用户连接，不在则返回空
+	 * @param accountName
+	 * @return
+	 */
+	public NetConnection checkPlayerIsOnline(String accountName)
+	{
+		for(int i = 0 ; i != connections.size() ; i ++)
+		{
+			NetConnection nc = (NetConnection)connections.get(i);
+			Object playerInfo = nc.getInfo();
+			
+			if(playerInfo == null)
+				continue;
+			
+			if(playerInfo instanceof Player)
+			{
+				Player player = (Player)playerInfo;
+				if(player.accountName.equals(accountName))
+					return nc;
+				continue;
+			}
+			
+			if(playerInfo instanceof PlayerController)
+			{
+				PlayerController target= (PlayerController)playerInfo;
+				if(target.getPlayer().accountName.equals(accountName))
+					return nc;
+				continue;
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * 玩家进入游戏世界
+	 * @param player
+	 * @param conn
+	 */
+	public PlayerController processEnterGame(Player player,NetConnection conn)
+	{
+		PlayerController target = new PlayerController(player);
+		target.setNetConnection(conn);
+		conn.setInfo(target);
+		addPlayerConntroller(target);	
+		return target;
+	}
+
+
+	public void clientMessageChain(AppMessage msg)
+	{
+		NetConnection netConnection = (NetConnection)msg.getSource();
+		Object playerInfo = netConnection.getInfo();
+		
+		int markType = msg.getMarkType();
+		
+		if(!(playerInfo instanceof PlayerController))
+			return;
+		
+		PlayerController target = (PlayerController)playerInfo;
+		
+		if(markType == SMsg.T_PLAYER_COMMAND)
+		{
+			target.clientMessageChain(msg);
+		}
+		else if(markType == SMsg.T_ROOM_COMMAND)
+		{
+			int areaId = msg.getBuffer().readInt();
+			int roomId = msg.getBuffer().readInt();
+			
+			AreaController area = getAreaById(areaId);
+			RoomController room = area.getRoomById(roomId);
+			
+			room.clientMessageChain(target,msg);
+		}
+	}
+	
+	
+	
+	public GameServer getGameServer()
+	{
+		return gameServer;
+	}
+
+	public void setGameServer(GameServer gameServer)
+	{
+		this.gameServer = gameServer;
+	}
+
+	public JobObserver getJobObserver()
+	{
+		return jobObserver;
+	}
+
+	public void setJobObserver(JobObserver jobObserver)
+	{
+		this.jobObserver = jobObserver;
+	}
+
+	public DatabaseAccessor getDatabaseAccessor()
+	{
+		return databaseAccessor;
+	}
+
+	public void setDatabaseAccessor(DatabaseAccessor databaseAccessor)
+	{
+		this.databaseAccessor = databaseAccessor;
+	}
+
+	public void setAreaController(AreaController[] areaControllers)
+	{
+		this.areaControllers = areaControllers;
+		areaLength = areaControllers.length;
+	}
+	
+	public AreaController getAreaById(int areaId)
+	{
+		for (int i = 0; i < areaLength; i++)
+		{
+			if(areaControllers[i].id == areaId)
+				return areaControllers[i];
+		}
+		return null;
+	}
+	
+	public PlayerController getPlayerController(String name)
+	{
+		return (PlayerController)playerMap.get(name);
+	}
+
+}

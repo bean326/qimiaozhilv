@@ -1,0 +1,329 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.impl.Reward;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.net.impl.PartyRewardJob;
+/**
+ * 家族活动控制器
+ * @author dxw
+ *
+ */
+public class FamilyPartyController extends PartyController
+{
+	/** 最大限制次数(从休息室到PK场) */
+	public static final int MAXLOSECOUNT = 20;
+	/** 胜利方获得荣誉值(每个人) */
+	public static final int WINHONOUR = 500;
+	/** 失败方获得荣誉值(每个人) */
+	public static final int LOSEHONOUR = 50;
+	/**
+	 * 几点开始  离24点 倒数几小时开始 4则为24-4  20点开始
+	 */
+	private final int START_TIME = 4*HOUR;
+	
+	/**
+	 * 0星期天 1 - 6 是星期一到星期六  活动日期  
+	 */
+	protected boolean [] PARTY_AT_WEKDAY = {true,true,true,true,true,true,true};
+	
+	/**
+	 * 家族点数
+	 */
+	private HashMap familyPoint;
+	
+	/**
+	 * 家族排名
+	 */
+	private List topFamilys = null;
+	
+	private static FamilyPartyController fpc = null;
+	
+	private FamilyPartyController()
+	{
+	}
+	
+	public static FamilyPartyController getInstance()
+	{
+		if(fpc == null)
+			fpc= new FamilyPartyController();
+		return fpc;
+	}
+	
+	
+	public void init()
+	{
+		familyPoint = new HashMap(200); //创建暂存名单
+		topFamilys = new ArrayList(20);
+		
+		super.init();
+	}
+	
+	public void update(long timeMillis)
+	{
+		//用boolean值得控制当天有活动没
+		if(!PARTY_AT_WEKDAY[WorldManager.weekDate])
+			return;
+		
+		
+		if(lessBeginTime <= 0 && !isReady)
+		{
+			if(WorldManager.nextDayTime < START_TIME)
+			{
+				//当天活动结束时候
+				//小于8点后开服则当天无活动
+				return;
+			}
+			else
+			{
+				//计算活动开始时间
+				lessBeginTime = WorldManager.nextDayTime - START_TIME;
+				lessBeginTime = lessBeginTime / 1000 *1000;		
+			}
+		}
+		
+		
+		if(!isStarted)
+		{
+			lessBeginTime -=500;
+			//活动开始前30分钟，系统开始公告（5分钟1次）
+			if(lessBeginTime <= 1800000)
+			{
+//				if(lessBeginTime%10000 == 0)
+				if(lessBeginTime%300000 == 0)
+				{
+					isReady = true;  //活动进入准备阶段则玩家可以进入准备房间
+					
+					init();
+					
+					//家族活动即将开始
+//					if(lessBeginTime >= 10000)
+					if(lessBeginTime >= 300000)
+					{
+						GameServer.getInstance().getWorldManager().sendEveryonePost("\u5BB6\u65CF\u6D3B\u52A8\u5373\u5C06\u5F00\u59CB!!!");//家族活动即将开始
+//						GameServer.getInstance().getWorldManager().sendEveryonePost("离家族活动开始还有["+(lessBeginTime/1000)+"]秒!");
+					}
+				}
+			}
+		}
+
+		
+		if(!isReady)
+			return;
+		
+		if(!isStarted && lessBeginTime <= 0 && partyTime <= 0)
+		{
+			partyTime = HOUR; //设置家族活动时间
+			isStarted = true;
+			isEnded = false;
+			
+			//家族活动开始
+			GameServer.getInstance().getWorldManager().sendEveryonePost("\u5BB6\u65CF\u6D3B\u52A8\u5F00\u59CB!!!");
+		}
+		else
+		{
+			if(!isStarted)
+				return;
+		}
+		
+		partyTime -=500;
+		
+		if(partyTime <= 0) 
+		{
+			isReady = false;
+			isStarted = false;
+			isEnded = true;
+			
+			//家族活动结束
+			GameServer.getInstance().getWorldManager().sendEveryonePost("\u5BB6\u65CF\u6D3B\u52A8\u7ED3\u675F!!!");
+			
+			//通知家族中的玩家活动结束
+			//胜利方获得该阵营所有人员的荣誉增加50%。 用一个job 
+			GameServer.getInstance().getJobsObserver().addJob(GameServer.JOB_GAME1, new PartyRewardJob(this));
+		}
+		else if(isStarted)
+		{
+			if(partyTime%300000 == 0)
+			{
+				GameServer.getInstance().getWorldManager().sendEveryonePost("\u5BB6\u65CF\u6D3B\u52A8\u6B63\u5728\u8FDB\u884C\u4E2D,\u6B22\u8FCE\u5927\u5BB6\u53C2\u52A0!!!!!");
+			}
+		}
+	}
+	
+
+	
+	/**
+	 * 加点数
+	 * @param target
+	 * @param point
+	 * @return
+	 */
+	public boolean addPoint(PlayerController target,int point)
+	{
+		if(!isStarted)
+			return false;
+		
+		
+		if(target.getFamily() == null)
+			return false;
+		
+		if(familyPoint != null)
+		{
+			StringBuffer sb = new StringBuffer();
+			sb.append(target.getFamily().id+":"+target.getFamily().name);
+			
+			Object obj = familyPoint.get(sb.toString());
+			if(obj != null)
+			{
+				long value = Long.parseLong(obj.toString()) + point;
+				familyPoint.put(sb.toString(), value);
+				
+//				System.out.println("加入排行！"+target.getName());
+				setRank(target, topFamilys, 2, value);
+			}
+		}
+		
+		//加入到家族排行
+		
+		super.addPlayerPoint(target, point);
+		
+		return true;
+	}
+	
+	
+	/**
+	 * 加入到家族活动里面
+	 */
+	public void addPlayer(PlayerController target)
+	{
+		if(target.getFamily() == null)
+			return;
+		
+		if(!isReady)
+			return;
+
+		if(familyPoint == null)
+			return;
+
+		//家族名字没在活动中是时，创建
+		Object obj = familyPoint.get(target.getFamily().id+":"+target.getFamily().name);
+		if(obj == null)
+		{
+			familyPoint.put(target.getFamily().id+":"+target.getFamily().name, 0);
+		}
+			
+		super.addPlayer(target);
+	}
+	
+	
+	/**
+	 * 玩家下线时 家族活动结束时
+	 */
+	public void removePlayer(PlayerController target)
+	{
+		if(target.getFamily() == null)
+			return;
+
+		if(!isStarted)
+			return;
+		
+		super.removePlayer(target);
+	}
+	
+	
+	/**
+	 * 发送活动奖励
+	 */
+	public void sendPartyReward()
+	{
+		////奖励发完后把玩家全部送回城
+
+		for (int i = 0; i < playerList.size(); i++)
+		{
+			PlayerController player = (PlayerController) playerList.get(i);
+			if(player == null || !player.isOnline())
+				continue;
+			if(player.getParent() instanceof BattleController)
+				continue;
+			player.moveToRoom(DataFactory.INITROOM);
+		}
+	}
+	
+	private void sendTopFamily(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		int size = topFamilys==null?0:topFamilys.size();
+		buffer.writeByte(size);
+//		System.out.println("家族排行："+size);
+		for (int i = 0; i < size; i++)
+		{
+			Reward reward = (Reward) topFamilys.get(i);
+			buffer.writeInt(reward.rank);
+			buffer.writeUTF(reward.name);
+			buffer.writeUTF(reward.leaderName);
+			buffer.writeInt(reward.playerCount);
+			buffer.writeUTF(reward.honorPoint+"");
+		}
+		if(target.getFamily() == null)
+		{
+			buffer.writeUTF("");
+			buffer.writeInt(0);
+		}
+		else
+		{
+			if(familyPoint == null)
+			{
+				buffer.writeUTF("");
+				buffer.writeInt(0);
+			}
+			else
+			{
+				Object obj = familyPoint.get(target.getFamily().id+":"+target.getFamily().name);
+				if(obj == null)
+				{
+					buffer.writeUTF("");
+					buffer.writeInt(0);
+				}
+				else
+				{
+					buffer.writeUTF(target.getFamily().name);
+					buffer.writeInt(Integer.parseInt(obj.toString()));
+				}
+			}
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_PARTY_FAMILY_REWARD_COMMAND,buffer));
+	}
+	
+	
+	/**
+	 * 接收家族活动内消息
+	 * 
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target,AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_GET_PARTY_FAMILY_REWARD_COMMAND)
+		{
+			sendTopFamily(target);
+		}
+		else if(type == SMsg.C_GET_PLAYER_FAMILY_HONOUR_COMMAND)
+		{
+			
+		}
+		else
+		{
+			super.clientMessageChain(target,msg);
+		}
+
+	}
+	
+}

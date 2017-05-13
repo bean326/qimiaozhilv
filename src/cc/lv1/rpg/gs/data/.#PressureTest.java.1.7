@@ -1,0 +1,180 @@
+package cc.lv1.rpg.gs.data;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.impl.Reward;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+
+public class PressureTest
+{
+	
+	private static PressureTest pt;
+	
+	public int fileCount = 1; 
+	
+	private ByteBuffer buffer;
+	
+	private int count = 0;
+	
+	private PressureTest()
+	{
+		buffer = new ByteBuffer(10240*2);
+	}
+	
+	public static PressureTest getInstance()
+	{
+		if(pt == null)
+			pt = new PressureTest();
+		return pt;
+	}
+	
+	public void addData(String timeString, long msgCount)
+	{
+		count++;
+		buffer.writeUTF(timeString);
+		buffer.writeLong(msgCount);
+		
+		if(buffer.available() > 10240)
+		{
+			saveTestText();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param obj
+	 * @param type obj为list时1表示是问答活动排名
+	 */
+	public void saveData(Object obj,int type)
+	{
+		if(obj instanceof List)
+		{
+			StringBuffer sb = new StringBuffer();
+			if(type == 1)
+			{
+				sb.append("名次");
+				sb.append("\t");
+				sb.append("名字");
+				sb.append("\t");
+				sb.append("等级");
+				sb.append("\t");
+				sb.append("积分");
+				sb.append("\t");
+				sb.append("记录时间");
+				sb.append(Utils.LINE_SEPARATOR);
+				
+				List list = (List) obj;
+				for (int i = 0; i < list.size(); i++) 
+				{
+					Reward reward = (Reward) list.get(i);
+					sb.append(reward.rank);
+					sb.append("\t");
+					sb.append(reward.name);
+					sb.append("\t");
+					sb.append(reward.level);
+					sb.append("\t");
+					sb.append(reward.point);
+					sb.append("\t");
+					sb.append(WorldManager.getTypeTime("yyyyMMdd-hh:mm:ss", reward.logTime));
+					if(i < list.size()-1)
+						sb.append(Utils.LINE_SEPARATOR);
+				}
+			}
+			
+			buffer.writeUTF(sb.toString());
+		}
+		else if(obj instanceof String)
+		{
+			buffer.writeUTF(obj.toString());
+		}
+		
+		
+		saveTestText();
+	}
+
+	private void saveTestText()
+	{
+		if(buffer.available() == 0)
+			return;
+		
+//		StringBuffer strBuff = new StringBuffer();
+		
+//		for (int i = 0; i < count; i++)
+//		{
+//			strBuff.append(buffer.readUTF());
+//			strBuff.append("\t");
+//			strBuff.append(buffer.readLong());
+//			strBuff.append(Utils.LINE_SEPARATOR);
+//		}
+		
+//		try
+//		{
+			String date = WorldManager.getTypeTime("yyyyMMdd", WorldManager.currentTime);
+//			File file = new File(GameServer.getAbsolutePath()+"answerRank_"+date+".txt");
+//			FileOutputStream os = new FileOutputStream(file);
+//			os.write(new String(buffer.getBytes(),"GBK").getBytes());
+//			os.close();
+			Utils.writeFile(GameServer.getAbsolutePath()+"answerRank_"+date+".txt", buffer.toString().getBytes());
+//			strBuff = null;
+			buffer = new ByteBuffer(10240*2);
+//		} 
+//		catch (FileNotFoundException e)
+//		{
+//			e.printStackTrace();
+//		} 
+//		catch (IOException e)
+//		{
+//			e.printStackTrace();
+//		}
+	}
+	
+	
+	public void saveText()
+	{
+		if(buffer.available() == 0)
+			return;
+		
+		StringBuffer strBuff = new StringBuffer();
+		
+		for (int i = 0; i < count; i++)
+		{
+			strBuff.append(buffer.readUTF());
+			strBuff.append("\t");
+			strBuff.append(buffer.readLong());
+			strBuff.append(Utils.LINE_SEPARATOR);
+		}
+		
+		try
+		{
+			File file = new File(GameServer.getAbsolutePath()+"pressureText"+(fileCount++)+".txt");
+			FileOutputStream os = new FileOutputStream(file);
+			os.write(strBuff.toString().getBytes());
+			os.close();
+			
+			strBuff = null;
+			buffer = new ByteBuffer(10240*2);
+			count = 0;
+		} 
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+}

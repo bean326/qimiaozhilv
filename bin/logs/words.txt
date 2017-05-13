@@ -1,0 +1,418 @@
+DatabaseAccessor.java  231 行      Mail mail = new Mail("\u6E38\u620F\u7BA1\u7406\u5458",System.currentTimeMillis());
+DatabaseAccessor.java  232 行      mail.setTitle("*"+"\u793C\u5305");//礼包
+DatabaseAccessor.java  310 行      Mail mail = new Mail("\u6E38\u620F\u7BA1\u7406\u5458",System.currentTimeMillis());
+DatabaseAccessor.java  311 行      mail.setTitle("*"+"\u793C\u5305");//礼包
+DatabaseAccessor.java  321 行      mail = new Mail("\u6E38\u620F\u7BA1\u7406\u5458",System.currentTimeMillis());
+DatabaseAccessor.java  322 行      mail.setTitle("*"+"\u793C\u5305");//礼包
+DatabaseAccessor.java  465 行      Mail mail = new Mail("\u7CFB\u7EDF"); //系统
+DatabaseAccessor.java  466 行      mail.setTitle("*"+"\u5BB6\u65CF\u57FA\u91D1");//家族基金
+DatabaseAccessor.java  468 行      sb.append(FontConver.simpleToCompl("\u60A8\u7684\u65CF\u5458"));
+DatabaseAccessor.java  472 行      sb.append(FontConver.simpleToCompl("\u5145\u503C"));
+DatabaseAccessor.java  474 行      sb.append(FontConver.simpleToCompl("\u7684\u5143\u5B9D,\u60A8\u5C06\u83B7\u5F97\u4E00\u7B14\u5BB6\u65CF\u57FA\u91D1(\u767E\u5206\u4E4B\u4E8C\u5341\u7684\u4EE3\u91D1\u5377)!!!"));
+DatabaseAccessor.java  2548 行      event = FontConver.simpleToCompl("\u767B\u9646")+"IP:"+str[1];
+DatabaseAccessor.java  2553 行      event = FontConver.simpleToCompl("\u76EE\u6807")+":"+str[str.length -1];
+DatabaseAccessor.java  2558 行      event = FontConver.simpleToCompl("\u76EE\u6807")+":"+str[str.length -3]+" "+FontConver.simpleToCompl("\u72B6\u6001")+":"+(str[str.length -1].equals("false")?FontConver.simpleToCompl("\u7981"):FontConver.simpleToCompl("\u89E3"));
+DatabaseAccessor.java  2563 行      event = FontConver.simpleToCompl("\u76EE\u6807")+":"+str[str.length -4]+" "+FontConver.simpleToCompl("\u72B6\u6001")+":"+(str[str.length -1].equals("1")?FontConver.simpleToCompl("\u5C01"):FontConver.simpleToCompl("\u89E3"));
+DatabaseAccessor.java  2580 行      sb.append(FontConver.simpleToCompl("\u76EE\u6807"));
+DatabaseAccessor.java  2583 行      sb.append(FontConver.simpleToCompl("\u91D1"));
+DatabaseAccessor.java  2585 行      sb.append(FontConver.simpleToCompl("\u5143"));
+BusinessInvitation.java  28 行      inviter.sendGetGoodsInfo(1,false, source.getName()+FontConver.simpleToCompl("\u62D2\u7EDD\u4E86\u4F60\u7684\u4EA4\u6613\u9080\u8BF7!"));
+BusinessInvitation.java  36 行      inviter.sendGetGoodsInfo(1, false,FontConver.simpleToCompl("\u5BF9\u65B9\u53D6\u6D88\u9080\u8BF7\u6216\u8D85\u65F6"));
+FamilyInvitation.java  83 行      inviter.sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u5BF9\u65B9\u53D6\u6D88\u9080\u8BF7\u6216\u8D85\u65F6"));
+PVPInvitation.java  29 行      inviter.sendGetGoodsInfo(1,false, source.getName()+FontConver.simpleToCompl("\u62D2\u7EDD\u4E86\u4F60\u7684\u5207\u78CB\u9080\u8BF7!"));
+PVPInvitation.java  37 行      inviter.sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u5BF9\u65B9\u53D6\u6D88\u9080\u8BF7\u6216\u8D85\u65F6"));
+ShopCenter.java  334 行      lineBuffer.append(FontConver.simpleToCompl("\u53D6\u6D88\u5BC4\u5356"));//取消寄卖
+ShopCenter.java  415 行      Mail mail = new Mail("\u5BC4\u5356\u7CFB\u7EDF");//寄卖系统
+ShopCenter.java  416 行      mail.setTitle("\u5356\u51FA\u786E\u8BA4");//卖出确认
+ShopCenter.java  418 行      sb.append(FontConver.simpleToCompl("\u60A8\u7684"));
+ShopCenter.java  422 行      sb.append(FontConver.simpleToCompl("\u5DF2\u7ECF\u5356\u51FA\u6210\u529F!!!"));
+ShopCenter.java  450 行      lineBuffer.append("\u8D2D\u4E70\u8FD4\u8FD8");//购买返还
+ShopCenter.java  548 行      lineBuffer.append(FontConver.simpleToCompl("\u5F00\u59CB\u5BC4\u5356"));//开始寄卖
+ShopCenter.java  1006 行      MainFrame.println("SOS:"+FontConver.simpleToCompl("\u5BC4\u5356\u8FD4\u56DE\u65F6\u73A9\u5BB6\u6B63\u5728\u767B\u9646\u5BC4\u5356\u5C06\u589E\u52A0\u5341\u5206\u949F")+": "+player.accountName+" "+cg.getGoods());
+ShopCenter.java  1036 行      lineBuffer.append(FontConver.simpleToCompl("\u65F6\u95F4\u8FD4\u8FD8"));//时间返还
+ShopCenter.java  1045 行      Mail mail = new Mail("\u5BC4\u5356\u7CFB\u7EDF",timeMillis);//寄卖系统
+ShopCenter.java  1046 行      mail.setTitle("\u5BC4\u5356\u4E2D\u5FC3");//寄卖中心
+ShopCenter.java  1047 行      mail.setContent(FontConver.simpleToCompl("\u60A8\u6240\u5BC4\u5356\u7684\u7269\u54C1\u5DF2\u5230\u671F"));//您所寄卖的物品已到期
+TeamInvitation.java  38 行      inviter.sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u5BF9\u65B9\u53D6\u6D88\u9080\u8BF7\u6216\u8D85\u65F6"));
+CampPartyController.java  143 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u9635\u8425\u6D3B\u52A8\u5373\u5C06\u5F00\u59CB!!!"));
+CampPartyController.java  160 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u9635\u8425\u6D3B\u52A8\u5F00\u59CB!!!"));
+CampPartyController.java  177 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u9635\u8425\u6D3B\u52A8\u7ED3\u675F!!!"));
+NpcController.java  560 行      target.sendError(FontConver.simpleToCompl("\u8BE5\u526F\u672CBOSS\u5DF2\u5168\u90E8\u88AB\u51FB\u6740!"));
+NpcController.java  639 行      target.sendError(FontConver.simpleToCompl("\u8BE5\u526F\u672CBOSS\u5DF2\u5168\u90E8\u88AB\u51FB\u6740!"));
+BattleController.java  109 行      Mail mail = new Mail("\u7CFB\u7EDF");
+BattleController.java  110 行      mail.setTitle("\u793C\u7269\u8D60\u9001");//礼物赠送
+BattleController.java  112 行      sb.append("\u5C0A\u656C\u7684\u73A9\u5BB6\uFF1A\u60A8\u7528\u81EA\u5DF1\u768410\u5143\u5B9D\uFF0C\u8BA9\u5168\u961F\u539F\u5730");
+BattleController.java  113 行      sb.append("\u590D\u6D3B\u3002\u8FD9\u79CD\u4FA0\u4E49\u7684\u884C\u4E3A\uFF0C\u8BA9\u6211\u4EEC\u6DF1\u611F\u4F69\u670D\uFF0C\u7279\u8D60");
+BattleController.java  114 行      sb.append("\u9001\u60A810\u4EE3\u91D1\u5238\uFF0C\u5E0C\u671B\u60A8\u6E38\u620F\u6109\u5FEB\u3002");
+BattleController.java  791 行      sb.append(FontConver.simpleToCompl("\u5E26\u9886\u5168\u961F\u539F\u5730\u590D\u6D3B!"));
+BattleController.java  924 行      Mail mail = new Mail("\u7CFB\u7EDF");
+BattleController.java  925 行      mail.setTitle("\u70ED\u5FC3\u6218\u7ED3\u675F");
+BattleController.java  927 行      sb.append("\u4F60\u597D");
+BattleController.java  929 行      sb.append("\u4F60\u4ECA\u5929\u7684\u70ED\u5FC3\u6218\u6597\u6B21");
+BattleController.java  930 行      sb.append("\u6570\u5DF2\u8FBE\u6700\u5927");
+BattleController.java  932 行      sb.append("\u4E0D\u80FD\u518D\u83B7\u5F97\u5E2E\u5FD9\u5173\u7CFB");
+BattleController.java  933 行      sb.append("\u7684\u989D\u5916\u7ECF\u9A8C\u52A0\u6210\u4E86!");
+BattleController.java  942 行      player.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u4F60\u4ECA\u5929\u7684\u70ED\u5FC3\u6218\u6B21\u6570\u4E3A")+": "+oei.aamCount);
+CopyController.java  68 行      public Reward bestPlayer = new Reward("\u5BC2\u5BDE\u64C2\u4E3B",1,1,WorldManager.currentTime);
+CopyController.java  236 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u79EF\u5206")+": "+point);
+PVPController.java  146 行      target.sendGetGoodsInfo(1, false,FontConver.simpleToCompl("\u4f60\u6ca1\u6709\u6280\u80fd\u6240\u9700\u6b66\u5668"));
+PVPController.java  152 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u4F60\u7684\u9B54\u529B\u503C\u4E0D\u591F\u4E86!"));
+PVPController.java  413 行      sb.append(FontConver.simpleToCompl("\u4F60\u7684\u961F\u4F0D\u5728PK(\u5207\u78CB)\u4E2D\u88AB"));
+PVPController.java  419 行      sb.append(FontConver.simpleToCompl("\u7684\u961F\u4F0D\u6253\u8D25\u4E86"));
+PVPController.java  428 行      sb.append(FontConver.simpleToCompl("\u4F60\u7684\u961F\u4F0D\u5728PK(\u5207\u78CB)\u4E2D\u6218\u80DC\u4E86"));
+PVPController.java  434 行      sb.append(FontConver.simpleToCompl("\u7684\u961F\u4F0D"));
+PVPController.java  447 行      sb.append(FontConver.simpleToCompl("\u4F60\u7684\u961F\u4F0D\u5728PK(\u5207\u78CB)\u4E2D\u88AB"));
+PVPController.java  453 行      sb.append(FontConver.simpleToCompl("\u7684\u961F\u4F0D\u6253\u8D25\u4E86"));
+PVPController.java  462 行      sb.append(FontConver.simpleToCompl("\u4F60\u7684\u961F\u4F0D\u5728PK(\u5207\u78CB)\u4E2D\u6218\u80DC\u4E86"));
+PVPController.java  468 行      sb.append(FontConver.simpleToCompl("\u7684\u961F\u4F0D"));
+TeamController.java  39 行      this.name = FontConver.simpleToCompl("\u6211\u7684\u961F\u4F0D");
+RoomController.java  833 行      target.sendError(players[j].getName()+FontConver.simpleToCompl("\u7684BOSS\u884C\u52A8\u503C\u4E0D\u591F!"));
+RoomController.java  850 行      target.sendError(players[j].getName()+FontConver.simpleToCompl("\u7684\u65F6\u7A7A\u4E4B\u65C5\u884C\u52A8\u503C\u4E0D\u591F!"));
+RoomController.java  865 行      target.sendError(players[j].getName()+FontConver.simpleToCompl("\u7684\u5143\u5b9d\u4e0d\u8db3!"));
+RoomController.java  876 行      target.sendError(players[j].getName()+FontConver.simpleToCompl("\u7684\u884c\u52a8\u503c\u4e0d\u591f!"));
+RoomController.java  889 行      target.sendError(players[j].getName()+FontConver.simpleToCompl("\u7684\u5143\u5b9d\u4e0d\u8db3!"));
+RoomController.java  903 行      target.sendError("["+players[j].getName()+"]"+FontConver.simpleToCompl("\u7684\u6302\u673A\u5361\u4E0D\u591F"));
+RoomController.java  914 行      target.sendError("["+players[j].getName()+"]"+FontConver.simpleToCompl("\u7684\u6302\u673A\u5361\u4E0D\u591F"));
+RoomController.java  935 行      sb.append(FontConver.simpleToCompl("\u4F60"));
+RoomController.java  938 行      sb.append(FontConver.simpleToCompl("\u6CA1\u6709"));
+RoomController.java  941 行      sb.append(FontConver.simpleToCompl("\u8BF7\u53BB\u5B8C\u6210\u76F8\u5173\u4EFB\u52A1\u540E\u9886\u53D6!"));
+PVEController.java  214 行      target.sendGetGoodsInfo(1, false,FontConver.simpleToCompl("\u4f60\u6ca1\u6709\u6280\u80fd\u6240\u9700\u6b66\u5668"));
+PVEController.java  220 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u4F60\u7684\u9B54\u529B\u503C\u4E0D\u591F\u4E86"));
+PVEController.java  671 行      sb.append(FontConver.simpleToCompl("\u83b7\u5f97\u94DC\u5e01"));
+PVEController.java  682 行      sb.append(FontConver.simpleToCompl("\u83B7\u5F97\u8363\u8A89"));
+PVEController.java  699 行      sb.append("\u83b7\u5f97\u7ecf\u9a8c");
+PVEController.java  706 行      sb.append("\u961f\u957f\u52a0\u6210");//队长加成
+PVEController.java  712 行      sb.append("\u5BB6\u65CF\u52A0\u6210");//家族加成
+PVEController.java  718 行      sb.append("\u961F\u4F0D\u52A0\u6210");//队伍加成
+PVEController.java  724 行      sb.append("\u5E2E\u5FD9\u52A0\u6210");//帮忙加成
+PVEController.java  730 行      sb.append("\u7ED3\u5A5A\u52A0\u6210");//结婚加成
+PVEController.java  935 行      sb.append(FontConver.simpleToCompl("\u83b7\u5f97"));
+PVEController.java  955 行      sb.append(FontConver.simpleToCompl("\u5f88\u6ee1\u610f\u7684\u6536\u4e0b\u4e86\u8d4e\u8eab\u6cd5\u5b9d"));
+PVEController.java  966 行      sb.append(FontConver.simpleToCompl("\u5e76\u8d60\u9001\u4e86\u4e00\u672c<<\u4e09\u597dBOSS\u5b88\u5219>>\u7ed9"));
+PVEController.java  971 行      sb.append(FontConver.simpleToCompl("\u8ba9\u5b83\u56de\u53bb\u597d\u597d\u7814\u8bfb"));
+PVEController.java  973 行      sb.append(FontConver.simpleToCompl("\u4eca\u540e\u4e0d\u5f97\u518d\u51fa\u6765\u4f5c\u6076!"));
+PVEController.java  1047 行      Mail mail = new Mail("\u7CFB\u7EDF\u5B9D\u8D1D");
+PVEController.java  1048 行      mail.setTitle("BOSS"+"\u5B9D\u7BB1\u8D60\u9001");
+PVEController.java  1071 行      sb.append(FontConver.simpleToCompl("\u606D\u559C\u4F60\u5728\u4E0E"));
+PVEController.java  1073 行      sb.append(FontConver.simpleToCompl("\u7684\u640F\u6597\u4E2D\u80DC\u5229"));
+PVEController.java  1075 行      sb.append(FontConver.simpleToCompl("\u5E76\u4E14\u83B7\u5F97"));
+PVEController.java  1086 行      sb.append(FontConver.simpleToCompl("\u901A\u8FC7\u90AE\u4EF6\u7CFB\u7EDF\u53D1\u9001\u7ED9\u4F60!"));
+PVEController.java  1410 行      sb.append(FontConver.simpleToCompl("\u53F7\u5916!!\u53F7\u5916!!\u5728"));
+PVEController.java  1416 行      sb.append(FontConver.simpleToCompl("\u961F\u4F0D\u7684\u5F3A\u529B\u653B\u51FB\u548C"));
+PVEController.java  1417 行      sb.append(FontConver.simpleToCompl("\u5B8C\u7F8E\u9632\u5FA1\u7684\u5A01\u6151\u4E0B"));
+PVEController.java  1428 行      sb.append(FontConver.simpleToCompl("\u5E94\u58F0\u5012\u5730"));
+AamController.java  189 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u5E2E\u5FD9\u83B7\u5F97\u8363\u8A89")+": "+honor);
+AamController.java  323 行      sb.append(FontConver.simpleToCompl("\u4F60\u548C"));
+AamController.java  327 行      sb.append(FontConver.simpleToCompl("\u7684\u5E2E\u5FD9\u5173\u7CFB\u5DF2\u6210\u529F\u89E3\u9664!"));
+PartyPKController.java  157 行      target.sendGetGoodsInfo(1, false,FontConver.simpleToCompl("\u4f60\u6ca1\u6709\u6280\u80fd\u6240\u9700\u6b66\u5668"));
+PartyPKController.java  163 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u4F60\u7684\u9B54\u529B\u503C\u4E0D\u591F\u4E86!"));
+PartyPKController.java  1026 行      targets[i].sendGetGoodsInfo(2, false, targets[i].getName()+FontConver.simpleToCompl("\u83B7\u5F97\u8363\u8A89")+": "+honor);//获得荣誉值
+PartyPKController.java  1030 行      targets[i].sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u7ECF\u9A8C")+": "+resultExp);
+PartyPKController.java  1062 行      targets[i].sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u94DC\u5E01")+": "+rp);
+PartyPKController.java  1104 行      sb.append(FontConver.simpleToCompl("\u5BB6\u65CF\u7684"));
+PartyPKController.java  1108 行      sb.append(FontConver.simpleToCompl("\u5E26\u9886\u961F\u4F0D,\u6253\u8D25\u4E86\u4F60\u7684\u961F\u4F0D!"));
+PartyPKController.java  1117 行      sb.append(FontConver.simpleToCompl("\u4F60\u7684\u961F\u4F0D\u6253\u8D25\u4E86"));
+PartyPKController.java  1121 行      sb.append(FontConver.simpleToCompl("\u5BB6\u65CF\u7684"));
+PartyPKController.java  1125 行      sb.append(FontConver.simpleToCompl("\u5E26\u9886\u7684\u961F\u4F0D!"));//你的队伍打败了XX家族XX的队伍
+FamilyPartyController.java  120 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u5BB6\u65CF\u6D3B\u52A8\u5373\u5C06\u5F00\u59CB"+","+"\u5927\u5BB6\u53EF\u4EE5\u901A\u8FC7\u57CE\u9547\u4F20\u9001\u8FDB\u51C6\u5907\u623F\u95F4\u54E6!!!"));//家族活动即将开始,大家可以通过城镇传送进准备房间哦
+FamilyPartyController.java  138 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u5BB6\u65CF\u6D3B\u52A8\u5F00\u59CB"+","+"\u4ECA\u5929\u7684'MVP'\u662F\u54EA\u4E2A\u5BB6\u65CF\u5462?\u5927\u5BB6\u52A0\u6CB9\u5427!!!"));
+FamilyPartyController.java  155 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u5BB6\u65CF\u6D3B\u52A8\u7ED3\u675F"+","+"\u6B22\u8FCE\u5927\u5BB6\u518D\u6B21\u53C2\u52A0\u672C\u6D3B\u52A8!!!"));
+FamilyPartyController.java  166 行      GameServer.getInstance().getWorldManager().sendEveryonePost((FontConver.simpleToCompl("\u5BB6\u65CF\u6D3B\u52A8\u8FD8\u5269\u4E0B")+partyTime/(1000*60))+FontConver.simpleToCompl("\u5206\u949F"+","+"\u5BB6\u65CF\u6D3B\u52A8\u6B63\u5728\u706B\u70ED\u8FDB\u884C\u4E2D !!!"));
+FamilyPartyController.java  330 行      Mail mail = new Mail("\u5BB6\u65CF\u6D3B\u52A8\u5B98");//家族活动官
+FamilyPartyController.java  331 行      mail.setTitle("*"+"\u5BB6\u65CF\u6D3B\u52A8\u8363\u8A89\u5956\u52B1");//家族活动荣誉奖励
+FamilyPartyController.java  332 行      mail.setContent(FontConver.simpleToCompl("\u8363\u8A89\u503C\u5956\u52B1!"));//荣誉值奖励
+FamilyPartyController.java  397 行      Mail mail = new Mail("\u5BB6\u65CF\u6D3B\u52A8\u5B98");//家族活动官
+FamilyPartyController.java  398 行      mail.setTitle("*"+"\u5BB6\u65CF\u6D3B\u52A8\u6392\u540D\u5956\u52B1");//家族活动排名奖励
+FamilyPartyController.java  400 行      sb.append("\u606D\u559C\u4F60\u6240\u5728\u5BB6\u65CF\u53D6\u5F97");
+FamilyPartyController.java  401 行      sb.append("\u5BB6\u65CF\u6D3B\u52A8\u7684\u7B2C\u4E00\u540D");
+FamilyPartyController.java  403 行      sb.append("\u4F60\u5728\u5BB6\u65CF\u4E2D\u6392\u540D\u7B2C");
+FamilyPartyController.java  407 行      sb.append("\u7279\u6B64\u5956\u52B1!");
+GoldPartyController.java  164 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u79BB\u9EC4\u91D1\u6597\u58EB\u6D3B\u52A8\u5F00\u59CB\u8FD8\u6709")+(lessBeginTime/60000)+"\u5206\u949F!");
+GoldPartyController.java  181 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u9EC4\u91D1\u6597\u58EB\u6D3B\u52A8\u5F00\u59CB!!!"));
+GoldPartyController.java  198 行      GameServer.getInstance().getWorldManager().sendEveryonePost(FontConver.simpleToCompl("\u9EC4\u91D1\u6597\u58EB\u6D3B\u52A8\u7ED3\u675F!!!"));
+GoldPartyController.java  237 行      sb.append(FontConver.simpleToCompl("\u9EC4\u91D1\u6597\u58EB\u6D3B\u52A8\u524D"+size+"\u540D\u5206\u522B\u662F["));
+GoldPartyController.java  250 行      sb.append(FontConver.simpleToCompl("\u5206"));
+GoldPartyController.java  260 行      sb.append(FontConver.simpleToCompl("\u5206"));
+GoldPartyController.java  265 行      sb.append(FontConver.simpleToCompl("\u606D\u559C\u4ED6\u4EEC!"));
+GoldPartyController.java  893 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u7ECF\u9A8C")+": "+exp);
+GoldPartyController.java  898 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u94DC\u5E01")+": "+point);
+GoldPartyController.java  905 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u8363\u8A89")+": "+yongqi);
+GoldPartyController.java  1005 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u9EC4\u91D1\u6597\u58EB\u6D3B\u52A8\u5956\u52B1")+": "+sb1.toString());
+GoldPartyController.java  1051 行      Mail mail = new Mail("\u9EC4\u91D1\u6597\u58EB");
+GoldPartyController.java  1052 行      mail.setTitle("\u6D3B\u52A8\u968F\u673A\u5956\u52B1");
+GoldPartyController.java  1053 行      mail.setContent("\u606D\u559C\u4F60\u83B7\u5F97\u6D3B\u52A8\u968F\u673A\u5956\u52B1!");
+GoldPartyController.java  1065 行      sb.append(FontConver.simpleToCompl("\u5728\u7ADE\u6280\u4E2D\u5C55\u73B0\u4E86\u66F4\u5FEB"));
+GoldPartyController.java  1067 行      sb.append("\u66F4\u9AD8");
+GoldPartyController.java  1069 行      sb.append("\u66F4\u5F3A\u7684\u6597\u58EB\u7CBE\u795E");
+GoldPartyController.java  1071 行      sb.append(FontConver.simpleToCompl("\u611F\u52A8\u4E86\u5973\u795E"));
+GoldPartyController.java  1073 行      sb.append("\u83B7\u5F97");
+GoldPartyController.java  1089 行      sb.append(FontConver.simpleToCompl("\u6B63\u5728\u89D2\u843D\u73A9\u8EB2\u732B\u732B"));
+GoldPartyController.java  1091 行      sb.append("\u5374\u88AB\u4E00\u9897\u6D41\u5F39\u51FB\u4E2D");
+GoldPartyController.java  1093 行      sb.append(FontConver.simpleToCompl("\u4F4E\u5934\u4E00\u770B"));
+GoldPartyController.java  1095 行      sb.append("\u7ADF\u7136\u662F");
+GoldPartyController.java  1360 行      rank = FontConver.simpleToCompl("\u4E00");
+GoldPartyController.java  1362 行      rank = FontConver.simpleToCompl("\u4E8C");
+GoldPartyController.java  1364 行      rank = FontConver.simpleToCompl("\u4E09");
+GoldPartyController.java  1366 行      rank = FontConver.simpleToCompl("\u56DB");
+GoldPartyController.java  1368 行      rank = FontConver.simpleToCompl("\u4E94");
+GoldPartyController.java  1369 行      target.sendError(FontConver.simpleToCompl("\u5947\u5999\u4E16\u754C\u7684\u7B2C")+rank+FontConver.simpleToCompl("\u9EC4\u91D1\u6597\u58EB")+npc.getName()+"!");
+GoldPartyController.java  1388 行      target.sendError(FontConver.simpleToCompl("\u83B7\u5F97\u9EC4\u91D1\u6597\u58EB")+"["+npc.getName()+"]"+FontConver.simpleToCompl("\u7684\u7B7E\u540D\u5199\u771F!"));
+GoldPartyController.java  1391 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u83B7\u5F97\u9EC4\u91D1\u6597\u58EB\u6D3B\u52A8\u7B7E\u540D\u5199\u771F!"));
+CopyPVEController.java  172 行      target.sendGetGoodsInfo(1, false,FontConver.simpleToCompl("\u4f60\u6ca1\u6709\u6280\u80fd\u6240\u9700\u6b66\u5668"));
+CopyPVEController.java  178 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u4F60\u7684\u9B54\u529B\u503C\u4E0D\u591F\u4E86"));
+CopyPVEController.java  533 行      sb.append(FontConver.simpleToCompl("\u83b7\u5f97\u94DC\u5e01"));
+CopyPVEController.java  544 行      sb.append(FontConver.simpleToCompl("\u83B7\u5F97\u8363\u8A89"));
+CopyPVEController.java  562 行      sb.append("\u83b7\u5f97\u7ecf\u9a8c");
+CopyPVEController.java  569 行      sb.append("\u961f\u957f\u52a0\u6210");//队长加成
+CopyPVEController.java  575 行      sb.append("\u5BB6\u65CF\u52A0\u6210");//家族加成
+CopyPVEController.java  581 行      sb.append("\u961F\u4F0D\u52A0\u6210");//队伍加成
+CopyPVEController.java  587 行      sb.append("\u5E2E\u5FD9\u52A0\u6210");//帮忙加成
+CopyPVEController.java  593 行      sb.append("\u7ED3\u5A5A\u52A0\u6210");//结婚加成
+CopyPVEController.java  674 行      sb.append(FontConver.simpleToCompl("\u606D\u559C"));
+CopyPVEController.java  682 行      sb.append(FontConver.simpleToCompl("\u7684\u65C5\u884C\u56E2"));
+CopyPVEController.java  684 行      sb.append("\u5E78\u8FD0\u7684\u9047\u5230\u4E86\u6C89\u7761\u7684");
+CopyPVEController.java  690 行      sb.append(FontConver.simpleToCompl("\u5E78\u8FD0\u7684\u9047\u5230\u4E86\u6C89\u7761\u7684"));
+CopyPVEController.java  705 行      sb.append(FontConver.simpleToCompl("\u4ED6\u80FD\u5426\u51FB\u5012BOSS\u643A\u5B9D\u800C\u5F52\u5462?\u8BA9\u6211\u4EEC\u62ED\u76EE\u4EE5\u5F85"));
+CopyPVEController.java  710 行      sb.append(FontConver.simpleToCompl("\u4ED6\u4EEC\u80FD\u5426\u51FB\u5012BOSS\u643A\u5B9D\u800C\u5F52\u5462?\u8BA9\u6211\u4EEC\u62ED\u76EE\u4EE5\u5F85"));
+CopyPVEController.java  818 行      sb.append(FontConver.simpleToCompl("\u83b7\u5f97"));
+CopyPVEController.java  839 行      sb.append(FontConver.simpleToCompl("\u5f88\u6ee1\u610f\u7684\u6536\u4e0b\u4e86\u8d4e\u8eab\u6cd5\u5b9d"));
+CopyPVEController.java  850 行      sb.append(FontConver.simpleToCompl("\u5e76\u8d60\u9001\u4e86\u4e00\u672c<<\u4e09\u597dBOSS\u5b88\u5219>>\u7ed9"));
+CopyPVEController.java  855 行      sb.append(FontConver.simpleToCompl("\u8ba9\u5b83\u56de\u53bb\u597d\u597d\u7814\u8bfb"));
+CopyPVEController.java  857 行      sb.append("\u4eca\u540e\u4e0d\u5f97\u518d\u51fa\u6765\u4f5c\u6076");
+CopyPVEController.java  934 行      Mail mail = new Mail("\u7CFB\u7EDF\u5B9D\u8D1D");
+CopyPVEController.java  935 行      mail.setTitle("BOSS"+"\u5B9D\u7BB1\u8D60\u9001");
+CopyPVEController.java  958 行      sb.append(FontConver.simpleToCompl("\u606D\u559C\u4F60\u5728\u4E0E"));
+CopyPVEController.java  960 行      sb.append(FontConver.simpleToCompl("\u7684\u640F\u6597\u4E2D\u80DC\u5229"));
+CopyPVEController.java  962 行      sb.append("\u5E76\u4E14\u83B7\u5F97");
+CopyPVEController.java  973 行      sb.append(FontConver.simpleToCompl("\u901A\u8FC7\u90AE\u4EF6\u7CFB\u7EDF\u53D1\u9001\u7ED9\u4F60"));
+CopyPVEController.java  1404 行      sb.append(FontConver.simpleToCompl("\u5929\u5566"));
+CopyPVEController.java  1410 行      sb.append(FontConver.simpleToCompl("\u7684\u56E2\u961F\u592A\u5F3A\u608D\u4E86"));
+CopyPVEController.java  1412 行      sb.append("\u5F3A\u5927\u7684");
+CopyPVEController.java  1423 行      sb.append(FontConver.simpleToCompl("\u88AB\u4ED6\u4EEC\u5F7B\u5E95\u5F81\u670D\u4E86"));
+CopyPVEController.java  1425 行      sb.append("\u4ED6\u4EEC\u83B7\u5F97\u4E86\u81F3\u9AD8\u65E0\u4E0A\u7684\u8363\u8A89\u548C\u73CD\u8D35\u7684\u8D22\u5B9D");
+PlayerController.java  345 行      str = "\u8BF7\u5148\u5173\u95ED\u9B54\u65B9!";
+PlayerController.java  347 行      str = "\u5F00\u5B9D\u7BB1\u65F6\u4E0D\u80FD\u505A\u5176\u5B83\u64CD\u4F5C\u54E6!";
+PlayerController.java  350 行      str = "\u8BF7\u5148\u7ED3\u675F\u5947\u5999\u95EE\u7B54\u6D3B\u52A8!";
+PlayerController.java  352 行      str = "\u8BF7\u5148\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB!";
+PlayerController.java  354 行      str = "\u8BF7\u5148\u9009\u62E9\u4F60\u8981\u8F6C\u7684\u804C\u4E1A!";
+PlayerController.java  356 行      str = "\u8BF7\u5148\u9009\u62E9\u4F60\u8981\u52A0\u5165\u7684\u9635\u8425!";
+PlayerController.java  358 行      str = "\u8BF7\u5148\u5173\u95ED\u4ED3\u5E93!";
+PlayerController.java  418 行      str = "\u8BF7\u5148\u5173\u95ED\u9B54\u65B9!";
+PlayerController.java  420 行      str = "\u5F00\u5B9D\u7BB1\u65F6\u4E0D\u80FD\u505A\u5176\u5B83\u64CD\u4F5C\u54E6!";
+PlayerController.java  423 行      str = "\u8BF7\u5148\u7ED3\u675F\u5947\u5999\u95EE\u7B54\u6D3B\u52A8!";
+PlayerController.java  426 行      str = "\u8BF7\u5148\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB!";
+PlayerController.java  428 行      str = "\u8BF7\u5148\u9009\u62E9\u4F60\u8981\u8F6C\u7684\u804C\u4E1A!";
+PlayerController.java  430 行      str = "\u8BF7\u5148\u9009\u62E9\u4F60\u8981\u52A0\u5165\u7684\u9635\u8425!";
+PlayerController.java  454 行      str = "\u8BF7\u5148\u5173\u95ED\u9B54\u65B9!";
+PlayerController.java  456 行      str = "\u5F00\u5B9D\u7BB1\u65F6\u4E0D\u80FD\u505A\u5176\u5B83\u64CD\u4F5C\u54E6!";
+PlayerController.java  459 行      str = "\u8BF7\u5148\u7ED3\u675F\u5947\u5999\u95EE\u7B54\u6D3B\u52A8!";
+PlayerController.java  462 行      str = "\u8BF7\u5148\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB!";
+PlayerController.java  464 行      str = "\u8BF7\u5148\u9009\u62E9\u4F60\u8981\u8F6C\u7684\u804C\u4E1A!";
+PlayerController.java  466 行      str = "\u8BF7\u5148\u9009\u62E9\u4F60\u8981\u52A0\u5165\u7684\u9635\u8425!";
+PlayerController.java  488 行      sb.append(FontConver.simpleToCompl("\u5BF9\u4E0D\u8D77"));
+PlayerController.java  495 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u8FDB\u884C\u8F6C\u804C\u9009\u62E9!");
+PlayerController.java  500 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u8FDB\u884C\u9635\u8425\u9009\u62E9!");
+PlayerController.java  505 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u8FDB\u884C\u5BA0\u7269\u53D8\u8EAB\u9009\u62E9!");
+PlayerController.java  515 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u53C2\u52A0\u9B54\u65B9\u6D3B\u52A8!");
+PlayerController.java  520 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u5F00\u542F\u5B9D\u7BB1!");
+PlayerController.java  526 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u53C2\u52A0\u5947\u5999\u95EE\u7B54\u6D3B\u52A8!");
+PlayerController.java  531 行      msg = FontConver.simpleToCompl("\u6B63\u5728\u8FDB\u884C\u4ED3\u5E93\u76F8\u5173\u64CD\u4F5C!");
+PlayerController.java  1043 行      inviter.sendGetGoodsInfo(1,false, getName()+FontConver.simpleToCompl("\u62D2\u7EDD\u4E86\u4F60\u7684\u7EC4\u961F\u9080\u8BF7!"));
+PlayerController.java  1119 行      Mail mail = new Mail(family.name+"\u5BB6\u65CF");//family.name+"家族"
+PlayerController.java  1120 行      mail.setTitle("*"+"\u65CF\u957F\u53D8\u66F4\u4FE1\u606F");//族长变更信息
+PlayerController.java  1123 行      String str = "\u60A8\u597D:\n\u60A8\u6240\u5728\u7684\u5BB6\u65CF\u3010";
+PlayerController.java  1126 行      sb.append(FontConver.simpleToCompl("\u3011\uFF0C\u5F53\u5BB6\u7684\u7531"));
+PlayerController.java  1130 行      sb.append(FontConver.simpleToCompl("\u53D8\u6210\u4E86"));
+PlayerController.java  1134 行      sb.append(FontConver.simpleToCompl("\u65CF\u957F\u53D8\u66F4\u7684\u4E24\u4E2A\u76F8\u5173\u76F8\u5173\u73A9\u5BB6\u9700\u8981\u91CD\u65B0\u767B\u5F55"));
+PlayerController.java  1136 行      sb.append(FontConver.simpleToCompl("\u6BCF\u5341\u4E8C\u4E2A\u5C0F\u65F6\u53EF\u4EE5\u53D8\u66F4\u4E00\u6B21\u65CF\u957F!"));
+PlayerController.java  1229 行      Mail mail = new Mail(family.name+"\u5BB6\u65CF");//family.name+"家族"
+PlayerController.java  1230 行      mail.setTitle("\u5BB6\u65CF\u89E3\u6563\u4FE1\u606F");//家族解散信息
+PlayerController.java  1233 行      String str = "\u60A8\u597D:\n\u5F88\u4E0D\u613F\u610F\u544A\u8BC9\u60A8\u8FD9\u4E2A\u4E0D\u5E78\u7684\u6D88\u606F\uFF0C\u60A8\u6240\u5728\u7684\u5BB6\u65CF\u3010";
+PlayerController.java  1236 行      str = "\u3011\uFF0C\u5DF2\u7ECF\u88AB";
+PlayerController.java  1239 行      str = "\u89E3\u6563\u4E86\u3002";
+PlayerController.java  1539 行      sendGetGoodsInfo(1,false,FontConver.simpleToCompl("\u5BF9\u4E0D\u8D77\uFF0C\u4F60\u88AB\u7BA1\u7406\u5458\u7981\u8A00\u4E86!"));
+PlayerController.java  2106 行      Mail mail = new Mail("\u7CFB\u7EDF");
+PlayerController.java  2154 行      Mail mail = new Mail("\u7CFB\u7EDF");
+PlayerController.java  3347 行      sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u8BF7\u5148\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB"));
+PlayerController.java  3491 行      sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u606D\u559C\u4F60\u7684\u5BA0\u7269\u5347\u7EA7\u4E86"));
+PlayerController.java  3544 行      sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u606D\u559C\u4F60\u7684\u5BA0\u7269\u5347\u7EA7\u4E86"));
+PlayerController.java  4384 行      sb.append(FontConver.simpleToCompl("\u83b7\u5f97"));
+PlayerController.java  4397 行      sb.append(FontConver.simpleToCompl("\u606d\u559c"));
+PlayerController.java  4403 行      sb.append(FontConver.simpleToCompl("\u5728\u53c2\u52a0"));
+PlayerController.java  4405 行      sb.append(FontConver.simpleToCompl("\u5143\u5b9d\u4e00\u6b21\u7684[\u5947\u5999\u9B54\u65B9]\u4e2d\u5f97\u5230"));
+PlayerController.java  4418 行      sb.append(FontConver.simpleToCompl("\u4EF7\u503C"));
+PlayerController.java  4420 行      sb.append(FontConver.simpleToCompl("\u5143\u5B9D"));
+PlayerController.java  4651 行      sendError(FontConver.simpleToCompl("\u6CA1\u627E\u5230\u73A9\u5BB6!!!"));//没找到玩家
+PlayerController.java  4665 行      sendError(FontConver.simpleToCompl("\u73A9\u5BB6\u6CA1\u5728\u7EBF!!!"));//玩家没在线
+PlayerController.java  4737 行      Mail mail = new Mail("\u7CFB\u7EDF");
+PlayerController.java  4818 行      sendError(FontConver.simpleToCompl("\u6CA1\u627E\u5230\u73A9\u5BB6!!!"));//没找到玩家
+PlayerController.java  4823 行      sendError(FontConver.simpleToCompl("\u73A9\u5BB6\u6CA1\u5728\u7EBF!!!"));//玩家没在线
+PlayerController.java  4899 行      sendError(FontConver.simpleToCompl("\u6B63\u5728\u5220\u9664\u4E2D!!!")); //正在删除中
+PlayerController.java  5051 行      new LogJob(this.player.accountName, 8,(isManager()?"manager : ":"kefu : ")+ this.player.name+" - \u5C01ip "+accountName));
+PlayerController.java  5086 行      new LogJob(this.player.accountName, 8,(isManager()?"manager : ":"kefu : ")+ this.player.name+" - \u5C01ip "+accountName+":"+result));
+PlayerController.java  5179 行      Mail mail = new Mail("\u7CFB\u7EDF");
+PlayerController.java  5378 行      sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u8BF7\u5148\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB"));
+PlayerController.java  5456 行      sb.append("\u4F60\u7684\u5BA0\u7269\u4EB2\u5BC6\u5EA6\u5DF2\u8FBE\u6700\u5927\u503C!");//你的宠物亲密度已达最大值
+PlayerController.java  5468 行      sb.append(FontConver.simpleToCompl("\u5582\u517B\u5BA0\u7269"));
+PlayerController.java  5472 行      sb.append(FontConver.simpleToCompl("\u5BA0\u7269\u83B7\u5F97"));
+PlayerController.java  5474 行      sb.append(FontConver.simpleToCompl("\u70B9\u4EB2\u5BC6\u5EA6"));
+PlayerController.java  5486 行      sb.append("\u4F60\u7684\u5BA0\u7269\u7B49\u7EA7\u5DF2\u8FBE\u6700\u5927\u503C!");//你的宠物等级已达最大值
+PlayerController.java  5498 行      sb.append(FontConver.simpleToCompl("\u5582\u517B\u5BA0\u7269"));
+PlayerController.java  5502 行      sb.append(FontConver.simpleToCompl("\u5BA0\u7269\u83B7\u5F97"));
+PlayerController.java  5504 行      sb.append(FontConver.simpleToCompl("\u70B9\u7ECF\u9A8C\u503C"));
+PlayerController.java  6033 行      sendError(FontConver.simpleToCompl("\u7533\u8BF7\u7EC4\u961F\u6210\u529F"));
+PlayerController.java  6206 行      sendError("["+player.getName()+"]"+FontConver.simpleToCompl("\u7684\u6302\u673A\u5361\u4E0D\u591F"));
+PlayerController.java  6216 行      sendError("["+player.getName()+"]"+FontConver.simpleToCompl("\u7684\u6302\u673A\u5361\u4E0D\u591F"));
+PlayerController.java  6325 行      str += "\u8BF7\u63D0\u53D6\u5B9D\u7BB1\u7684\u7269\u54C1!";//请提取宝箱的物品
+PlayerController.java  6330 行      str += "\u6B63\u5728\u5F00\u5B9D\u7BB1!";//正在开宝箱
+PlayerController.java  6332 行      str += "\u6B63\u5728\u53C2\u52A0\u9B54\u65B9\u6D3B\u52A8!";
+PlayerController.java  6339 行      str += "\u8BF7\u9009\u62E9\u8981\u52A0\u5165\u7684\u9635\u8425!";//请选择要加入的阵营
+PlayerController.java  6343 行      str += "\u6B63\u5728\u9009\u62E9\u9635\u8425!";//正在选择阵营
+PlayerController.java  6350 行      str += "\u8BF7\u9009\u62E9\u5BA0\u7269\u8FDB\u5316!";//请选择宠物进化
+PlayerController.java  6354 行      str += "\u6B63\u5728\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB!";//正在选择宠物变身
+PlayerController.java  6396 行      sendError(FontConver.simpleToCompl("\u4F60\u7684\u5E74\u9F84\u672A\u6EE118!"));
+PlayerController.java  6418 行      Mail mail = new Mail("\u8EAB\u4EFD\u8BC1\u9A8C\u8BC1\u5B98");//身份证验证官
+PlayerController.java  6419 行      mail.setTitle("\u8EAB\u4EFD\u9A8C\u8BC1\u6210\u529F\u793C\u54C1");//身份验证成功礼品
+PlayerController.java  6420 行      mail.setContent(FontConver.simpleToCompl("\u4F60\u5DF2\u6210\u529F\u901A\u8FC7\u8EAB\u4EFD\u9A8C\u8BC1"+","+"\u7279\u6B64\u53D1\u653E\u5956\u52B1\u7ED9\u4F60!"));//你已成功通过身份验证,特此发放奖励给你
+PlayerController.java  6736 行      inviter.sendGetGoodsInfo(1,false, getName()+FontConver.simpleToCompl("\u62D2\u7EDD\u4E86\u4F60\u7684\u5E2E\u52A9\u9080\u8BF7!"));
+PlayerController.java  6743 行      inviter.sendError("["+player.name+"]"+FontConver.simpleToCompl("\u5DF2\u7ECF\u6210\u4E3A\u4F60\u7684\u88AB\u5E2E\u52A9\u4EBA!"));
+PlayerController.java  6744 行      sendError("["+inviter.getName()+"]"+FontConver.simpleToCompl("\u5DF2\u7ECF\u6210\u4E3A\u4F60\u7684\u70ED\u5FC3\u4EBA!"));
+PlayerController.java  6954 行      Mail mail = new Mail("\u5947\u5999\u79BB\u5A5A\u767B\u8BB0\u5904");//奇妙离婚登记处
+PlayerController.java  6955 行      mail.setTitle("\u79BB\u5A5A\u4FE1\u606F");//"离婚信息
+PlayerController.java  6959 行      mail = new Mail("\u5947\u5999\u79BB\u5A5A\u767B\u8BB0\u5904");
+PlayerController.java  6960 行      mail.setTitle("\u79BB\u5A5A\u4FE1\u606F");
+PlayerController.java  6968 行      Mail mail = new Mail("\u5947\u5999\u79BB\u5A5A\u767B\u8BB0\u5904");
+PlayerController.java  6969 行      mail.setTitle("\u79BB\u5A5A\u4FE1\u606F");
+PlayerController.java  6973 行      mail = new Mail("\u5947\u5999\u79BB\u5A5A\u767B\u8BB0\u5904");
+PlayerController.java  6974 行      mail.setTitle("\u79BB\u5A5A\u4FE1\u606F");
+PlayerController.java  7126 行      Mail mail = new Mail("\u5947\u5999\u6708\u8001");
+PlayerController.java  7127 行      mail.setTitle("\u6C42\u5A5A\u6212\u6307\u8FD4\u8FD8");
+PlayerController.java  7294 行      Mail mail = new Mail("\u4E07\u80FD\u7BA1\u5BB6");
+PlayerController.java  7295 行      mail.setTitle("\u5BA0\u7269\u8F6C\u6362");
+PlayerController.java  7301 行      sendError(FontConver.simpleToCompl("\u5BA0\u7269\u5DF2\u6062\u590D\u5230\u521D\u59CB\u72B6\u6001!"));
+PlayerController.java  7453 行      sb.append("\u5F88\u9057\u61BE");
+PlayerController.java  7455 行      sb.append("\u70BC\u91D1\u672F\u58EB\u610F\u5916\u8D70\u795E\u4E86");
+PlayerController.java  7457 行      sb.append("\u4F60\u4EC0\u4E48\u4E5F\u6CA1\u83B7\u5F97");
+PlayerController.java  7493 行      sb.append(FontConver.simpleToCompl("\u606d\u559c"));
+PlayerController.java  7499 行      sb.append(FontConver.simpleToCompl("\u7531\u4E8E\u70BC\u91D1\u672F\u58EB\u4ECA\u5929RP\u610F\u5916\u7206\u53D1\u4E86"));
+PlayerController.java  7501 行      sb.append("\u70BC\u91D1\u6210\u529F\u83B7\u5F97");
+PlayerController.java  7514 行      sb.append(FontConver.simpleToCompl("\u597D\u6D88\u606F"));
+PlayerController.java  7516 行      sb.append("\u70BC\u91D1\u672F\u58EB\u4ECA\u5929RP\u7206\u53D1\u4E86");
+PlayerController.java  7518 行      sb.append("\u4F60\u672C\u6B21\u70BC\u91D1\u6210\u529F");
+PlayerController.java  7520 行      sb.append("\u83B7\u5F97");
+PlayerController.java  7540 行      sb.append("\u5F88\u9057\u61BE");
+PlayerController.java  7542 行      sb.append("\u70BC\u91D1\u672F\u58EB\u610F\u5916\u8D70\u795E\u4E86");
+PlayerController.java  7544 行      sb.append("\u4F60\u4EC0\u4E48\u4E5F\u6CA1\u83B7\u5F97");
+PlayerController.java  7632 行      sb.append(FontConver.simpleToCompl("\u4F60\u6253\u5F00\u4E86\u4E00\u4E2A\u7CBE\u81F4\u7684\u793C\u54C1\u76D2"));
+PlayerController.java  7634 行      sb.append("\u83B7\u5F97");
+AnswerParty.java  884 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u606D\u559C\u4F60\u5728\u5947\u5999\u5B9E\u9A8C\u4E2D\u83B7\u5F97\u7ECF\u9A8C\u5956\u52B1")+":"+rewardExp);
+AnswerParty.java  888 行      Mail mail = new Mail("\u5947\u5999\u5C0F\u535A\u58EB");
+AnswerParty.java  889 行      mail.setTitle("\u5B9E\u9A8C\u6210\u679C");
+AnswerParty.java  891 行      sb.append(FontConver.simpleToCompl("\u4F60\u6210\u529F\u5151\u6362\u4E86"));
+AnswerParty.java  893 行      sb.append("\u4E2A");
+AnswerParty.java  895 行      sb.append(FontConver.simpleToCompl(",\u83B7\u5F97\u7ECF\u9A8C"));
+AnswerParty.java  897 行      sb.append(FontConver.simpleToCompl("\u70B9"));
+Storage.java  515 行      target.sendError(FontConver.simpleToCompl("\u5BF9\u4E0D\u8D77"+","+"\u8D85\u8FC7\u6700\u5927\u5B58\u94B1\u9650\u5236!"));
+MailBox.java  119 行      target.sendError(FontConver.simpleToCompl("\u90AE\u4EF6\u5C06\u6EE1"+","+"\u672A\u514D\u9020\u6210\u635F\u5931\u8BF7\u53CA\u65F6\u6E05\u7406!!"));
+Bag.java  2601 行      setTmp(goods,"\u5973\u795e\u8bd5\u7ec3\u5b9d\u7bb1");
+Bag.java  2637 行      sb.append(FontConver.simpleToCompl("\u606d\u559c"));
+Bag.java  2643 行      sb.append(FontConver.simpleToCompl("\u5f00\u542f"));
+Bag.java  2647 行      sb.append(FontConver.simpleToCompl("\u83B7\u5F97\u7269\u54c1"));
+Bag.java  2684 行      sb.append(FontConver.simpleToCompl("\u83b7\u5f97"));
+Bag.java  2701 行      sb.append(FontConver.simpleToCompl("\u606d\u559c"));
+Bag.java  2707 行      sb.append(FontConver.simpleToCompl("\u5f00\u542f"));
+Bag.java  2711 行      sb.append(FontConver.simpleToCompl("\u83B7\u5F97\u7269\u54c1"));
+Bag.java  2742 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u4f60\u5f00\u542f\u4e86[\u5973\u795e\u8bd5\u7ec3\u5b9d\u7bb1],\u83b7\u5f97\u7ecf\u9a8c")+": "+rewardExp);
+Bag.java  2978 行      target.sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u83B7\u5F97")+":"+goods.name);
+Bag.java  3311 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u8BF7\u5148\u5173\u95ED\u4EA4\u6613!"));//请先关闭交易
+Bag.java  3517 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u8BF7\u5148\u5173\u95ED\u4EA4\u6613!"));//请先关闭交易
+BaseFlayer.java  164 行      target.sendError("["+everyone.getName()+"]"+FontConver.simpleToCompl("\u7684\u884C\u52A8\u503C\u4E0D\u591F,") +
+BaseFlayer.java  165 行      FontConver.simpleToCompl("\u4E0D\u80FD\u6362\u623F\u95F4"));//的行动值不够，不能换房间
+Mail.java  400 行      MainFrame.println(FontConver.simpleToCompl("\u53D1\u9001\u79BB\u7EBF\u90AE\u4EF6\u5931\u8D25")+": "+account);//发送离线邮件失败
+Shop.java  447 行      sb.append(FontConver.simpleToCompl("\u51FA\u552E"));
+Shop.java  450 行      sb.append(FontConver.simpleToCompl("\u5F97\u5230"));
+Shop.java  452 行      sb.append(FontConver.simpleToCompl("\u4EE3\u91D1\u5238."));
+Guide.java  73 行      Mail mail = new Mail("\u65B0\u624B\u6307\u5BFC");
+Guide.java  74 行      mail.setTitle("\u65B0\u624B\u6CE1\u6CE1\u5956\u52B1");
+Guide.java  75 行      mail.setContent("\u65B0\u624B\u6CE1\u6CE1\u5956\u52B1");
+Guide.java  86 行      mail = new Mail("\u65B0\u624B\u6307\u5BFC");
+Guide.java  87 行      mail.setTitle("\u65B0\u624B\u6CE1\u6CE1\u5956\u52B1");
+Guide.java  88 行      mail.setContent("\u65B0\u624B\u6CE1\u6CE1\u5956\u52B1");
+GoodsProp.java  593 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u8BF7\u5148\u9009\u62E9\u5BA0\u7269\u53D8\u8EAB"));
+GoodsProp.java  612 行      sb.append("\u4F60\u7684\u5BA0\u7269\u4EB2\u5BC6\u5EA6\u5DF2\u8FBE\u6700\u5927\u503C!");//你的宠物亲密度已达最大值
+GoodsProp.java  631 行      sb.append("\u4F60\u7684\u5BA0\u7269\u7B49\u7EA7\u5DF2\u8FBE\u6700\u5927\u503C!");//你的宠物等级已达最大值
+GoodsMarry.java  149 行      sb.append(FontConver.simpleToCompl("\u56E0\u4E3A"));//因为
+GoodsMarry.java  151 行      sb.append(FontConver.simpleToCompl("\u4F60"));//你
+GoodsMarry.java  158 行      sb.append(FontConver.simpleToCompl("\u63D0\u51FA\u7533\u8BF7"));//提出申请,你和
+GoodsMarry.java  160 行      sb.append("\u4F60\u548C");
+GoodsMarry.java  167 行      sb.append(FontConver.simpleToCompl("\u7684\u5A5A\u59FB\u5173\u7CFB\u7ED3\u675F\u4E86"));
+GoodsMarry.java  169 行      sb.append(FontConver.simpleToCompl("\u5E0C\u671B\u4F60\u4EEC\u4EE5\u540E\u80FD\u627E\u5230\u771F\u6B63\u5C5E\u4E8E\u81EA\u5DF1\u7684\u5E78\u798F!"));
+GoodsMarry.java  205 行      Mail mail = new Mail("\u5947\u5999\u6708\u8001");
+GoodsMarry.java  206 行      mail.setTitle("\u7ED3\u5A5A\u793C\u7269");
+GoodsMarry.java  248 行      equip.name = oei.loverName+"\u7684\u8001\u516C";//的老公
+GoodsMarry.java  250 行      equip.name = oei.loverName+"\u7684\u8001\u5A46";//的老婆
+GoodsMarry.java  258 行      mail = new Mail("\u5947\u5999\u6708\u8001");
+GoodsMarry.java  259 行      mail.setTitle("\u7ED3\u5A5A\u793C\u7269");
+Pet.java  914 行      sb.append("\u4F60\u7684\u5BA0\u7269\u4EB2\u5BC6\u5EA6\u5DF2\u8FBE\u6700\u5927\u503C!");//你的宠物亲密度已达最大值
+Pet.java  924 行      sb.append("\u4F60\u7684\u5BA0\u7269\u7B49\u7EA7\u5DF2\u8FBE\u6700\u5927\u503C!");//你的宠物等级已达最大值
+Pet.java  1010 行      trainStr = "\u5B09\u620F";
+Pet.java  1012 行      trainStr = "\u953B\u70BC";
+Pet.java  1014 行      trainStr = "\u63A2\u9669";
+Pet.java  1027 行      sb.append("\u606D\u559C\u4F60\u7684\u5BA0\u7269\u5728\u521A\u624D\u7684");
+Pet.java  1029 行      sb.append("\u4E2D\u83B7\u5F97");
+Pet.java  1031 行      sb.append("\u70B9\u4EB2\u5BC6\u5EA6!");
+Pet.java  1045 行      sb.append("\u606D\u559C\u4F60\u7684\u5BA0\u7269\u5728\u521A\u624D\u7684");
+Pet.java  1047 行      sb.append("\u4E2D\u83B7\u5F97");
+Pet.java  1049 行      sb.append("\u70B9\u7ECF\u9A8C\u503C!");
+Pet.java  1055 行      Mail mail = new Mail("\u5BA0\u7269\u4FE1\u606F");
+RewardSender.java  49 行      sb.append("\u9053\u5177\u7F16\u53F7");
+RewardSender.java  51 行      sb.append("\u9053\u5177\u540D\u5B57");
+RewardSender.java  53 行      sb.append("\u9053\u5177\u6570\u91CF");
+RewardSender.java  55 行      sb.append("\u54C1\u8D28\u9650\u5B9A");
+RewardSender.java  57 行      sb.append("\u9886\u53D6\u6570\u91CF\u9650\u5236");
+RewardSender.java  59 行      sb.append("\u7B49\u7EA7\u9886\u53D6\u9650\u5236");
+Player.java  1216 行      Mail mail = new Mail("\u5947\u5999\u6708\u8001");
+Player.java  1217 行      mail.setTitle("\u6C42\u5A5A\u6212\u6307\u8FD4\u8FD8");
+AamInvitation.java  37 行      inviter.sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u5BF9\u65B9\u62D2\u7EDD\u5E2E\u5FD9\u9080\u8BF7\u6216\u8D85\u65F6"));
+MarryInvitation.java  58 行      inviter.sendGetGoodsInfo(1,false, source.getName()+FontConver.simpleToCompl("\u62D2\u7EDD\u4E86\u4F60\u7684\u7ED3\u5A5A\u9080\u8BF7!"));
+MarryInvitation.java  68 行      inviter.sendGetGoodsInfo(1,false, FontConver.simpleToCompl("\u5BF9\u65B9\u62D2\u7EDD\u6C42\u5A5A\u9080\u8BF7\u6216\u8D85\u65F6"));
+MarryInvitation.java  192 行      sb.append("\u4E0E");
+MarryInvitation.java  196 行      sb.append(FontConver.simpleToCompl("\u643A\u624B\u6B65\u5165\u5A5A\u59FB\u7684\u6BBF\u5802"));
+MarryInvitation.java  198 行      sb.append(FontConver.simpleToCompl("\u4ED6\u4EEC\u5BA3\u8A93\u76F8\u7231\u4E00\u751F\u4E00\u4E16"));
+MarryInvitation.java  200 行      sb.append(FontConver.simpleToCompl("\u8BA9\u6211\u4EEC\u4E3A\u8FD9\u5E78\u798F\u7684\u4E00\u5BF9\u4EBA\u513F\u6B22\u547C\u5427!"));
+MarryInvitation.java  204 行      sb.append(FontConver.simpleToCompl("\u606D\u559C"));
+MarryInvitation.java  208 行      sb.append(FontConver.simpleToCompl("\u4E0E"));
+MarryInvitation.java  212 行      sb.append(FontConver.simpleToCompl("\u7ED3\u4E3A\u592B\u59BB"));
+MarryInvitation.java  214 行      sb.append(FontConver.simpleToCompl("\u8BA9\u6211\u4EEC\u5927\u5BB6\u4E00\u8D77\u6765\u795D\u798F\u4ED6\u4EEC\u5427!"));
+LocalDataLoader.java  578 行      ge.name = "\u5154\u603B\u70B8\u5F39";
+OnlineExpJob.java  75 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u606D\u559C\u60A8\u83B7\u5F97\u5728\u7EBF\u7ECF\u9A8C")+":"+standExp);//恭喜您获得在线经验××
+PartyRewardJob.java  40 行      sb.append(FontConver.simpleToCompl("\u53F7\u5916!\u53F7\u5916!"));
+PartyRewardJob.java  44 行      sb.append(FontConver.simpleToCompl("\u5BB6\u65CF\u5728\u672C\u6B21\u5BB6\u65CF\u6218\u4E2D\u83B7\u53D6\u80DC\u5229"));
+PartyRewardJob.java  46 行      sb.append("\u679C\u7136\u5B9E\u529B\u975E\u51E1!");
+CMsgJob.java  342 行      buffer.writeUTF(FontConver.simpleToCompl("\u6709\u76F8\u540C\u89D2\u8272\u5728\u6E38\u620F\u4E2D!!!"));//有相同角色在游戏中
+CMsgJob.java  520 行      buffer.writeUTF(FontConver.simpleToCompl("\u6709\u76F8\u540C\u89D2\u8272\u5728\u6E38\u620F\u4E2D"));//有相同角色在游戏中
+CMsgJob.java  599 行      buffer.writeUTF(FontConver.simpleToCompl("\u6709\u76F8\u540C\u89D2\u8272\u5728\u6E38\u620F\u4E2D"));//有相同角色在游戏中
+CMsgJob.java  620 行      System.out.println(accountname+" GM"+FontConver.simpleToCompl("\u3067\u306F\u3042\u308A\u307E\u305B\u3093 ")+netConnection.getIP());
+CMsgJob.java  673 行      buffer.writeUTF(FontConver.simpleToCompl("\u8BF7\u6E05\u7406\u7F13\u5B58\u6216\u5347\u7EA7Flash\u7248\u672C\u518D\u8BD5"));//请清理缓存或升级flash版本再试
+CMsgJob.java  815 行      buffer.writeUTF(FontConver.simpleToCompl("\u8BF7\u6E05\u7406\u7F13\u5B58\u6216\u5347\u7EA7Flash\u7248\u672C\u518D\u8BD5"));//请清理缓存或升级flash版本再试
+CMsgJob.java  892 行      Mail mail = new Mail("\u6E38\u620F\u7BA1\u7406\u5458"); //游戏管理员
+CMsgJob.java  893 行      mail.setTitle("\u7CFB\u7EDF\u90AE\u4EF6");//系统邮件
+CopyJob.java  83 行      player.sendGetGoodsInfo(1, true, FontConver.simpleToCompl("\u526F\u672C\u5DF2\u5237\u65B0,\u8BF7\u91CD\u65B0\u8FDB\u884C\u95EF\u5173!"));
+WorldManager.java  105 行      private PartyReward bestPlayer = new PartyReward("\u5BC2\u5BDE\u64C2\u4E3B",1,1,WorldManager.currentTime);
+WorldManager.java  690 行      target.sendGetGoodsInfo(1, false, FontConver.simpleToCompl("\u6302\u673A\u81EA\u52A8\u6253\u602A\u4E2D,") +
+WorldManager.java  691 行      FontConver.simpleToCompl("\u4E0D\u80FD\u8FDB\u884C\u76F8\u5173\u64CD\u4F5C!"));//挂机自动打怪中，不能进行相关操作
+WorldManager.java  1303 行      MainFrame.println(FontConver.simpleToCompl("\u5BC4\u5356\u4E2D\u5FC3\u4E1C\u897F\u6389\u4E86"));//寄卖中心东西掉了......
+WorldManager.java  1480 行      buffer.writeUTF("\u7CFB\u7EDF");
+WorldManager.java  1701 行      mail = new Mail("\u5947\u5999\u5C0F\u535A\u58EB",System.currentTimeMillis());
+WorldManager.java  1703 行      mail = new Mail("\u5947\u5999\u5C0F\u535A\u58EB");
+WorldManager.java  1708 行      mail.setTitle("\u95EE\u7B54\u6392\u540D\u5956\u52B1");
+WorldManager.java  1709 行      sb.append("\u606D\u559C\u4F60\u5728\u5947\u5999\u95EE");
+WorldManager.java  1710 行      sb.append("\u7B54\u6D3B\u52A8\u4E2D\u83B7\u5F97\u7B2C");
+WorldManager.java  1714 行      sb.append("\u540D");
+WorldManager.java  1716 行      sb.append("\u7279\u6B64\u5956\u52B1");
+WorldManager.java  1718 行      sb.append("\u4EE5\u5179\u9F13\u52B1");
+WorldManager.java  1723 行      mail.setTitle("\u95EE\u7B54\u5B8C\u6210\u5956\u52B1");
+WorldManager.java  1725 行      sb.append("\u606D\u559C\u4F60\u5B8C\u6210\u4E86\u7B2C");
+WorldManager.java  1729 行      sb.append("\u8F6E\u7684\u5947\u5999\u95EE\u7B54\u6D3B\u52A8");
+WorldManager.java  1731 行      sb.append("\u7279\u6B64\u5956\u52B1");
+WorldManager.java  1733 行      sb.append("\u4EE5\u5179\u9F13\u52B1!");

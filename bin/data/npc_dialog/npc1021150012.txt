@@ -1,0 +1,173 @@
+<dialog>
+
+<!--该NPC名为杰克 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="1009">/每到新年，渤岛通往奇妙农场的大门就会打开，据说农场里的“战斗鸡”会下金蛋。金蛋虽然不能吃，砸开以后却会有意想不到的宝物。</text>
+		</words>
+   		 <options>
+			
+		</options>
+	</s01>
+   </default>
+	<t1073020292>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020292">任务：追鸡令！ </text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029201">/每年这个时候，总有无数人涌入我们农场来砸金蛋。不过你们不要以为农场里只有战斗鸡……</text>
+			</words>
+			<options>
+				<item textId="110238" text="接受任务" command="accept:1073020292" />
+				<item textId="110239" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029201">/每年这个时候，总有无数人涌入我们农场来砸金蛋。不过你们不要以为农场里只有战斗鸡……</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020292" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029201">/每年这个时候，总有无数人涌入我们农场来砸金蛋。不过你们不要以为农场里只有战斗鸡……</text>
+			</words>
+			<options>
+				<item textId="1100242" text="完成任务" command="finish:1073020292" />
+			</options>
+		 </s03>
+   	</t1073020292>
+	<t1073020293>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020293">任务：蛋蛋形象 </text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029301">/如果你想在新年，这个喜庆的节日里显得与众不同，又和适宜，我这里有套蛋蛋装正好能满足你的需求。</text>
+			</words>
+			<options>
+				<item textId="110238" text="接受任务" command="accept:1073020293" />
+				<item textId="110239" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029301">/如果你想在新年，这个喜庆的节日里显得与众不同，又和适宜，我这里有套蛋蛋装正好能满足你的需求。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020293" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029301">/如果你想在新年，这个喜庆的节日里显得与众不同，又和适宜，我这里有套蛋蛋装正好能满足你的需求。</text>
+			</words>
+			<options>
+				<item textId="1100242" text="完成任务" command="finish:1073020293" />
+			</options>
+		 </s03>
+   	</t1073020293>
+	<t1073020294>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020294">任务：春节礼物 </text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029401">/奇妙之旅祝大家新春快乐！！！</text>
+			</words>
+			<options>
+				<item textId="110238" text="接受任务" command="accept:1073020294" />
+				<item textId="110239" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029401">/奇妙之旅祝大家新春快乐！！！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020294" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029401">/奇妙之旅祝大家新春快乐！！！。</text>
+			</words>
+			<options>
+				<item textId="1100242" text="完成任务" command="finish:1073020294" />
+			</options>
+		 </s03>
+   	</t1073020294>
+	<t1073020295>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020295">任务：元宵礼物 </text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029501">/奇妙之旅祝大家在新的一年里，万事如意，心想事成！！</text>
+			</words>
+			<options>
+				<item textId="110238" text="接受任务" command="accept:1073020295" />
+				<item textId="110239" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029501">/奇妙之旅祝大家在新的一年里，万事如意，心想事成！！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020295" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="3029501">/奇妙之旅祝大家在新的一年里，万事如意，心想事成！！。</text>
+			</words>
+			<options>
+				<item textId="1100242" text="完成任务" command="finish:1073020295" />
+			</options>
+		 </s03>
+   	</t1073020295>
+</dialog>

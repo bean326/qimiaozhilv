@@ -1,0 +1,32 @@
+package cc.lv1.rpg.gs.net.impl;
+
+import cc.lv1.rpg.gs.data.PressureTest;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.job.i.NetJob;
+
+
+public class PressureJob extends NetJob {
+	
+	String data;
+	
+	String fileName;
+
+	public NetConnection getConnection() {
+		return null;
+	}
+	
+	public PressureJob(String data,String fileName)
+	{
+		this.data = data;
+		this.fileName = fileName;
+	}
+
+
+	public void run() 
+	{
+		PressureTest.getInstance().saveTextByFileName(data, fileName);
+	}
+	
+	
+
+}

@@ -1,0 +1,467 @@
+package cc.lv1.rpg.gs.entity.impl.battle;
+
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.controller.BattleController;
+import cc.lv1.rpg.gs.entity.controller.MonsterController;
+import cc.lv1.rpg.gs.entity.controller.PVEController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.Effect;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.FlashEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.net.SMsg;
+
+/**
+ * 玩家临时数据
+ * @author dxw
+ *
+ */
+public class PlayerBattleTmp extends SpriteBattleTmp
+{
+
+	private PlayerController playerController;
+	
+	private Player player;
+
+	public int phyAtt;
+	public int sptAtt;
+	public int phyDef;
+	public int sptDef;
+	public int spiritStand;
+	public int avoidance;
+	public int hit;
+	public int phyHurtAvoid;
+	public int sptHurtAvoid;
+	public int noDefPhyHurt;
+	public int noDefSptHurt;
+	
+	/**
+	 * 物理减伤比
+	 */
+	protected double phsHitRate;
+	
+	/**
+	 * 精神减伤比
+	 */
+	protected double sptHitRate;
+	
+
+
+	public void setPlayer(PlayerController playerController)
+	{
+		setSpriteController(playerController);
+		setSprite(playerController.getPlayer());
+		
+		this.playerController = playerController;
+		this.player = playerController.getPlayer();
+		EquipSet equipSet = (EquipSet) playerController.getPlayer().getExtPlayerInfo("equipSet");
+		baseInfo = new PlayerBaseInfo(playerController.getPlayer());
+		playerController.getPlayer().getBaseInfo().copyTo(baseInfo);
+		baseInfo.battleMaxHP = player.maxHitPoint;
+		baseInfo.battleMaxMP = player.maxMagicPoint;
+		
+		phyAtt = baseInfo.phsAtt + equipSet.getTotalAtt("phyAtt");
+		sptAtt = baseInfo.sptAtt + equipSet.getTotalAtt("sptAtt");
+		phyDef = baseInfo.phsDef + equipSet.getTotalAtt("phyDef");
+		sptDef = baseInfo.sptDef + equipSet.getTotalAtt("stpDef");
+		spiritStand = baseInfo.spiritStand + equipSet.getTotalAtt("spiritStand");
+		avoidance = baseInfo.avoidance + equipSet.getTotalAtt("avoidance");
+		hit = baseInfo.hit + equipSet.getTotalAtt("hit");
+		phyHurtAvoid = baseInfo.phsHurtAvoid + equipSet.getTotalAtt("phyHurtAvoid");
+		sptHurtAvoid = baseInfo.sptHurtAvoid + equipSet.getTotalAtt("sptHurtAvoid");
+		noDefPhyHurt = baseInfo.noDefPhsHurt + equipSet.getTotalAtt("noDefPhyHurt");
+		noDefSptHurt = baseInfo.noDefSptHurt + equipSet.getTotalAtt("noDefSptHurt");
+		
+		phsHitRate = (double)phyDef/(double)(phyDef+8020);
+		sptHitRate = (double)sptDef/(double)(sptDef+8020);
+		
+		buffBox = (BuffBox)player.getExtPlayerInfo("buffBox");
+		buffBox.updateBattleBuffBox(baseInfo);
+		
+		setCDTimer(baseInfo.speed);	
+		
+		//测试打印********************************************************************************
+		System.out.println("---------------------------------------");
+		System.out.println("玩家 " +player.name+" 的战斗信息");
+		System.out.println("物理攻击 ..." + phyAtt);
+		System.out.println("精神攻击 ..." + sptAtt);
+		System.out.println("物理防御 ... "+ phyDef);
+		System.out.println("物理减伤比 ... "+ phsHitRate);
+		System.out.println("精神防御 ... "+ sptDef);
+		System.out.println("精神减伤比 ... "+ sptHitRate);
+		System.out.println("速度 ..." + baseInfo.speed);
+		System.out.println("---------------------------------------");
+		//测试打印********************************************************************************
+	}
+	
+	/**
+	 * //1.	战斗中精神抵抗几率 =被攻击者精神抵抗率+[（被攻击者lv-攻击者lv）/abs（被攻击者lv-攻击者lv）*abs（被攻击者lv-攻击者lv）^2 /400]
+	 */
+	public boolean getSpiResistance(PlayerController target)
+	{
+		int sourceLv = player.level;
+		int targetLv = target.getPlayer().level;
+		
+		double attachPoint = 0;
+		
+		if(targetLv - sourceLv != 0)
+		{
+			attachPoint = 
+			(double)(targetLv - sourceLv)/
+			(double)Math.abs(targetLv - sourceLv)*
+			(double)(Math.abs(targetLv - sourceLv)*
+			Math.abs(targetLv - sourceLv))/
+			(double)400;
+		}
+		return
+		(int)(((double)spiritStand / 
+		(double)10000 +attachPoint)*
+		10000) >=
+		(int)Math.random()
+		*10000;
+	}
+	
+	/**
+	 * //1.	战斗中精神抵抗几率 =被攻击者精神抵抗率+[（被攻击者lv-攻击者lv）/abs（被攻击者lv-攻击者lv）*abs（被攻击者lv-攻击者lv）^2 /400]
+	 */
+	public boolean getSpiResistance(MonsterController monster)
+	{
+		int sourceLv = player.level;
+		int targetLv = monster.getMonster().level;
+		
+		double attachPoint = 0;
+		
+		if(targetLv - sourceLv != 0)
+		{
+			attachPoint = 
+			(double)(targetLv - sourceLv)/
+			(double)Math.abs(targetLv - sourceLv)*
+			(double)(Math.abs(targetLv - sourceLv)*
+			Math.abs(targetLv - sourceLv))/
+			(double)400;
+		}
+		return
+		(int)(((double)monster
+		.getMonster().IFResistance
+		/ 
+		(double)10000 +attachPoint)*
+		10000) >=
+		(int)Math.random()
+		*10000;
+	}
+
+	/**
+	 * 物理命中率 万分之
+	 */
+	public int getPhsHitRate(MonsterController monster)
+	{
+		int chanceToDodge = monster.getMonster().chanceToDodge;
+		return getPhsHitRate(chanceToDodge);
+	}
+	
+	/**
+	 * 物理命中率 万分之
+	 */
+	public int getPhsHitRate(PlayerController target)
+	{
+		return getPhsHitRate(avoidance);
+	}
+	/**
+	 * 物理命中率 万分之
+	 */
+	public int getPhsHitRate(int avoidance)
+	{
+		return (hit-avoidance+80)*100;
+	}
+	/**
+	 * 逃跑率 万分之
+	 */
+	public int getEscapeRate(MonsterController monster)
+	{
+		int lv = monster.getMonster().level;
+		return getEscapeRate(lv);
+	}
+	/**
+	 * 逃跑率 万分之
+	 */
+	public int getEscapeRate(PlayerController target)
+	{
+		int lv = target.getPlayer().level;
+		return getEscapeRate(lv);
+	}
+	/**
+	 * 逃跑率 万分之
+	 */
+	public int getEscapeRate(int targetLv)
+	{
+		return (player.level - targetLv + 25)*100;
+	}
+	
+	/**
+	 * 取得玩家伤害 物理攻击
+	 */
+	private int getDamagePointByHit(PlayerController target)
+	{
+		double nPhsHitRate = ((PlayerBattleTmp)target.getAttachment()).phsHitRate;
+		return getDamagePointByHit(nPhsHitRate,phyHurtAvoid);
+	}
+	
+	/**
+	 * 取得怪物伤害 物理攻击
+	 */
+	private int getDamagePointByHit(MonsterController monster)
+	{
+		double nPhsHitRate = monster.getMonster().phsHitRate;
+		return getDamagePointByHit(nPhsHitRate,0);
+	}
+	
+	/**
+	 * 取得伤害 物理攻击
+	 */
+	private int getDamagePointByHit(double nPhsHitRate,int nPhsHurtAvoid)
+	{
+		return (int)
+		(((double)phyAtt
+		*(double)(((double)1)-nPhsHitRate))
+		+ noDefPhyHurt 
+		- nPhsHurtAvoid);
+	}
+	/**
+	 * 取得伤害 魔法攻击
+	 */
+	public int getDamagePointByMagic(PlayerController target)
+	{
+		double nSptHitRate = ((PlayerBattleTmp)target.getAttachment()).sptHitRate;
+		return getDamagePointByMagic(nSptHitRate,sptHurtAvoid);
+	}
+	/**
+	 * 取得伤害 魔法攻击
+	 */
+	public int getDamagePointByMagic(MonsterController monster)
+	{
+		double nSptHitRate = monster.getMonster().sptHitRate;
+		return getDamagePointByMagic(nSptHitRate,0);
+	}
+	/**
+	 * 取得伤害 魔法攻击
+	 */
+	private int getDamagePointByMagic(double nSptHitRate,int nSptHurtAvoid)
+	{
+		return (int)(sptAtt*
+		(1-nSptHitRate) 
+		+ noDefSptHurt
+		- nSptHurtAvoid);
+	}
+
+
+	public void update(long timeMillis)
+	{
+		super.update(timeMillis);
+		
+		if(isDead())
+			return;
+		
+		if(isEmptyEffect())
+			return;
+		
+		
+		for(int j = 0 ; j < effectList.size() ; j ++)
+		{
+			TimeEffect effect = (TimeEffect)effectList.get(j);
+			
+			if(effect.interval != 0)
+			{
+				if(effect.isUseEffect(timeMillis))
+				{
+					processTimeEffectExt(effect,index);
+				}
+			}
+			
+			if(effect.isEndEffect(timeMillis))
+			{				
+				for(int i = 0 ; i < effect.dataType.length ; i ++)
+				{
+					
+					if(effect.dataType[i].equals("0"))
+					{
+						break;
+					}
+					
+					if(effect.interval == 0)
+					{
+						int currPoint = Integer.parseInt(baseInfo.getVariable(effect.dataType[i]));
+						baseInfo.setVariable(effect.dataType[i],String.valueOf(currPoint - effect.getPoint(i)));
+					}
+				}
+				
+				if(effect.interval != 0)
+				{
+					processTimeEffectEndExt(effect, index);
+				}
+				
+				removeEffect(effect);
+			}
+		}
+		
+	}
+	
+	
+
+	/**
+	 * 玩家战斗释放主动技能
+	 * @param skill
+	 */
+	public void processActiveSkill(ActiveSkill skill)
+	{	
+		if(isBeforeUnusualEffect)
+			checkUnusualEffect();
+		
+		ByteBuffer buffer = new ByteBuffer(64);
+		buffer.writeByte(BattleController.SKILLPROCESSOR); //释放技能
+		buffer.writeByte(getTeamNo());//使用技能者的组编号
+		buffer.writeByte(getIndex()); //使用者技能者的index;
+		buffer.writeInt(skill.id);
+		
+		//测试资源
+		buffer.writeInt(1031020003);
+		buffer.writeInt(1000004);
+		buffer.writeInt(1031010001);
+		
+		DataFactory dataFactory = DataFactory.getInstance();
+		
+		int skillLength = skill.effectList.length;
+
+		for(int i = 0 ; i < skillLength ; i ++)
+		{
+			if(skill.effectList[i] == 0)
+				continue;
+
+			Effect effect = (Effect)dataFactory.getGameObject(skill.effectList[i]);
+			
+			if(effect == null)
+				continue;
+			
+			
+			if(i != 0)
+			{
+				if(targetMonster != null
+				&&skill.targetType[i] == ActiveSkill.TARGET_TYPE_TEAM_SELF) //先敌后己，如果第二次的效果是
+				{
+					setSkillTarget(playerController);
+				}
+				else if(targetPlayer != null
+				&& skill.targetType[i] == ActiveSkill.TARGET_TYPE_TEAM_SELF
+				&& skill.targetType[0] == ActiveSkill.TARGET_TYPE_TEAM_ENEMY) 
+				{
+					setSkillTarget(playerController);
+				}
+			}
+			
+			int type = 0;
+
+			if(effect instanceof FlashEffect)
+			{
+				System.out.println(skill.name+ " 技能产生---瞬时效果 : "+effect.name);
+
+				while(!onFlashEffectUse((FlashEffect)effect))
+				{
+					if(!changeTarget())
+						return;
+				}
+				
+				//打除了主目标以外的怪
+				if(skill.effectRangeList != ActiveSkill.EFFECT_RANGE_ONE)
+				{
+					int targetType = getSkillTargeType();
+					
+					if(targetType == ActiveSkill.TARGET_TYPE_PLAYERS)
+					{
+						hitMorePlayerByFlashEffect(effect, skill.effectRangeList);
+					}
+					else if(targetType == ActiveSkill.TARGET_TYPE_MONSTERS)
+					{
+						hitMoreMonsterByFlashEffect(effect,skill.effectRangeList);
+					}
+				}
+				type = 1;
+			}
+			else if(effect instanceof TimeEffect)
+			{
+				onTimeEffectUse((TimeEffect)effect);
+				type = 2;
+
+			}
+			
+			
+			buffer.writeInt(effect.id);
+			buffer.writeByte(type);
+			pack(buffer);
+		}
+		
+		player.setMagicPoint(-skill.magic);
+		
+		battle.dispatchMsg(SMsg.S_BATTLE_ACTION_COMMAND, buffer);
+		battle.checkDeadState();
+	}
+	
+	
+	/**
+	  effect 百分比计算
+	  (基本伤害+装备<值>)*装备<百分>*效果<百分>
+	  
+	  effect 值计算
+	  (基本伤害+装备<值>+效果<值>)*装备<百分>
+	  
+	 */
+	protected int getTotalDamageByMonster(FlashEffect effect)
+	{
+		int baseDamage = 0;
+		
+		if(player.profession == 1 || player.profession == 2)
+			baseDamage = getDamagePointByHit(targetMonster);
+		else if(player.profession == 3 || player.profession == 4)
+			baseDamage = getDamagePointByMagic(targetMonster);
+		
+		int rdp = 0;
+		if(effect.dataPattern == 1) //数值
+		{
+			rdp = baseDamage + effect.effectPoint;
+		}
+		else if(effect.dataPattern == 2) //百分比
+		{
+			rdp = baseDamage * effect.effectPoint / 100;
+		}
+		return rdp;
+	}
+	
+
+
+	protected int getTotalDamageByPlayer(FlashEffect effect)
+	{
+		
+		int baseDamage = 0;
+		
+		if(player.profession == 1 || player.profession == 2)
+			baseDamage = getDamagePointByHit(targetPlayer);
+		else if(player.profession == 3 || player.profession == 4)
+			baseDamage = getDamagePointByMagic(targetPlayer);
+
+		int rdp = 0;
+		if(effect.dataPattern == 1) //数值
+		{
+			rdp = baseDamage + effect.effectPoint;
+		}
+		else if(effect.dataPattern == 2) //百分比
+		{
+			rdp = baseDamage * effect.effectPoint / 100;
+		}
+		return rdp;
+	}
+
+}

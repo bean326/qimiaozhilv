@@ -1,0 +1,4 @@
+rank	account	name	level	point	logTime
+1	null	素颜如水	2173	5703	20101214-12:21:19
+2	null	天权	327	5635	20101214-01:23:13
+3	null	ulex	588	3282	20101214-01:27:57

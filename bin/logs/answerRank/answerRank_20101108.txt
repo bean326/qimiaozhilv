@@ -1,0 +1,2 @@
+rank	account	name	level	point	logTime
+1	null	123456	3637	502	20101105-11:27:38

@@ -1,0 +1,704 @@
+<dialog>
+
+<!--该NPC名为 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="100000">//奇妙世界的福利待遇是很好的，每天可以在我这里领取到各种奖励，记得天天都来哦~|//看我每天处理的这些事务，发放这么多福利，你应该猜到，我是奇妙世界的公务员了吧？|//如果你在万能管家那里听到了一些莫名其妙的话，请你蔑视、斜视、无视、鄙视他。|//你猜对了，每日任务和其他任务一样，也有等级限制的，等级越高，可以完成的任务越多。</text>
+		</words>
+   		 <options>
+                        <item textId="1021090085">taskList</item>
+                 </options>
+	</s01>
+   </default>		
+<t1073020174>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020174">任务：仓库扩展</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300323">收集素材来兑换仓库扩展道具，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130324" text="接受任务" command="accept:1073020174" />
+				<item textId="130325" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300326">收集素材来兑换仓库扩展道具，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020174" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300327">收集素材来兑换仓库扩展道具，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300328" text="完成任务" command="finish:1073020174" />
+			</options>
+		 </s03>
+   </t1073020174>
+<t1073020178>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020178">任务：宠物的好主人</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300347">收集素材来兑换宠物道具，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130348" text="接受任务" command="accept:1073020178" />
+				<item textId="130349" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300350">收集素材来兑换宠物道具，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020178" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300351">收集素材来兑换宠物道具，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300352" text="完成任务" command="finish:1073020178" />
+			</options>
+		 </s03>
+   </t1073020178> 
+<t1073020179>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020179">任务：能量补充</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300353">收集素材来兑换行动点补充包，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130354" text="接受任务" command="accept:1073020179" />
+				<item textId="130355" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300356">收集素材来兑换行动点补充包，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020179" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300357">收集素材来兑换行动点补充包，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300358" text="完成任务" command="finish:1073020179" />
+			</options>
+		 </s03>
+   </t1073020179>
+<t1073020173>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020173">任务：经验卡！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300317">收集素材来兑换经验卡，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130318" text="接受任务" command="accept:1073020173" />
+				<item textId="130319" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300320">收集素材来兑换经验卡，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020173" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300321">收集素材来兑换经验卡，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300322" text="完成任务" command="finish:1073020173" />
+			</options>
+		 </s03>
+   </t1073020173>
+<t1073020200>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020200">任务：挂机经验卡</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300478">收集素材来兑换挂机经验卡，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020200" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300481">收集素材来兑换挂机经验卡，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020200" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1300482">收集素材来兑换挂机经验卡，这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020200" />
+			</options>
+		 </s03>
+   </t1073020200>
+   
+   <t1073020224>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020224">任务：荣誉之战！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022401">打倒邪恶月亮使者可以获得荣誉，这个任务每天只能完成3次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020224" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022402">打倒邪恶月亮使者可以获得荣誉，这个任务每天只能完成3次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020224" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022403">打倒邪恶月亮使者可以获得荣誉，这个任务每天只能完成3次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020224" />
+			</options>
+		 </s03>
+   </t1073020224>
+   <t1073020227>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020227">任务：生命精力宝石！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022701">收集素材兑换生命宝石和精力宝石！这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020227" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022702">收集素材兑换生命宝石和精力宝石！这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020227" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022703">收集素材兑换生命宝石和精力宝石！这个任务每天只能完成1次，好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020227" />
+			</options>
+		 </s03>
+   </t1073020227>
+   <t1073020228>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020228">任务：三十万点生命药水！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022801">收集素材兑换三十万点生命药水！这个任务每天只能完成1次，好好把握哟！金条在普通商店出售！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020228" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022802">收集素材兑换三十万点生命药水！这个任务每天只能完成1次，好好把握哟！金条在普通商店出售！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020228" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022803">收集素材兑换三十万点生命药水！这个任务每天只能完成1次，好好把握哟！金条在普通商店出售！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020228" />
+			</options>
+		 </s03>
+   </t1073020228>
+   <t1073020229>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020229">任务：五十万点生命药水！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022901">收集素材兑换五十万点生命药水！这个任务每天只能完成1次，好好把握哟！金条在普通商店出售！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020229" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022902">收集素材兑换五十万点生命药水！这个任务每天只能完成1次，好好把握哟！金条在普通商店出售！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020229" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302022903">收集素材兑换五十万点生命药水！这个任务每天只能完成1次，好好把握哟！金条在普通商店出售！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020229" />
+			</options>
+		 </s03>
+   </t1073020229>
+	<t1073020230>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1073020238">任务：荣誉兑换！</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023001">收集素材兑换荣誉！这个任务每天只能完成1次，完成该任务需要雄厚的资本，要好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020238" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023002">收集素材兑换荣誉！这个任务每天只能完成1次，完成该任务需要雄厚的资本，要好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020238" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023003">收集素材兑换荣誉！这个任务每天只能完成1次，完成该任务需要雄厚的资本，要好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020238" />
+			</options>
+		</s03>
+	</t1073020230>
+	<t1073020235>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023501">任务：刷图至尊宝一</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023502">获得一百万生命宝石，一百万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020235" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023502">获得一百万生命宝石，一百万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020235" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023502">获得一百万生命宝石，一百万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020235" />
+			</options>
+		</s03>
+	</t1073020235>
+	<t1073020236>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023601">任务：刷图至尊宝二</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023602">获得二百五十万生命宝石，二百五十万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020236" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023602">获得二百五十万生命宝石，二百五十万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020236" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023602">获得二百五十万生命宝石，二百五十万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020236" />
+			</options>
+		</s03>
+	</t1073020236>
+	<t1073020237>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023701">任务：刷图至尊宝三</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023702">获得五百万生命宝石，五百万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020237" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023702">获得五百万生命宝石，五百万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020237" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023702">获得五百万生命宝石，五百万精力宝石各一个，刷图挂机至尊宝啊。</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020237" />
+			</options>
+		</s03>
+	</t1073020237>
+	<t1073020239>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023901">任务：炼化宝石</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023902">收集素材兑换炼化宝石！这个任务每天只能完成1次，完成该任务需要雄厚的资本，要好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020239" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023902">收集素材兑换炼化宝石！这个任务每天只能完成1次，完成该任务需要雄厚的资本，要好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020239" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302023902">收集素材兑换炼化宝石！这个任务每天只能完成1次，完成该任务需要雄厚的资本，要好好把握哟！</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020239" />
+			</options>
+		</s03>
+	</t1073020239>
+	<t1073020247>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024701">任务：荣誉药水</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024702">量变引起质变!去收集足够的药水，让药水变得更猛烈些吧!</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020247" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024702">量变引起质变!去收集足够的药水，让药水变得更猛烈些吧!</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020247" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302024702">量变引起质变!去收集足够的药水，让药水变得更猛烈些吧!</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020247" />
+			</options>
+		</s03>
+	</t1073020247>
+	<t1073020250>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302025001">任务：时空旅行船票</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302025002">激动人心的时空旅行又开始了，赶快来领取船票吧!</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020250" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302025002">激动人心的时空旅行又开始了，赶快来领取船票吧!</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020250" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302025002">激动人心的时空旅行又开始了，赶快来领取船票吧!</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020250" />
+			</options>
+		</s03>
+	</t1073020250>
+	<t1073020282>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028201">任务：进化小元宝</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028202">收集素材兑换进化小元宝!</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020282" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028202">收集素材兑换进化小元宝!</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020282" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028202">收集素材兑换进化小元宝!</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020282" />
+			</options>
+		</s03>
+	</t1073020282>
+	<t1073020283>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028301">任务：素材之星·天下</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028302">收集素材兑换素材之星·天下!</text>
+			</words>
+			<options>
+				<item textId="130479" text="接受任务" command="accept:1073020283" />
+				<item textId="130480" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028302">收集素材兑换素材之星·天下!</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020283" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302028302">收集素材兑换素材之星·天下!</text>
+			</words>
+			<options>
+				<item textId="1300483" text="完成任务" command="finish:1073020283" />
+			</options>
+		</s03>
+	</t1073020283>
+
+
+</dialog>

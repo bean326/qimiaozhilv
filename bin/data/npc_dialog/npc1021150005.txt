@@ -1,0 +1,131 @@
+<dialog>
+
+<!--该NPC名为五一管理员 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="1009">/看似简单凄美的牛郎织女七夕相聚一日，却有很多都在“人”忙碌着 。银河管理处在做着汛期的防洪工作。喜鹊们在忙着排练安全舒适的“鹊桥”。王母娘娘在私下教唆妖怪破坏这良辰美景。当然也少不了正义之士的拔刀相助……are you ready？！</text>
+		</words>
+   		 <options>
+			 <!--item textId="15010305" text="端午形象兑换" command="changeBossCoat" /-->
+		</options>
+	</s01>
+   </default>
+	<t1073020271>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027101">任务:妖怪追缉令!</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027102">/没错，我就是冲级任务官，但我过去是天庭的彩霞仙子。王母娘娘又想破坏我妹妹一家的七夕相聚了。现在有三个头领在王母的唆使下，带领着一些妖怪过来捣乱，希望有正义之士能拔刀相助。</text>
+			</words>
+			<options>
+				<item textId="10000002" text="接受任务" command="accept:1073020271" />
+				<item textId="10000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027102">/没错，我就是冲级任务官，但我过去是天庭的彩霞仙子。王母娘娘又想破坏我妹妹一家的七夕相聚了。现在有三个头领在王母的唆使下，带领着一些妖怪过来捣乱，希望有正义之士能拔刀相助。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020271" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027102">/没错，我就是冲级任务官，但我过去是天庭的彩霞仙子。王母娘娘又想破坏我妹妹一家的七夕相聚了。现在有三个头领在王母的唆使下，带领着一些妖怪过来捣乱，希望有正义之士能拔刀相助。</text>
+			</words>
+			<options>
+				<item textId="10000006" text="完成任务" command="finish:1073020271" />
+			</options>
+		 </s03>
+   	</t1073020271>  
+	<t1073020272>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027201">任务:玉液</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027202">/如果你们能从妖怪身上收集到“王母的教唆书信”，我就可以委托我的姐妹把这些证据上报给玉帝，以揭穿王母的阴谋。当然对于伸张正义的勇士，丰厚的奖赏也是必须的。</text>
+			</words>
+			<options>
+				<item textId="10000002" text="接受任务" command="accept:1073020272" />
+				<item textId="10000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027202">/如果你们能从妖怪身上收集到“王母的教唆书信”，我就可以委托我的姐妹把这些证据上报给玉帝，以揭穿王母的阴谋。当然对于伸张正义的勇士，丰厚的奖赏也是必须的。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020272" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027202">/如果你们能从妖怪身上收集到“王母的教唆书信”，我就可以委托我的姐妹把这些证据上报给玉帝，以揭穿王母的阴谋。当然对于伸张正义的勇士，丰厚的奖赏也是必须的。</text>
+			</words>
+			<options>
+				<item textId="10000006" text="完成任务" command="finish:1073020272" />
+			</options>
+		 </s03>
+   	</t1073020272>  
+	<t1073020273>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027301">任务:金丹</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027302">/如果你们能从妖怪身上收集到“王母的教唆书信”，我就可以委托我的姐妹把这些证据上报给玉帝，以揭穿王母的阴谋。当然对于伸张正义的勇士，丰厚的奖赏也是必须的。</text>
+			</words>
+			<options>
+				<item textId="10000002" text="接受任务" command="accept:1073020273" />
+				<item textId="10000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027302">/如果你们能从妖怪身上收集到“王母的教唆书信”，我就可以委托我的姐妹把这些证据上报给玉帝，以揭穿王母的阴谋。当然对于伸张正义的勇士，丰厚的奖赏也是必须的。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1073020273" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="302027302">/如果你们能从妖怪身上收集到“王母的教唆书信”，我就可以委托我的姐妹把这些证据上报给玉帝，以揭穿王母的阴谋。当然对于伸张正义的勇士，丰厚的奖赏也是必须的。</text>
+			</words>
+			<options>
+				<item textId="10000006" text="完成任务" command="finish:1073020273" />
+			</options>
+		 </s03>
+   	</t1073020273> 
+</dialog>

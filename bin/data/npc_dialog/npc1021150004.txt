@@ -1,0 +1,93 @@
+<dialog>
+
+<!--该NPC名为奇妙大博士 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="1009">//作为一个严谨务实的大科学家，我的兴趣就是寂寞的看人结婚和辛勤的帮人接生，啊口误，是转生。|//在哪里，在哪里见过你？你的笑容这样熟悉，我一时想不起……</text>
+		</words>
+   		 <options>
+			  <item textId="1008" text="转生" command="upRole" />
+		</options>
+	</s01>
+   </default>
+	<t1072000019>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001901">任务:一转任务</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001902">我研究出了可以让人进化重生的奇妙DNA，不过必须要真正的强者才能使用它。如果你能通过考验，打败传说中的永生不死的“纯哥教信徒”，我会免费赠送的！“纯哥教信徒”在BOSS房间！</text>
+			</words>
+			<options>
+				<item textId="10000002" text="接受任务" command="accept:1072000019" />
+				<item textId="10000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001902">我研究出了可以让人进化重生的奇妙DNA，不过必须要真正的强者才能使用它。如果你能通过考验，打败传说中的永生不死的“纯哥教信徒”，我会免费赠送的！“纯哥教信徒”在BOSS房间！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000019" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001902">我研究出了可以让人进化重生的奇妙DNA，不过必须要真正的强者才能使用它。如果你能通过考验，打败传说中的永生不死的“纯哥教信徒”，我会免费赠送的！“纯哥教信徒”在BOSS房间！</text>
+			</words>
+			<options>
+				<item textId="10000006" text="完成任务" command="finish:1072000019" />
+			</options>
+		 </s03>
+   	</t1072000019> 
+	<t1072000020>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200002001">任务:二转任务</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200002002">你是想二次转生吗？说真的，你的证件照非常beautiful，并且没有PS的痕迹，不过这可不是填写一张转生申请表就能OK的……二次转生需要两个道具，一个是“真时之沙”。当然，对于你这样的大人物来说，它不算什么。另一个是“时之刃”，我想你肯定不会有的，因为它在我这里。如果你能帮我转告“女武神”，不要把大型动物当做宠物养，我会借给你用一下下的。</text>
+			</words>
+			<options>
+				<item textId="10000002" text="接受任务" command="accept:1072000020" />
+				<item textId="10000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200002002">你是想二次转生吗？说真的，你的证件照非常beautiful，并且没有PS的痕迹，不过这可不是填写一张转生申请表就能OK的……二次转生需要两个道具，一个是“真时之沙”。当然，对于你这样的大人物来说，它不算什么。另一个是“时之刃”，我想你肯定不会有的，因为它在我这里。如果你能帮我转告“女武神”，不要把大型动物当做宠物养，我会借给你用一下下的。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000020" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200002002">你是想二次转生吗？说真的，你的证件照非常beautiful，并且没有PS的痕迹，不过这可不是填写一张转生申请表就能OK的……二次转生需要两个道具，一个是“真时之沙”。当然，对于你这样的大人物来说，它不算什么。另一个是“时之刃”，我想你肯定不会有的，因为它在我这里。如果你能帮我转告“女武神”，不要把大型动物当做宠物养，我会借给你用一下下的。</text>
+			</words>
+			<options>
+				<item textId="10000006" text="完成任务" command="finish:1072000020" />
+			</options>
+		 </s03>
+   	</t1072000020>            
+</dialog>

@@ -1,0 +1,3 @@
+goodsId	name	saleRate	buyRate
+物品ID	名字	出售比率	买入比率
+1041000001	回城卷轴	30	100

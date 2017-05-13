@@ -1,0 +1,2 @@
+id	name	materialsName	materialsIds	materialsCount	point	modValue
+装备Id	装备名称	可拆解出的材料名称	可拆解出的材料Id	可拆解出的材料数量	所需游戏币	绿装修正值

@@ -1,0 +1,12 @@
+<merge>
+	<dbnames>
+		<dbname>1</dbname>
+		<dbname>2</dbname>
+		<dbname>3</dbname>
+		<dbname>4</dbname>
+	</dbnames>
+	
+	<goods>
+		<g1>1045000028:2</g1>
+	</goods>
+</merge>

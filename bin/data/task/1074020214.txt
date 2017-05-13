@@ -1,0 +1,80 @@
+<task>
+	<!-- 持有该任务的npc -->
+	<npcs>1021090080</npcs>
+        <npcname>活动任务官</npcname>
+	<!-- 任务ID，必填 -->
+	<id>1074020214</id>
+	<!-- 任务说明 -->
+	<info>价值RMB600的上古玄衣·火升级为价值RMB800的奇妙之衣·火。</info>
+
+	<!-- 任务名称，必填 -->
+	<name>上古玄衣·火</name>
+	
+	<!-- 任务类型, 1 普通任务 2 日常任务 3 称号任务 4 活动任务-->
+	<type>1</type>
+
+	<!-- 任务等级 -->
+        <level>1</level>
+
+	<!-- 初心 熟练 会心 达人 -->
+        <display>3</display>
+
+	<!-- 触发条件 1.点击npc触发 2.使用道具触发  必填-->
+        <trigger>1</trigger>
+	
+
+	<!-- 接任务的条件 选填 默认为0 玩家等级、玩家物品、玩家接任务的旗标、玩家任务旗标、角色属性 等 -->
+	<condition>
+		<level>1</level>
+		<item>0</item>
+		<before_accept_taskID>0</before_accept_taskID>
+		<before_taskID>0</before_taskID>
+		<attribute>0</attribute>
+		<GOP>0</GOP><!-- 阵营 -->
+	</condition>
+
+
+	<!-- 是否可以取消任务  必填 true or false -->
+	<can_cancel>true</can_cancel>
+
+
+	<!-- 实现类型，选填 包括指定的怪或（和）收集指定的物品的ID和数量,默认没有为0 -->
+	<impl_types>
+		<kill_monsters>
+		   <monster id="0" name="0" count="0" />
+		   <monster id="0" name="0" count="0" />
+		   <monster id="0" name="0" count="0" />
+		   <monster id="0" name="0" count="0" />
+		   <monster id="0" name="0" count="0" />
+		</kill_monsters>
+		
+		<collect_items>
+		   <item id="1050211112" name="上古玄衣·火" count="1" />
+		   <item id="1045011001" name="进化宝石" count="4" />
+		   <item id="0" name="0" count="0" />
+		   <item id="0" name="0" count="0" />
+		   <item id="0" name="0" count="0" />
+		</collect_items>	
+	</impl_types>			
+
+	<!-- 完成此任务需要的时间  必填 无限制为0 有限制填入毫秒数  -->
+	<time>0</time>
+
+
+	<!-- 任务奖励 选填 默认为0 经验、金钱、元宝、道具、属性 -->
+	<awards>
+		<exp>0</exp>
+		<money>0</money>
+		<RMB>0</RMB>
+		<items choose="false">
+			<item id="1050211113" name="奇妙之衣·火" icon="1150211113" count="1"/>
+			<item id="0" name="0" icon="0" count="0"/>
+			<item id="0" name="0" icon="0" count="0"/>
+			<item id="0" name="0" icon="0" count="0"/>
+			<item id="0" name="0" icon="0" count="0"/>
+		</items>
+		<attribute>0</attribute>	
+	</awards>
+        <!-- 任务是否重复 必填 true or false  false为不重复count为0 如果为true则count>0 -->
+	<can_replay count="100000000" >true</can_replay>	
+</task>

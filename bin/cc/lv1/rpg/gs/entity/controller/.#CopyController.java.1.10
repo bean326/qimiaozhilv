@@ -1,0 +1,371 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.Reward;
+import cc.lv1.rpg.gs.net.SMsg;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+
+/**
+ * 副本控制器
+ * @author bean
+ *
+ */
+public class CopyController extends PartyController
+{
+	/** 能否组队 */
+	public boolean isTeam;
+	
+	/** 胜利后得到积分的基础分 */
+	public int winPoint;
+	
+	/** 失败后得到积分的基础分 */
+	public int losePoint;
+	
+	/** 第一个房间的ID */
+	public int startRoomId;
+	
+	/** 结束房间ID */
+	public int endRoomId;
+	
+	/** 区域ID */
+	public int areaId;
+	
+	/** 前一期玩家排行 */
+	public List beforeTop = new ArrayList(20);
+	
+	/** 历史最强玩家 */
+	public Reward bestPlayer = new Reward("\u5BC2\u5BDE\u64C2\u4E3B",1,1,WorldManager.currentTime);
+	
+	public CopyController()
+	{
+		
+	}
+	
+	
+	public void loadFrom(ByteBuffer buffer)//主要是取排行榜
+	{
+		int length = buffer.readByte();
+		for (int i = 0; i < length; i++)
+		{
+			Reward reward = new Reward();
+			reward.id = buffer.readInt();
+			reward.name = buffer.readUTF();
+			reward.rank = buffer.readInt();
+			reward.level = buffer.readInt();
+			reward.point = buffer.readInt();
+			reward.logTime = buffer.readLong();
+			beforeTop.add(reward);
+		}
+		
+		length = buffer.readByte();
+		for (int i = 0; i < length; i++)
+		{
+			Reward reward = new Reward();
+			reward.id = buffer.readInt();
+			reward.name = buffer.readUTF();
+			reward.rank = buffer.readInt();
+			reward.level = buffer.readInt();
+			reward.point = buffer.readInt();
+			reward.logTime = buffer.readLong();
+			topPlayers.add(reward);
+		}
+		
+		bestPlayer.id = buffer.readInt();
+		bestPlayer.name = buffer.readUTF();
+		bestPlayer.level = buffer.readInt();
+		bestPlayer.point = buffer.readInt();
+		bestPlayer.logTime = buffer.readLong();
+	}
+	
+	public void saveTo(ByteBuffer buffer)//主要是存排行榜
+	{
+		int length = beforeTop.size();
+		buffer.writeByte(length);
+		for (int i = 0; i < length; i++) 
+		{
+			Reward reward = (Reward) beforeTop.get(i);
+			buffer.writeInt(reward.id);
+			buffer.writeUTF(reward.name);
+			buffer.writeInt(reward.rank);
+			buffer.writeInt(reward.level);
+			buffer.writeInt(reward.point);
+			buffer.writeLong(reward.logTime);
+		}
+		
+		length = topPlayers.size();
+		buffer.writeByte(length);
+		for (int i = 0; i < length; i++) 
+		{
+			Reward reward = (Reward) topPlayers.get(i);
+			buffer.writeInt(reward.id);
+			buffer.writeUTF(reward.name);
+			buffer.writeInt(reward.rank);
+			buffer.writeInt(reward.level);
+			buffer.writeInt(reward.point);
+			buffer.writeLong(reward.logTime);
+		}
+		
+		/*******************历史最强**************************/
+		buffer.writeInt(bestPlayer.id);
+		buffer.writeUTF(bestPlayer.name);
+		buffer.writeInt(bestPlayer.level);
+		buffer.writeInt(bestPlayer.point);
+		buffer.writeLong(bestPlayer.logTime);
+	}
+	
+	
+	public boolean setVariable(String key,String value)
+	{
+		if(key.equals("isTeam"))
+		{
+			isTeam = value.equals("1");
+			return true;
+		}
+		else
+			return super.setVariable(key, value);
+	}
+	
+	
+	public Reward getRewardYestoday(int id)
+	{
+		for (int i = 0; i < beforeTop.size(); i++) 
+		{
+			Reward r = (Reward) beforeTop.get(i);
+			if(r.id == id)
+				return r;
+		}
+		return null;
+	}
+	
+	public Reward getRewardToday(int id)
+	{
+		for (int i = 0; i < topPlayers.size(); i++) 
+		{
+			Reward r = (Reward) topPlayers.get(i);
+			if(r.id == id)
+				return r;
+		}
+		return null;
+	}
+	
+	
+	
+	public void addPlayerPoint(PlayerController target,int point,RoomController room)
+	{
+		if(topPlayers != null)
+		{
+			target.setOtherExtInfo("copyPoint", point+"",room);
+			
+			int copyPoint = Integer.parseInt(target.getOtherExtInfo("copyPoint",false,room));
+			if(copyPoint == -1)
+				return;
+			
+			String name = target.getName();
+			if(topPlayers.size() == 0)
+			{
+				Reward player = new Reward();
+				player.id = target.getID();
+				player.name = name;
+				player.point = copyPoint;
+				player.rank = 1;
+				player.logTime = WorldManager.currentTime;
+				player.setPlayer(target.getPlayer());
+				topPlayers.add(player);
+				GameServer.getInstance().getWorldManager().addCopyAllRank(player,target,room);
+			}
+			else
+			{
+				boolean isInRank = false;
+				//如果玩家已经在前20，则更新玩家的积分
+				for(int has = 0;has < topPlayers.size();has++)
+				{
+					Reward player = (Reward) topPlayers.get(has);
+					if(player.name.equals(name))
+					{
+						player.point = copyPoint;
+						isInRank = true;
+						GameServer.getInstance().getWorldManager().addCopyAllRank(player,target,room);
+						break;
+					}
+				}
+				
+				//如果玩家没有在排行榜中，则加入到排行榜
+				if(!isInRank)
+				{
+					Reward player = new Reward();
+					player.id = target.getID();
+					player.name = name;
+					player.point = copyPoint;
+					player.logTime = WorldManager.currentTime;
+					player.setPlayer(target.getPlayer());
+					topPlayers.add(player);
+					GameServer.getInstance().getWorldManager().addCopyAllRank(player,target,room);
+				}
+				
+				if (topPlayers.size() > 1) 
+				{
+				//对排行榜中的玩家进行排序	
+					for (int cur = 0; cur < topPlayers.size() - 1; cur++)
+					{
+						for (int next = cur + 1; next < topPlayers.size(); next++) 
+						{
+							Reward player1 = (Reward)topPlayers.get(cur);
+							Reward player2 = (Reward)topPlayers.get(next);
+							if (player1.point < player2.point) 
+							{
+								Reward temp = player1;
+								topPlayers.set(cur, player2);
+								topPlayers.set(next, temp);
+							}
+							else if(player1.point == player2.point)
+							{
+								if(player1.logTime > player2.logTime)
+								{
+									Reward temp = player1;
+									topPlayers.set(cur, player2);
+									topPlayers.set(next, temp);
+								}
+							}
+						}
+					}	
+				}
+				//移除排行于第20名之后的玩家
+				if (topPlayers.size() > 20) 
+				{
+					for (int i = 20; i < topPlayers.size(); i++) 
+					{
+						topPlayers.remove(i);
+					}
+				}
+				
+				//设置玩家的名次
+				for(int rank = 0;rank < topPlayers.size();rank++)
+				{
+					Reward player = (Reward) topPlayers.get(rank);
+					player.rank = rank + 1;
+					if(rank == 0 && player.point > bestPlayer.point)
+					{
+						player.copyTo(bestPlayer);
+					}
+				}
+			}
+			
+
+		
+			
+			target.sendGetGoodsInfo(1, false, "\u83B7\u5F97\u79EF\u5206:"+point);
+
+		}
+	}
+	
+	/**
+	 * CopyJob里调用
+	 */
+	public void initTop()
+	{
+		beforeTop = new ArrayList(topPlayers.size());
+		for (int i = 0; i < topPlayers.size(); i++) 
+		{
+			beforeTop.add(topPlayers.get(i));
+		}
+		topPlayers = new ArrayList(20);
+	}
+	
+	
+	public void sendTopPlayer(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		/********************昨天的排行********************************/
+		int size = beforeTop==null?0:beforeTop.size();
+		buffer.writeByte(size);
+		String str = "";
+		for (int i = 0; i < size; i++)
+		{
+			Reward reward = (Reward) beforeTop.get(i);
+			buffer.writeInt(reward.rank);
+			buffer.writeUTF(reward.name);
+			Player player = reward.getPlayer();
+			if(player == null)
+				player = GameServer.getInstance().getDatabaseAccessor().getPlayer(reward.id);
+			if(player == null)
+			{
+				buffer.writeUTF("");
+				buffer.writeByte(0);
+			}
+			else
+			{
+				buffer.writeUTF(player.familyName);
+				buffer.writeByte(player.upProfession);
+			}
+			buffer.writeInt(reward.point);
+			if(str.isEmpty())
+				str = WorldManager.getTypeTime("yyyy-MM-dd", reward.logTime);
+		}
+		if(str.isEmpty())
+			str = WorldManager.getTypeTime("yyyy-MM-dd", WorldManager.currentTime);
+		buffer.writeUTF(str);
+		
+		/*******************今天的排行**************************/
+		size = topPlayers==null?0:topPlayers.size();
+		buffer.writeByte(size);
+		str = "";
+		for (int i = 0; i < size; i++)
+		{
+			Reward reward = (Reward) topPlayers.get(i);
+			buffer.writeInt(reward.rank);
+			buffer.writeUTF(reward.name);
+			Player player = reward.getPlayer();
+			if(player == null)
+				player = GameServer.getInstance().getDatabaseAccessor().getPlayer(reward.id);
+			if(player == null)
+			{
+				buffer.writeUTF("");
+				buffer.writeByte(0);
+			}
+			else
+			{
+				buffer.writeUTF(player.familyName);
+				buffer.writeByte(player.upProfession);
+			}
+			buffer.writeInt(reward.point);
+			if(str.isEmpty())
+				str = WorldManager.getTypeTime("yyyy-MM-dd", reward.logTime);
+		}
+		if(str.isEmpty())
+			str = WorldManager.getTypeTime("yyyy-MM-dd", WorldManager.currentTime);
+		buffer.writeUTF(str);
+		
+		/*******************历史最强**************************/
+		buffer.writeUTF(bestPlayer.name);
+		buffer.writeInt(bestPlayer.point);
+		buffer.writeUTF(WorldManager.getTypeTime("yyyy-MM-dd HH:mm:ss", bestPlayer.logTime));
+		
+		/*******************自己的**************************/
+		buffer.writeUTF(target.getOtherExtInfo("copyPoint",false,target.getRoom()));
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_COPY_PLAYER_REWARD_COMMAND,buffer));
+	}
+	
+	
+
+	
+	/**
+	 * 接收副本内消息
+	 * 
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target,AppMessage msg)
+	{
+		int type = msg.getType();
+		if(type == SMsg.C_GET_COPY_PLAYER_REWARD_COMMAND)
+		{
+//			sendTopPlayer(target);
+		}
+		
+	}
+}

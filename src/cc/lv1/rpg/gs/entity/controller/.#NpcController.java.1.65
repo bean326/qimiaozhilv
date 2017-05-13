@@ -1,0 +1,988 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.TaskManager;
+import cc.lv1.rpg.gs.entity.NpcDialog;
+import cc.lv1.rpg.gs.entity.NpcDialog.DialogStep;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.ext.AnswerParty;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.Storage;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+import cc.lv1.rpg.gs.entity.impl.BaseFlayer;
+import cc.lv1.rpg.gs.entity.impl.NPC;
+import cc.lv1.rpg.gs.entity.impl.Shop;
+import cc.lv1.rpg.gs.entity.impl.Task;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.net.impl.SaveJob;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * npc 控制器
+ * @author dxw
+ *
+ */
+public class NpcController extends SpriteController
+{
+	private WorldManager worldManager;
+	
+	private NPC npc;
+	
+	private NpcDialog[] npcDialogs;
+	
+	private Shop shop;
+	
+	private Shop[] shops = new Shop[0];
+
+	private Task []tasks = new Task[0];
+	
+	private boolean [] isTaskAccept = new boolean[0];
+	
+	private boolean [] isTaskFinish = new boolean[0];
+	
+	public void parseDialog(XMLNode xmlDialog)
+	{
+		if(xmlDialog != null)
+		{
+			List dialog = xmlDialog.getSubNodes();
+			npcDialogs = new NpcDialog[dialog.size()];
+			for (int i = 0; i < dialog.size(); i++) {
+				XMLNode root = (XMLNode) dialog.get(i);
+				npcDialogs[i] = new NpcDialog(root);
+				npcDialogs[i].setParent(this);
+			}
+		}
+	}
+	
+	public NpcDialog getNpcDialog(String dialog)
+	{
+		for (int i = 0; i < npcDialogs.length; i++) {
+			NpcDialog nd = npcDialogs[i];
+			if(nd.getDialogIndex().equals(dialog))
+			{
+				return nd;
+			}
+		}
+		return null;
+	}
+
+
+
+	
+	/**
+	 * 请求NPC对话
+	 * @param target
+	 * @param msg
+	 */
+	public void requestNpcDialog(PlayerController target,AppMessage msg)
+	{
+		String cmd = msg.getBuffer().readUTF();	
+
+		if(cmd.isEmpty())
+		{
+			clickNpc(target);
+		}
+		else
+		{
+			String[] strs= Utils.split(cmd, ":");
+			
+			if(strs[0].equals("link"))
+			{
+				if(strs.length != 3)
+					return;
+
+				ByteBuffer buffer = new ByteBuffer(20);
+				NpcDialog nDialog = getNpcDialog(strs[1]);
+				if(nDialog == null)
+				{
+					System.out.println("NpcController "+getID()+"  "+getName());
+					System.out.println("link : "+strs[1]);
+					return;
+				}
+				DialogStep dStep = nDialog.getDialogStep(strs[2]);
+				if(dStep == null)
+				{
+					System.out.println("NpcController "+getID()+"  "+getName());
+					System.out.println("link : "+strs[1]+" : "+strs[2]);
+					return;
+				}
+				dStep.writeTo(buffer);
+				target.getNetConnection().sendMessage(new SMsg(SMsg.S_CLICK_NPC_COMMAND,buffer));
+			}
+			else if(strs[0].equals("openShop") || strs[0].equals("honourExchange"))
+			{
+				int shopId = 0;
+				try 
+				{
+					shopId = Integer.parseInt(strs[1]);
+				} catch (Exception e) 
+				{
+					System.out.println("shopId error:"+strs[1]);
+					return;
+				}
+				Shop shop = getShopById(shopId);
+				if(shop == null)
+					return;
+				ByteBuffer buffer = new ByteBuffer(100);
+				shop.writeTo(buffer);
+				target.getNetConnection().sendMessage(new SMsg(SMsg.S_OPEN_SHOP_COMMAND,buffer));
+			}
+			else if(strs[0].equals("openPrivateStorage"))//打开玩家私人仓库
+			{
+//				ByteBuffer buffer = msg.getBuffer();
+				List storages = target.getPlayer().getExtPlayerInfos("storage");
+				for (int i = 0; i < storages.size(); i++) 
+				{
+					Storage storage = (Storage) storages.get(i);
+					if(storage.storageType == 0)
+					{
+						storage.openPrivateStorage(target);
+						break;
+					}
+				}
+			}
+			else if(strs[0].equals("familyCreate"))//创建家族
+			{
+				familyCreate(target,strs[1]); 
+			}
+			else if(strs[0].equals("openCenterShop")) //打开寄卖中心ui
+			{
+			}
+			else if(strs[0].equals("flyer"))
+			{
+				if(strs.length == 2)
+				{
+					flying(target, strs[1]);
+				}
+			}
+			else if(strs[0].equals("taskList"))
+			{	
+			}
+			else if(strs[0].equals("answer"))//问答活动
+			{
+				sendAnswerQuestionState(target);
+			}
+			else
+			{
+				taskProcess(target,strs);
+			}
+		}	
+	}
+	
+	
+	private void sendAnswerQuestionState(PlayerController target)
+	{
+		AnswerParty ap = (AnswerParty) target.getPlayer().getExtPlayerInfo("answerParty");
+		ap.npcId = npc.id;
+		ap.sendAnswerQuestionState(target);
+	}
+	
+	
+	
+	private void flying(PlayerController target, String str)
+	{
+		
+		if(str.isEmpty() || str.trim().length() == 0)
+			return;
+		
+		int id = 0;
+		
+		try 
+		{
+			id = Integer.parseInt(str);
+		} 
+		catch (NumberFormatException e) 
+		{
+			return;
+		}
+		
+		Map flyMap =  (Map)DataFactory.getInstance().getAttachment(DataFactory.ATTACH_NPC_FLYER);
+
+		BaseFlayer bf = (BaseFlayer)flyMap.get(id);
+
+		if(bf == null)
+			return;
+		
+		if(bf.checkFly(target))
+		{
+			bf.sendFly(target);
+		}
+	}
+
+//	/**
+//	 * 设置阵营
+//	 * @param msg
+//	 */
+//	private void setCamp(PlayerController target,String c)
+//	{
+//		if(target.getPlayer().level < 20)
+//		{
+//			target.sendAlert(ErrorCode.ALERT_LEVEL_LESS_CAMP_LEVEL);
+//			return;
+//		}
+//		if(target.getPlayer().camp != 0)
+//		{
+//			target.sendAlert(ErrorCode.ALERT_PLAYER_CAMP_NOT_NULL);
+//			return;
+//		}
+//		if(c.isEmpty() || c.trim().length() == 0)
+//			return;
+//		int camp = 0;
+//		try 
+//		{
+//			camp = Integer.parseInt(c);
+//		} catch (Exception e) {
+//			return;
+//		}
+//		if(camp != 1 && camp != 2)
+//		{
+//			target.sendAlert(ErrorCode.ALERT_NOT_THE_CAMP);
+//			return;
+//		}
+//		FamilyController family = target.getFamily();
+//		if(family != null)
+//		{
+//			if(camp != family.camp && family.camp != 0)
+//			{
+//				target.sendAlert(ErrorCode.ALERT_FAMILY_CAMP_ERROR);
+//				return;
+//			}
+//		}
+//		target.getPlayer().setCamp(camp);
+//		ByteBuffer buffer = new ByteBuffer(5);
+//		buffer.writeByte(camp);
+//		buffer.writeInt(target.getID());//选择了阵营才发这个ID
+//		target.getRoom().dispatchMsg(SMsg.S_PLAYER_CAMP_SET_COMMAND, buffer);
+//		
+//		if(target.getTeam() != null)
+//			target.getTeam().playerLeaveTeam(target);
+//	}
+	
+/*	private void familyList(PlayerController target)
+	{
+		
+		TongController targetTong = target.getTong();
+		
+		if(targetTong == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_CDR_CAN_USE);
+			return;
+		}
+		if(target.getID() != targetTong.leaderId &&
+				target.getID() != targetTong.deputyLeaderId)
+		{
+			target.sendAlert(ErrorCode.ALERT_CDR_CAN_USE);
+			return;
+		}
+		
+		List list = worldManager.getFamilyList();
+		int size = list.size();
+		
+		ByteBuffer buffer = new ByteBuffer(64);
+		//buffer.writeInt(size);
+		for (int i = 0; i < size; i++)
+		{
+			FamilyController family = (FamilyController)list.get(i);
+			
+			if(family == null)
+				continue;
+			
+			if(target.getPlayer().camp != family.camp)
+				continue;
+			
+			buffer.writeBoolean(family.tongId != 0);
+			buffer.writeUTF(family.name);
+			buffer.writeUTF(family.leaderName);
+			buffer.writeInt(family.count);
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_PLAYER_FAMILYLISTS_COMMAND,buffer));
+	}*/
+
+/*	private void tongCreate(PlayerController target, String name)
+	{
+		FamilyController family = target.getFamily();
+		
+		if(family == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_NO_FAMILY_ERROR);
+			return;
+		}
+		
+		if(target.getPlayer().level < 30)
+		{
+			target.sendAlert(ErrorCode.ALERT_CREATE_TONG_CON_ERROR);
+			return;
+		}
+		
+		Bag bag = (Bag)target.getPlayer().getExtPlayerInfo("bag");
+		
+		if(bag.point < 1000000)
+		{
+			target.sendAlert(ErrorCode.ALERT_CREATE_TONG_MONEY_ERROR);
+			return;
+		}
+		
+		if(target.getTong() != null)
+		{
+			target.sendAlert(ErrorCode.ALERT_TONG_NOT_NULL);
+			return;
+		}
+		
+		if(worldManager.isTongHaved(name))
+		{
+			target.sendAlert(ErrorCode.ALERT_TONG_NAME_EXISTS);
+			return;
+		}
+		
+		int id = worldManager.getDatabaseAccessor().getFamilyObjIndex();
+		
+		TongController tong = new TongController(id,name);
+		tong.setWorldManager(worldManager);
+		tong.setLeader(target);
+		tong.addFamily(family);
+		
+		family.tongId = id;
+		
+		for (int i = 0; i < family.getPlayerCount(); i++)
+		{
+			PlayerController everyone = family.getPlayerByIndex(i);
+			
+			if(everyone == null)
+				continue;
+			
+			everyone.setTongController(tong);
+			
+			if(everyone.getID() == target.getID())
+				continue;
+			
+			everyone.sendAlert(ErrorCode.ALERT_SHANKH_CREATE_TONG);
+		}
+		
+		//tong.addPlayer(target);
+		
+		worldManager.addTong(tong);
+		
+		bag.point -= 1000000;
+		ByteBuffer buffer = new ByteBuffer(4);
+		buffer.writeInt(1000000);
+		target.getNetConnection().sendMessage(new SMsg(
+				SMsg.S_PLAYER_TONGCREATE_COMMAND,buffer));
+	}*/
+	
+	private void familyCreate(PlayerController target, String name)
+	{
+		
+		if(target.getPlayer().level < FamilyController.LEVEL)
+		{
+			target.sendAlert(ErrorCode.ALERT_FAMILY_NOT_CREATE);
+			return;
+		}
+		
+		if(target.getPlayer().camp == 0)
+		{
+			target.sendAlert(ErrorCode.ALERT_FAMILY_NOT_CREATE);
+			return;
+		}
+		
+		Bag bag = (Bag)target.getPlayer().getExtPlayerInfo("bag");
+		
+		if(bag.point < FamilyController.FAMILY_POINT_CONDITION)
+		{
+			target.sendAlert(ErrorCode.ALERT_FAMILY_NOT_CREATE);
+			return;
+		}
+		
+		if(target.getFamily() != null)
+		{
+			target.sendAlert(ErrorCode.EXCEPTION_PLAYER_HAS_FAMILY);
+			return;
+		}
+		
+		if(worldManager.isFamilyHaved(name))
+		{
+			target.sendAlert(ErrorCode.EXCEPTION_PLAYER_FAMILYNAME_SAME);
+			return;
+		}
+		
+		int id = worldManager.getDatabaseAccessor().getFamilyObjIndex();
+		FamilyController family = new FamilyController(id,name);
+		family.setWorldManager(worldManager);
+		target.getPlayer().familyId = id;
+		target.getPlayer().familyName = name;
+		target.getPlayer().isFamilyLeader = true;
+		target.setFamilyController(family);
+		family.setLeader(target);
+		family.addNameToFamily(target.getName());
+		family.addPlayer(target);
+		
+		worldManager.addFamily(family);
+		
+		bag.point -= 100000;
+		ByteBuffer buffer = new ByteBuffer(4);
+		buffer.writeInt(100000);
+		buffer.writeUTF(family.name);
+		target.getNetConnection().sendMessage(new SMsg(
+				SMsg.S_PLAYER_FAMILYCREATE_COMMAND,buffer));
+		
+		
+		/**
+		 * 玩家创建家族，更新家族列表
+		 */
+		GameServer.getInstance().getDatabaseAccessor().createOrUpdateFamilyInfo(family, true);
+		target.getWorldManager().getJobObserver().addJob(GameServer.JOB_DATABASEJOB,
+				new SaveJob(target.getWorldManager(),target.getPlayer()));
+		
+		GameServer.getInstance().getDatabaseAccessor().savedObjIndexs();
+	}
+	
+	
+
+	/**
+	 * 检测点击npc
+	 */
+	private void clickNpc(PlayerController target)
+	{
+		if(tasks.length > 0)
+		{
+			TaskInfo taskInfo = (TaskInfo)target.getPlayer().getExtPlayerInfo("taskInfo");
+			
+			StringBuffer strBuff1,strBuff2;
+			
+			for (int i = 0; i < tasks.length; i++)
+			{
+				taskInfo.checkReplayTask(tasks[i]);
+				
+				if(taskInfo.isTaskCompleted(tasks[i].id))
+					continue;
+				
+				if(target.getPlayer().level < tasks[i].con_level)
+					continue;
+
+				if(tasks[i].con_bTaskId != 0)
+				{
+					if(!taskInfo.isTaskCompleted(tasks[i].con_bTaskId))
+						continue;
+				}
+				
+
+				if(tasks[i].con_bAcceptTaskId != 0)
+				{
+					if(taskInfo.isTaskAccept(tasks[i].con_bAcceptTaskId))
+						continue;
+				}
+				
+				if(tasks[i].con_gop != 0)
+				{
+					if(target.getPlayer().camp != tasks[i].con_gop)
+						continue;
+				}
+
+				Task task = taskInfo.getTaskById(tasks[i].id);
+
+				strBuff1 = new StringBuffer(24);
+				strBuff2 = new StringBuffer(24);
+				if(task == null)
+				{
+					
+					if(!isTaskAccept[i]) 
+						continue;
+	
+					strBuff1.append(tasks[i].id);
+					strBuff1.append(":");
+					strBuff1.append(tasks[i].type);
+					strBuff1.append(":");
+					strBuff1.append(tasks[i].level);
+					strBuff1.append(":");
+					strBuff1.append(tasks[i].display);
+					
+					strBuff2.append("link:t");
+					strBuff2.append(tasks[i].id);
+					strBuff2.append(":01");
+					
+					npcDialogs[0].getDialogStep()[0].addTaskOption(strBuff1.toString(),strBuff2.toString());
+				}
+				else
+				{
+					if(task.isEnoughCondition())
+					{
+						if(!isTaskFinish[i])
+							continue;
+						
+						
+						strBuff1.append(tasks[i].id);
+						strBuff1.append(":");
+						strBuff1.append(tasks[i].type);
+						strBuff1.append(":");
+						strBuff1.append(tasks[i].level);
+						strBuff1.append(":");
+						strBuff1.append(tasks[i].display);
+						
+						strBuff2.append("link:t");
+						strBuff2.append(tasks[i].id);
+						strBuff2.append(":03");
+						
+						npcDialogs[0].getDialogStep()[0].addTaskOption(strBuff1.toString(),
+								strBuff2.toString());
+					}
+					else
+					{
+						
+						strBuff1.append(tasks[i].id);
+						strBuff1.append(":");
+						strBuff1.append(tasks[i].type);
+						strBuff1.append(":");
+						strBuff1.append(tasks[i].level);
+						strBuff1.append(":");
+						strBuff1.append(tasks[i].display);
+						
+						strBuff2.append("link:t");
+						strBuff2.append(tasks[i].id);
+						strBuff2.append(":02");
+						
+						npcDialogs[0].getDialogStep()[0].addTaskOption(strBuff1.toString(),
+								strBuff2.toString());
+					}
+				}
+				
+			}	
+		}
+		
+		ByteBuffer buffer = new ByteBuffer(20);
+		npcDialogs[0].getDialogStep()[0].writeTo(buffer);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_CLICK_NPC_COMMAND,buffer));
+	}
+
+	/**
+	 * 任务相关命令
+	 * @param target
+	 * @param com
+	 * @return
+	 */
+	public void taskProcess(PlayerController target,String [] strs)
+	{
+		TaskInfo taskInfo = (TaskInfo)target.getPlayer().getExtPlayerInfo("taskInfo");
+
+		if(strs[0].equals("accept"))
+		{
+			if(taskInfo.getCurrentTaskSize() >= TaskInfo.MAX_TASK_COUNT)
+			{
+				target.sendAlert(ErrorCode.ALERT_PLAYER_TASK_MAX_COUNT);
+				return;
+			}
+		
+			Task task = getTaskById(Integer.parseInt(strs[1]));
+			
+			if(task == null)
+				return;
+			
+			if(taskInfo.isTaskCompleted(task.id))
+				return;
+			
+			if(target.getPlayer().level < task.con_level)
+				return;
+
+			if(task.con_bTaskId != 0)
+			{
+				if(!taskInfo.isTaskCompleted(task.con_bTaskId))
+					return;
+			}
+			
+
+			if(task.con_bAcceptTaskId != 0)
+			{
+				if(taskInfo.isTaskAccept(task.con_bAcceptTaskId))
+					return;
+			}
+			
+			if(task.con_gop != 0)
+			{
+				if(task.con_gop != target.getPlayer().camp)
+				{
+					return;
+				}
+			}
+			
+
+			Task nTask = new Task();
+			task.copyTo(nTask);
+
+			if(!taskInfo.addTask(nTask))
+				return;
+	
+			nTask.updateTask(target);
+			nTask.sendAddTask(target);
+			taskInfo.addAcceptTask(nTask.id);
+			
+			nTask.checkTaskFinish(target);
+		}
+		else if(strs[0].equals("finish"))
+		{
+			Task task = taskInfo.getTaskById(Integer.parseInt(strs[1]));
+
+			if(task == null)
+				return;
+			
+			if(taskInfo.isTaskCompleted(task.id))
+				return;
+			
+			if(!task.checkTaskFinish(target))
+				return;
+
+			
+			if(task.awa_item.length != 0)
+			{
+				Bag bag =(Bag)target.getPlayer().getExtPlayerInfo("bag");
+				if(!bag.checkEnough(task.is_awa_item_choose?1:task.awa_item.length))
+				{
+					target.sendAlert(ErrorCode.ALERT_TASK_AWA_BAG_NOT_ENOUGH);
+					return;
+				}
+			}
+		
+			if(task.itemCount > 0)
+			{
+				if(!task.recovery(target))
+				{
+					return;
+				}
+			}
+			
+			if(strs.length > 2)
+			{
+				if(task.is_awa_item_choose)
+				{
+					//发送选择奖励
+					boolean result = task.sendAwards(target,Integer.parseInt(strs[2]));
+
+					if(!result)
+						return;
+				}
+			}
+			else
+			{
+				boolean result = task.sendAwards(target,-1);
+	
+				if(!result)
+					return;
+			}
+			
+			if(task.isCanReplay)
+			{
+				taskInfo.completeReplayTask(task);
+				taskInfo.removeTask(task);
+			}
+			else
+			{
+				taskInfo.completeTask(task);
+			}
+		
+			task.sendTaskFinish(target);
+			target.onTaskFinish(task);
+		}
+		
+	}
+
+	
+	public Task getTaskById(int id)
+	{
+		for (int i = 0; i < tasks.length; i++)
+		{
+			if(tasks[i].id == id)
+				return tasks[i];
+		}
+		return null;
+	}
+
+	public void setNpc(NPC npc)
+	{
+		this.npc = npc;
+	}
+	
+	public int getID()
+	{
+		return npc.id;
+	}
+
+	public String getName()
+	{
+		return npc.name;
+	}
+
+	public long getObjectIndex() 
+	{
+		return npc.objectIndex;
+	}
+	
+	public NPC getNpc()
+	{
+		return npc;
+	}
+	
+	public void setWorld(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+	
+	public NpcDialog[] getNpcDialogs()
+	{
+		return npcDialogs;
+	}
+	
+	public Shop getShop()
+	{
+		return shop;
+	}
+	
+	public Shop getShopById(int shopId)
+	{
+		for (int i = 0; i < shops.length; i++)
+		{
+			if(shops[i] == null)
+				continue;
+			if(shops[i].id == shopId)
+				return shops[i];
+		}
+		return null;
+	}
+
+	public void setShop(Shop shop) 
+	{
+		Shop[] ss = new Shop[shops.length+1];
+		for (int i = 0; i < shops.length; i++)
+		{
+			ss[i] = shops[i];
+		}
+		ss[shops.length] = shop;
+		shops = ss;
+	}
+
+	public void addTask(Task task,int index,int length)
+	{
+		if(!isTaskExist(task))
+		{
+			Task []taskTmp = new Task[tasks.length+1];
+			for (int i = 0; i < tasks.length; i++)
+			{
+				taskTmp[i] = tasks[i];
+			}
+			taskTmp[taskTmp.length-1] = task;
+			tasks = taskTmp;
+		}
+		
+
+		if(length == 1)
+		{
+			addAcceptBoolean(true);
+			addFinishBoolean(true);
+		}
+		else
+		{
+			if(index == 0)
+			{
+				addAcceptBoolean(true);
+				addFinishBoolean(false);
+			}
+			else
+			{
+				addAcceptBoolean(false);
+				addFinishBoolean(true);
+			}
+		}	
+
+	}
+
+	public boolean isTaskExist(int taskId)
+	{
+		for (int i = 0; i < tasks.length; i++)
+		{
+			if(tasks[i].id == taskId)
+				return true;
+		}
+		return false;
+	}
+	
+	public Task[] getTasks()
+	{
+		return tasks;
+	}
+	
+	public boolean isTaskExist(Task task)
+	{
+		return isTaskExist(task.id);
+	}
+
+	
+	private void addAcceptBoolean(boolean b)
+	{
+		boolean []isTaskAcceptTmp = new boolean[isTaskAccept.length+1];
+		for (int i = 0; i < isTaskAccept.length; i++)
+		{
+			isTaskAcceptTmp[i] = isTaskAccept[i];
+		}
+		isTaskAcceptTmp[isTaskAcceptTmp.length-1] = b;
+		isTaskAccept = isTaskAcceptTmp;
+	}
+	
+	private void addFinishBoolean(boolean b)
+	{
+		boolean []isTaskFinishTmp = new boolean[isTaskFinish.length+1];
+		for (int i = 0; i < isTaskFinish.length; i++)
+		{
+			isTaskFinishTmp[i] = isTaskFinish[i];
+		}
+		isTaskFinishTmp[isTaskFinishTmp.length-1] = b;
+		isTaskFinish = isTaskFinishTmp;
+	}
+	
+	public void anyTask(PlayerController target,ByteBuffer buffer)
+	{
+		TaskInfo taskInfo = (TaskInfo)target.getPlayer().getExtPlayerInfo("taskInfo");
+		
+		ByteBuffer buff = new ByteBuffer(16);
+
+		for (int i = 0; i < tasks.length; i++)
+		{
+			taskInfo.checkReplayTask(tasks[i]);
+			
+			if(taskInfo.isTaskCompleted(tasks[i].id))
+				continue;
+			
+			if(target.getPlayer().level < tasks[i].con_level)
+				continue;
+
+			if(tasks[i].con_bTaskId != 0)
+			{
+				if(!taskInfo.isTaskCompleted(tasks[i].con_bTaskId))
+					continue;
+			}
+			
+
+			if(tasks[i].con_bAcceptTaskId != 0)
+			{
+				if(taskInfo.isTaskAccept(tasks[i].con_bAcceptTaskId))
+					continue;
+			}
+			
+			if(tasks[i].con_gop != 0)
+			{
+				if(tasks[i].con_gop != target.getPlayer().camp)
+				{
+					continue;
+				}
+			}
+			
+			
+			Task task = taskInfo.getTaskById(tasks[i].id);
+			
+
+			if(task == null)
+			{
+				
+				if(!isTaskAccept[i]) 
+					continue;
+
+				//1 未接任务
+				Task t = TaskManager.getInstance().getTask(tasks[i].id);
+				buff.writeBoolean(t.isCanReplay);
+				buff.writeByte(1);
+			}
+			else
+			{
+				if(task.isEnoughCondition())
+				{
+					if(!isTaskFinish[i])
+						continue;
+					
+					//3满足条件
+					buff.writeBoolean(task.isCanReplay);
+					buff.writeByte(3);
+				}
+				else
+				{
+					//2未满足条件
+					buff.writeBoolean(task.isCanReplay);
+					buff.writeByte(2);
+				}
+			}
+			
+			
+
+		}
+		buffer.writeInt(buff.available()/2);
+		buffer.writeBytes(buff.getBytes());
+	}
+	
+	public void setParent(PlayerContainer playerContainer)
+	{
+		super.setParent(playerContainer);
+	}
+
+	public void runAttach()
+	{
+		String attachCmd = npc.attach;
+		
+		if(attachCmd.startsWith("otherWhere"))
+		{
+			String [] strs = Utils.split(attachCmd, ":");
+			
+			for (int i = 0; i < strs.length; )
+			{
+				if(i == 0)
+				{
+					i++;
+					continue;
+				}
+				
+				int areaId = Integer.parseInt(strs[i++]);
+				
+				AreaController area = worldManager.getAreaById(areaId);
+				
+				if(area == null)
+				{
+					System.out.println("npc.txt otherWhere area not has "+areaId);
+					break;
+				}
+				
+				int roomId = Integer.parseInt(strs[i++]);
+				
+				RoomController room = area.getRoomById(roomId);
+					
+				if(room == null)
+				{
+					System.out.println("npc.txt otherWhere room not has "+roomId);
+					break;
+				}
+				
+				room.addNpcList(this);
+			}
+
+		}
+	}
+	
+	
+	
+
+	
+	/** 接收玩家和npc的互动 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_CLICK_NPC_COMMAND)
+		{
+			requestNpcDialog(target,msg);
+		}
+		else if(type == SMsg.C_BUY_GOODS_COMMAND)
+		{
+			shop.clientMessageChain(target, msg);
+		}
+	}
+}

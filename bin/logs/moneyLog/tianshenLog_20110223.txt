@@ -1,0 +1,3 @@
+account	name	level	count	point	money	daijin	goods
+all	all	0	1	0	1000	0	нч
+shouhu01	еёеё	3160	1	0	1000	0	нч

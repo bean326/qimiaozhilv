@@ -1,0 +1,1 @@
+acountName:bean01 name:bean01 bakData[lastTime:2011-03-09 15:05:31 level:365 job:10]localPlayerData[lastTime:2011-03-09 15:04:20 level:364 job:10]

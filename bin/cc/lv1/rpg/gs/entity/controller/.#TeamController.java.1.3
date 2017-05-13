@@ -1,0 +1,28 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+/**
+ * 队伍控制器
+ * @author dxw
+ *
+ */
+public class TeamController extends PlayerContainer
+{
+	
+	PlayerController leader;
+	
+	public PlayerController[] getPlayers()
+	{
+		int size = getPlayerCount();
+		PlayerController [] players = new PlayerController[size]; 
+		for(int i = 0 ; i < size ; i ++)
+		{
+			players[i] = (PlayerController)playerList.get(i);
+			
+		}
+		return players;
+	}
+	
+
+	
+}

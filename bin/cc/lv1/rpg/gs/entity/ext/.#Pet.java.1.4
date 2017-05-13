@@ -1,0 +1,383 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.Exp;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PetSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.util.SaverChanger;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+
+public class Pet extends PlayerExtInfo 
+{
+
+	public int id;
+	
+	public String name = "";//哆啦•M//初始名字,最多7个汉字
+	
+	public int modeId = 1190011001;
+	
+	public int level = 1;
+	
+	/** 宠物星级 */
+	public int starLevel;
+	
+	public int sex;
+	
+	/** 宠物类型(0.普通型 1.攻击型 2.防御型) */
+	public int type;
+	
+	/** 当前总经验 */
+	public int experience = 0;
+	
+	/** 升级到下一级需要的经验 */
+	public int requireExp = 86;
+
+	/** 当前等级初始经验 */
+	public int nextExp = 0;
+	
+	/** 宠物寿命时间 */
+	public int lifeTime;
+	
+	/** 宠物种类(1.猫 2.狗 3.猪) */
+	public int petType;
+	
+	private Exp expObj;
+	
+	private PetSkill[] petSkills = new PetSkill[0];
+	
+	private Skill[] skills = null;
+	
+	/** 主人 */
+	private Player player;
+	
+	public Pet(){}
+	
+	@Override
+	public String getName() 
+	{
+		return "pet";
+	}
+	
+
+
+	@Override
+	public void loadFrom(ByteBuffer byteBuffer)
+	{
+		id = byteBuffer.readInt();
+		name = byteBuffer.readUTF();
+		modeId = byteBuffer.readInt();
+		level = byteBuffer.readInt();
+		starLevel = byteBuffer.readInt();
+		sex = byteBuffer.readInt();
+		type = byteBuffer.readInt();
+		
+		/*****************************************************************************/
+//		if(SaverChanger.isNewSave)//改变数据结构要用的，现在已经改变，下面这个值是已经
+		petType = byteBuffer.readInt();//传外网时要注释这个
+		/*****************************************************************************/
+		
+		experience = byteBuffer.readInt();
+		requireExp = byteBuffer.readInt();
+		lifeTime = byteBuffer.readInt();
+		int	length = byteBuffer.readInt();
+		skills = new Skill[length];
+		
+		for (int i = 0; i < length; i++)
+		{
+			int skillId = byteBuffer.readInt();
+			boolean isStudied = byteBuffer.readBoolean();
+			
+			Skill skill = (Skill)DataFactory.getInstance().getGameObject(skillId);
+			skill = (Skill)Skill.cloneObject(skill);
+			skill.isStudied = isStudied;
+			
+			if(skill.isStudied)
+			{
+				addSkill(skill);
+			}
+			skills[i] = skill;
+		}
+	}
+
+	@Override
+	public void saveTo(ByteBuffer byteBuffer)
+	{
+		byteBuffer.writeInt(id);
+		byteBuffer.writeUTF(name);
+		byteBuffer.writeInt(modeId);
+		byteBuffer.writeInt(level);
+		byteBuffer.writeInt(starLevel);
+		byteBuffer.writeInt(sex);
+		byteBuffer.writeInt(type);
+		
+		/*****************************************************************************/
+//		if(SaverChanger.isNewSave)//改变数据结构要用的，现在已经改变，下面这个值是已经
+		byteBuffer.writeInt(petType);
+		/*****************************************************************************/
+		byteBuffer.writeInt(experience);
+		byteBuffer.writeInt(requireExp);
+		byteBuffer.writeInt(lifeTime);
+		int length = 0;
+		if(skills == null)
+			length = 0;
+		else
+			length = skills.length;
+		byteBuffer.writeInt(length);
+		for (int i = 0; i < length; i++) 
+		{
+			byteBuffer.writeInt(skills[i].id);
+			byteBuffer.writeBoolean(skills[i].isStudied);
+		}
+	}
+	
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
+	public void setPlayer(Player player)
+	{
+		this.player = player;
+	}
+	
+	public Skill getSkill(int id)
+	{
+		for (int i = 0; i < skills.length; i++)
+		{
+			if(skills[i].id == id)
+				return skills[i];
+		}
+		return null;
+	}
+	
+	public void addSkill(int skillId)
+	{
+		Skill skill = getSkill(skillId);
+		if(skill == null)
+			return;
+		addSkill(skill);
+	}
+
+	
+	private void addSkill(Skill extInfo)
+	{
+		extInfo.isStudied = true;
+
+		PetSkill [] infos = new PetSkill[petSkills.length+1];
+		for (int i = 0; i < petSkills.length; i++)
+			infos[i] = petSkills[i];
+		infos[petSkills.length] = (PetSkill)extInfo;
+		petSkills = infos;
+	}
+	
+	public void initPetSkill(int []skillIds)
+	{
+		for(int i = 0 ; i < skillIds.length ; i ++)
+		{
+			addSkill(skillIds[i]);
+		}
+	}
+	
+	public void writeTo(ByteBuffer byteBuffer)
+	{
+		byteBuffer.writeInt(id);
+		byteBuffer.writeUTF(name);
+		byteBuffer.writeInt(modeId);
+		byteBuffer.writeInt(level);
+		byteBuffer.writeInt(starLevel);
+		byteBuffer.writeByte(sex);
+		byteBuffer.writeByte(type);
+		byteBuffer.writeByte(petType);
+		byteBuffer.writeInt(lifeTime);
+		if(nextExp == 0)
+		{
+			Map map = (Map)DataFactory.getInstance().getAttachment(DataFactory.ATTACH_PET_EXP);
+			Exp exp = (Exp)map.get(level+1);
+			if(exp != null)
+			nextExp = exp.levelExp;
+		}
+		byteBuffer.writeInt(nextExp - requireExp); 
+		byteBuffer.writeInt(nextExp);
+		
+		writeSkill(byteBuffer);
+	}
+	
+	public void writeSkill(ByteBuffer byteBuffer)
+	{
+		int length = 0;
+		if(skills == null)
+			length = 0;
+		else
+			length = skills.length;
+		String name = "";
+		for (int i = 0; i < length; i++) 
+		{
+			if(name.equals(skills[i].name))
+				continue;
+			
+			if(skills[i].isStudied)
+			{
+				if(isNextLv(i,skills[i].level))
+					continue;
+			}
+			else
+			{
+				if(isPreLv(i,skills[i].level))
+					continue;
+			}
+
+			byteBuffer.writeInt(skills[i].id);
+			byteBuffer.writeInt(skills[i].iconId);
+			byteBuffer.writeUTF(skills[i].name);
+			byteBuffer.writeInt(skills[i].level);
+			byteBuffer.writeBoolean(skills[i].isStudied);
+			byteBuffer.writeInt(skills[i].order);
+		
+			if(!skills[i].isStudied)
+				name = skills[i].name;
+		}
+	}
+	
+	private boolean isPreLv(int index,int currlv)
+	{
+		try
+		{
+			if(index > 0)
+			{
+				if(skills[index-1].level < currlv)
+				return true;
+			}
+		}
+		catch(NullPointerException e)
+		{
+			return false;
+		}
+		catch(ArrayIndexOutOfBoundsException e)
+		{
+			return false;
+		}
+		return false;
+	}
+
+	private boolean isNextLv(int index,int currlv)
+	{
+		try
+		{
+			if(skills[index+1].level > currlv
+					&&
+				skills[index+1].isStudied)
+				return true;
+		}
+		catch(NullPointerException e)
+		{
+			return false;
+		}
+		catch(ArrayIndexOutOfBoundsException e)
+		{
+			return false;
+		}
+		return false;
+	}
+
+	
+	public void checkLevelUp()
+	{
+		if(expObj == null)
+		{
+			expObj = getExpByLevel(level+1);
+			
+			if(expObj == null)
+				return;
+		}
+		
+		if(expObj.checkIsLevelUp(this))
+		{
+			levelUp();
+			checkLevelUp();
+		}
+	}
+	
+	private Exp getExpByLevel(int lv)
+	{
+		Map expMap = (Map)DataFactory.
+		getInstance()
+		.getAttachment(DataFactory.ATTACH_PET_EXP);
+		return (Exp)expMap.get(lv);
+	}
+	
+	private void levelUp()
+	{
+		level ++;
+		expObj = getExpByLevel(level+1);
+		
+		if(expObj == null)
+			return;
+		
+		requireExp += expObj.levelExp;
+	}
+	
+	public PetSkill[] getPetSkills()
+	{
+		return this.petSkills;
+	}
+	
+	public Skill[] getSkills()
+	{
+		return this.skills;
+	}
+	
+	/**
+	 * 宠物主人
+	 * @return
+	 */
+	public Player getMaster()
+	{
+		return this.player;
+	}
+	
+	public Exp getExpObj()
+	{
+		return this.expObj;
+	}
+	
+	public void setExpObj(Exp obj)
+	{
+		this.expObj = obj;
+	}
+	
+	public void setDefault()
+	{
+		setName("\u54c6\u5566·M");//哆啦•M//初始名字,最多7个汉字
+		petType = 1;//默认为猫
+		
+		List list = DataFactory.getInstance().getPetSkillList();
+		skills = new Skill[list.size()];
+		for (int i = 0; i < list.size(); i++) 
+		{
+			Skill skill = (Skill) list.get(i);
+			skills[i] = (Skill) Skill.cloneObject(skill);
+		}
+	}
+	
+	/**
+	 * 检测宠物是否到了学习技能的等级 
+	 * @param target
+	 */
+	public void checkLevelSkill(PlayerController target)
+	{
+		for (int i = 0; i < skills.length; i++) 
+		{
+			if(skills[i] == null)
+				continue;
+			if(level >= skills[i].needLevel && !skills[i].isStudied)
+			{
+				addSkill(skills[i].id);
+				target.sendGetGoodsInfo(1, "\u4f60\u7684\u5ba0\u7269\u5df2\u5b66\u4f1a\u6280\u80fd:"+skills[i].name);
+			}
+		}
+	}
+}

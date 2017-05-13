@@ -1,0 +1,1719 @@
+package cc.lv1.rpg.gs.entity.impl.pet;
+
+import java.text.SimpleDateFormat;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.Exp;
+import cc.lv1.rpg.gs.data.PetExp;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.impl.BoxDropProp;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Mail;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.Role;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PetSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * 宠物实体
+ * @author bean
+ *
+ */
+public class Pet extends Role 
+{
+	public static final String FIRSTATT1 = "life";
+	
+	public static final String FIRSTATT2 = "magic";
+	
+	/** 强制结束宠物养成需要花费的元宝 */
+	public static final int OVERMONEY = 10;
+	
+	/** 宠物初始经验 */
+	public static final int PETEXP = 80;
+	
+	public static final double TRAINMIN = 0.9;
+	public static final double TRAINMAX = 1.1;
+	
+	/** 激活状态 */
+	public boolean isActive;
+	
+	/** 需要通知变身的形象 */
+	public int cmi1,cmi2,tmpLevel;
+	public String att1 = "",att2 = "";
+	
+	
+	/** 遛宠状态 */
+	public boolean isStroll = false;
+	
+	/** 出行状态(一次只能选择一次出行方式1.嬉戏 2.锻炼 3.探险) */
+	public int trainState;
+	
+	/** 开始出行时间 */
+	public long trainTime;
+	
+	/** 第一次出行时间 */
+	public long firstTime;
+	
+	/** 每天可喂养的次数(配置文件读取) */
+	public int maxFeedCount;
+	
+	/** 宠物类型(1.2.3.4.5.6.7.8.9....) */
+	public int petType;
+	
+	/** 开始喂养时间 */
+	public long feedTime;
+	
+	/** 总喂养次数 (程序计算,喂养一次就加一次)*/
+	public int feedCount;
+	
+	/** 宠物每次出行的时间 */
+	public int gameTime;
+	
+	/** 活跃度(出行一次就减一次) */
+	public int activePoint;
+	
+	/** 成长值 */
+	public int growPoint;
+	
+	/** 亲密度 */
+	public long intimacyPoint;
+	
+	/**
+	 * 以下 属性都是加到玩家身上
+	 */
+	/** 力量 */
+	public int power;
+	
+	/** 敏捷 */
+	public int nimble;
+	
+	/** 精神 */
+	public int spirit;
+	
+	/** 智慧 */ 
+	public int wisdom;
+	
+//	/** 体质 */
+//	public int physique;
+	
+	/** 最大生命 */
+	public int life;
+	
+	/** 最大精力 */
+	public int magic;
+	
+	/** 物理攻击 */
+	public int phyAtt;
+	
+	/** 精神攻击 */
+	public int sptAtt;
+	
+	/** 形象序列 */
+	public String modelWay = "a";
+
+	public String remark = "";
+	
+	public String attStr = "";
+	
+	/** 剩余的经验(在变身时条件不足，要把经验加满，但不升级，加满后剩余的经验保存) */
+	public long moreExp;
+	
+	/** 主人 */
+	private Player player;
+
+	private PetExp expObj;
+	
+	private Map upMap = new HashMap();
+	
+	private PetSkill[] petSkills = new PetSkill[0];
+	
+	private Skill[] skills = null;
+	
+	public Map getUpMap()
+	{
+		return this.upMap;
+	}
+	
+	public void setStroll(boolean flag)
+	{
+		this.isStroll = flag;
+	}
+	
+	public void setPlayer(Player player)
+	{
+		this.player = player;
+	}
+	
+	public Player getPlayer()
+	{
+		return this.player;
+	}
+	
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
+	public void setUpMap(Map map)
+	{
+		this.upMap = map;
+	}
+	
+	public int getUpMapSize()
+	{
+		return ((HashMap) upMap).size();
+	}
+	
+	public PetUpRule getPetUpRule(int level)
+	{
+		return (PetUpRule) upMap.get(level);
+	}
+	
+	public void copyTo(GameObject go)
+	{
+		super.copyTo(go);
+		Pet pet = (Pet)go;
+		
+		pet.gameTime = gameTime;
+		pet.activePoint = activePoint;
+		pet.growPoint = growPoint;
+		pet.power = power;
+		pet.nimble = nimble;
+		pet.spirit = spirit;
+		pet.wisdom = wisdom;
+		pet.life = life;
+		pet.magic = magic;
+		pet.requireExp = requireExp;
+		pet.experience = experience;
+		pet.feedCount = feedCount;
+		pet.maxFeedCount = maxFeedCount;
+		pet.feedTime = feedTime;
+		pet.petType = petType;
+		pet.intimacyPoint = intimacyPoint;
+		pet.modelId = modelId;
+		pet.remark = remark;
+		pet.expObj = expObj;
+		pet.player = player;
+		pet.upMap = upMap;
+		pet.modelWay = modelWay;
+		pet.trainTime = trainTime;
+		pet.trainState = trainState;
+		pet.isActive = isActive;
+		pet.attStr = attStr;
+		pet.cmi1 = cmi1;
+		pet.cmi2 = cmi2;
+		pet.tmpLevel = tmpLevel;
+		pet.att1 = att1;
+		pet.att2 = att2;
+		pet.firstTime = firstTime;
+	}
+	
+
+	
+	@Override
+	public void loadFrom(ByteBuffer byteBuffer)
+	{
+		id = byteBuffer.readInt();
+		name = byteBuffer.readUTF();
+		objectIndex = byteBuffer.readLong();
+		level = byteBuffer.readInt();
+		iconId = byteBuffer.readInt();
+		petType = byteBuffer.readInt();
+		experience = byteBuffer.readLong();
+		requireExp = byteBuffer.readLong();
+		feedTime = byteBuffer.readLong();
+		feedCount = byteBuffer.readInt();
+		activePoint = byteBuffer.readInt();
+		growPoint = byteBuffer.readInt();
+		modelId = byteBuffer.readInt();
+		isActive = byteBuffer.readBoolean();
+		modelWay = byteBuffer.readUTF();
+		intimacyPoint = byteBuffer.readLong();
+		
+		attStr = byteBuffer.readUTF();
+		cmi1 = byteBuffer.readInt();
+		cmi2 = byteBuffer.readInt();
+		tmpLevel = byteBuffer.readInt();
+		trainTime = byteBuffer.readLong();
+		trainState = byteBuffer.readByte();
+		att1 = byteBuffer.readUTF();
+		att2 = byteBuffer.readUTF();
+		firstTime = byteBuffer.readLong();
+
+		if(attStr.isEmpty())
+			return;
+		
+		String[] strs = Utils.split(attStr, ":");
+		for (int i = 0; i < strs.length; i++) 
+		{
+			setVariable(strs[i], String.valueOf(byteBuffer.readInt()));
+		}
+		
+//		int	length = byteBuffer.readInt();
+//		skills = new Skill[length];
+//		
+//		for (int i = 0; i < length; i++)
+//		{
+//			int skillId = byteBuffer.readInt();
+//			boolean isStudied = byteBuffer.readBoolean();
+//		
+//			Skill skill = (Skill)DataFactory.getInstance().getGameObject(skillId);
+//			skill = (Skill)Skill.cloneObject(skill);
+//			skill.isStudied = isStudied;
+//		
+//			if(skill.isStudied)
+//			{
+//				addSkill(skill);
+//			}
+//			skills[i] = skill;
+//		}
+	}
+
+	@Override
+	public void saveTo(ByteBuffer byteBuffer)
+	{
+		byteBuffer.writeInt(id);
+		byteBuffer.writeUTF(name);
+		byteBuffer.writeLong(objectIndex);
+		byteBuffer.writeInt(level);
+		byteBuffer.writeInt(iconId);
+		byteBuffer.writeInt(petType);
+		byteBuffer.writeLong(experience);
+		byteBuffer.writeLong(requireExp);
+		byteBuffer.writeLong(feedTime);
+		byteBuffer.writeInt(feedCount);
+		byteBuffer.writeInt(activePoint);
+		byteBuffer.writeInt(growPoint);
+		byteBuffer.writeInt(modelId);
+		byteBuffer.writeBoolean(isActive);
+//		byteBuffer.writeLong(moreExp);
+		byteBuffer.writeUTF(modelWay);
+		byteBuffer.writeLong(intimacyPoint);
+//		byteBuffer.writeLong(moreInt);
+		
+//		byteBuffer.writeInt(moreInti);
+//		byteBuffer.writeInt(conState);
+		
+		byteBuffer.writeUTF(attStr);
+		byteBuffer.writeInt(cmi1);
+		byteBuffer.writeInt(cmi2);
+		byteBuffer.writeInt(tmpLevel);
+		byteBuffer.writeLong(trainTime);
+		byteBuffer.writeByte(trainState);
+		byteBuffer.writeUTF(att1);
+		byteBuffer.writeUTF(att2);
+		byteBuffer.writeLong(firstTime);
+
+		if(attStr.isEmpty())
+			return;
+		
+		String[] strs = Utils.split(attStr, ":");
+		for (int i = 0; i < strs.length; i++) 
+		{
+			byteBuffer.writeInt(Integer.parseInt(getVariable(strs[i])));
+		}
+		
+//		int length = 0;
+//		if(skills == null)
+//			length = 0;
+//		else
+//			length = skills.length;
+//		byteBuffer.writeInt(length);
+//		for (int i = 0; i < length; i++) 
+//		{
+//			byteBuffer.writeInt(skills[i].id);
+//			byteBuffer.writeBoolean(skills[i].isStudied);
+//		}
+	}
+	
+//	public void writeTo(ByteBuffer byteBuffer)
+//	{
+//		super.writeTo(byteBuffer);
+//		byteBuffer.writeInt(growPoint);
+//	}
+	
+//	public Skill getSkill(int id)
+//	{
+//		for (int i = 0; i < skills.length; i++)
+//		{
+//			if(skills[i].id == id)
+//				return skills[i];
+//		}
+//		return null;
+//	}
+	
+//	/**
+//	 * 是否是更低等级的技能没学
+//	 * @param skill
+//	 * @return
+//	 */
+//	public boolean isLowLevelNoStudy(Skill skill)
+//	{
+//		for (int i = 0; i < skills.length; i++) 
+//		{
+//			if(skills[i] == null)
+//				continue;
+//			if(skills[i].id == skill.id)
+//				continue;
+//			if(skills[i].iconId == skill.iconId)
+//			{
+////				System.out.println(skills[i].iconId+"/////"+skills[i].name+"//////"+skills[i].level+"///////"+skills[i].isStudied+"---"+skill.level);
+//				if(skills[i].level < skill.level && !skills[i].isStudied)
+//				{	
+//					return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
+	
+//	/**
+//	 * 是否有更高等级的技能已经学习
+//	 * @param skill
+//	 * @return
+//	 */
+//	public boolean isHighLevelStudy(Skill skill)
+//	{
+//		for (int i = 0; i < skills.length; i++) 
+//		{
+//			if(skills[i] == null)
+//				continue;
+//			if(skills[i].id == skill.id)
+//				continue;
+//			if(skills[i].iconId == skill.iconId)
+//			{
+//				if(skills[i].level > skill.level && skills[i].isStudied)
+//				{
+//					return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
+	
+//	public void addSkill(int skillId)
+//	{
+//		Skill skill = getSkill(skillId);
+//		if(skill == null)
+//			return;
+//		if(skill instanceof PetSkill)
+//		{
+//			((PetSkill) skill).setValue(player, 1);
+//			addSkill(skill);
+//		}
+//	}
+
+	
+//	private void addSkill(Skill extInfo)
+//	{
+//		extInfo.isStudied = true;
+//
+//		PetSkill [] infos = new PetSkill[petSkills.length+1];
+//		for (int i = 0; i < petSkills.length; i++)
+//			infos[i] = petSkills[i];
+//		infos[petSkills.length] = (PetSkill)extInfo;
+//		petSkills = infos;
+//	}
+//	
+//	public void initPetSkill(int []skillIds)
+//	{
+//		for(int i = 0 ; i < skillIds.length ; i ++)
+//		{
+//			addSkill(skillIds[i]);
+//		}
+//	}
+	
+	
+//	public void writeSkill(ByteBuffer byteBuffer)
+//	{
+//		int length = 0;
+//		if(skills == null)
+//			length = 0;
+//		else
+//			length = skills.length;
+//		String name = "";
+//		for (int i = 0; i < length; i++) 
+//		{
+//			if(name.equals(skills[i].name))
+//				continue;
+//			
+//			if(skills[i].isStudied)
+//			{
+//				if(isNextLv(i,skills[i].level))
+//					continue;
+//			}
+//			else
+//			{
+//				if(isPreLv(i,skills[i].level))
+//					continue;
+//			}
+//
+//			byteBuffer.writeInt(skills[i].id);
+//			byteBuffer.writeInt(skills[i].iconId);
+//			byteBuffer.writeUTF(skills[i].name);
+//			byteBuffer.writeInt(skills[i].level);
+//			byteBuffer.writeBoolean(skills[i].isStudied);
+//			byteBuffer.writeInt(skills[i].order);
+//	
+//			if(!skills[i].isStudied)
+//				name = skills[i].name;
+//			
+////			System.out.println(skills[i].level+"--"+skills[i].name);
+//		}
+//	}
+	
+//	private boolean isPreLv(int index,int currlv)
+//	{
+//		try
+//		{
+//			if(index > 0)
+//			{
+//				if(skills[index-1].level < currlv)
+//				return true;
+//			}
+//		}
+//		catch(NullPointerException e)
+//		{
+//			return false;
+//		}
+//		catch(ArrayIndexOutOfBoundsException e)
+//		{
+//			return false;
+//		}
+//		return false;
+//	}
+
+//	private boolean isNextLv(int index,int currlv)
+	{
+//		try
+//		{
+//			if(skills[index+1].level > currlv
+//					&&
+//				skills[index+1].isStudied)
+//				return true;
+//		}
+//		catch(NullPointerException e)
+//		{
+//			return false;
+//		}
+//		catch(ArrayIndexOutOfBoundsException e)
+//		{
+//			return false;
+		}
+//		return false;
+//	}
+	
+//	public boolean checkSameSkill(Skill skill)
+//	{
+//		for (int i = 0; i < skills.length; i++)
+//		{
+//			if(skills[i] == null)
+//				continue;
+//			if(skills[i].iconId != skill.iconId && skills[i].isStudied && skills[i].priority == skill.priority)
+//				return true;
+//		}
+//		return false;
+//	}
+
+	
+	public void checkLevelUp()
+	{
+		if(expObj == null)
+		{
+			expObj = getExpByLevel(level+1);
+			
+			if(expObj == null)
+				return;
+		}
+		
+		if(expObj.checkIsLevelUp(this))
+		{
+			levelUp();
+			checkLevelUp();
+		}
+	}
+	
+	public PetExp getExpByLevel(int lv)
+	{
+		Map expMap = (Map)DataFactory.
+		getInstance()
+		.getAttachment(DataFactory.ATTACH_PET_EXP);
+		return (PetExp)expMap.get(lv);
+	}
+	
+	private void levelUp()
+	{
+		level ++;
+		expObj = getExpByLevel(level+1);
+		
+		if(expObj == null)
+			return;
+		
+		requireExp += expObj.levelExp;
+	}
+	
+	public PetSkill[] getPetSkills()
+	{
+		return this.petSkills;
+	}
+	
+	public Skill[] getSkills()
+	{
+		return this.skills;
+	}
+	
+	/**
+	 * 宠物主人
+	 * @return
+	 */
+	public Player getMaster()
+	{
+		return this.player;
+	}
+	
+	public PetExp getExpObj()
+	{
+		return this.expObj;
+	}
+	
+	public void setExpObj(PetExp obj)
+	{
+		this.expObj = obj;
+	}
+	
+//	public void setDefault()
+//	{
+//		name = "\u54c6\u5566·M";//哆啦•M//初始名字,最多7个汉字
+		
+//		List list = DataFactory.getInstance().getPetSkillList();
+//		skills = new Skill[list.size()];
+//		for (int i = 0; i < list.size(); i++) 
+//		{
+//			Skill skill = (Skill) list.get(i);
+//			skills[i] = (Skill) Skill.cloneObject(skill);
+//		}
+//	}
+	
+//	/**
+//	 * 检测宠物是否到了学习技能的等级 
+//	 * @param target
+//	 */
+//	public void checkLevelSkill(PlayerController target)
+//	{
+//		for (int i = 0; i < skills.length; i++) 
+//		{
+//			if(skills[i] == null)
+//				continue;
+//			if(level >= skills[i].needLevel && !skills[i].isStudied)
+//			{
+//				addSkill(skills[i].id);
+//				target.sendGetGoodsInfo(1, "\u4f60\u7684\u5ba0\u7269\u5df2\u5b66\u4f1a\u6280\u80fd:"+skills[i].name);
+//			}
+//		}
+//	}
+	
+	private void setPetInfoToPlayer(String type,int point)
+	{
+		PlayerBaseInfo base = player.getBaseInfo();
+		int pPoint = Integer.parseInt(base.getVariable(type));
+		pPoint += point;
+		if(type.equals("life"))
+			player.maxHitPoint += growPoint;
+		else if(type.equals("magic"))
+			player.maxMagicPoint += growPoint;
+		else
+		{
+			base.setVariable(type, String.valueOf(pPoint));
+			base.updateLifeValue(point, type);
+		}
+	}
+	
+	/**
+	 * 把宠物的基本属性加到玩家身上
+	 * type (1表示加，0表示减)
+	 */
+	public void setPlayerBaseInfo(int type)
+	{
+		if(attStr.isEmpty())
+			return;
+		PlayerBaseInfo base = player.getBaseInfo();
+		if(type == 1)
+		{
+			String[] strs = Utils.split(attStr, ":");
+			for (int i = 0; i < strs.length; i++) 
+			{
+				if(strs[i].equals("life") || strs[i].equals("magic"))
+					continue;
+				int point = Integer.parseInt(getVariable(strs[i]));
+				if(point > 0)
+				{
+					int pPoint = Integer.parseInt(base.getVariable(strs[i]));
+					pPoint += point;
+					base.setVariable(strs[i], String.valueOf(pPoint));
+				}
+			}
+		}
+		else if(type == 0)
+		{
+			String[] strs = Utils.split(attStr, ":");
+			for (int i = 0; i < strs.length; i++) 
+			{
+				if(strs[i].equals("life") || strs[i].equals("magic"))
+					continue;
+				int point = Integer.parseInt(getVariable(strs[i]));
+				if(point > 0)
+				{
+					int pPoint = Integer.parseInt(base.getVariable(strs[i]));
+					if(pPoint > point)
+					{
+						pPoint -= point;
+						base.setVariable(strs[i], String.valueOf(pPoint));
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 把生命和精力加到玩家身上(最大生命)
+	 * @param type 1表示加 0表示减
+	 */
+	public void setPlayerOtherValue(int type)
+	{
+		if(type == 1)
+		{
+			if(life > 0)
+			{
+				player.maxHitPoint += life;
+				player.maxMagicPoint += magic;
+			}
+		}
+		else if(type == 0)
+		{
+			if(player.maxHitPoint > life)
+				player.maxHitPoint -= life;
+			if(player.maxMagicPoint > magic)
+				player.maxMagicPoint -= magic;
+		}
+	}
+	
+	/**
+	 * 设置喂养次数
+	 */
+	public void setFeed()
+	{
+		if(feedTime == 0)
+		{
+			feedTime = System.currentTimeMillis();
+			feedCount++;
+			return;
+		}
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String feedTimeStr = time.format(feedTime);
+		String nowTimeStr = time.format(System.currentTimeMillis());
+		if(feedTimeStr.equals(nowTimeStr))//同一天
+		{
+			if(feedCount < maxFeedCount)
+				feedCount++;
+		}
+		else
+		{
+			feedTime = System.currentTimeMillis();
+			feedCount = 1;
+		}
+	}
+	
+	/**
+	 * 检测宠物今天是否还可以喂养(喂养次数是否已经到达最大)
+	 * @return true表示还可以喂养，false表示已经达到最大喂养次数
+	 */
+	public boolean isFeed()
+	{
+		if(feedTime == 0)
+		{
+			return true;
+		}
+		
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String feedTimeStr = time.format(feedTime);
+		String nowTimeStr = time.format(System.currentTimeMillis());
+		if(feedTimeStr.equals(nowTimeStr))//同一天
+		{
+			if(feedCount >= maxFeedCount)
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		else
+		{
+			return true;
+		}
+	}
+	
+	/**
+	 * 检测宠物今天是否还可以出行(出行次数是否已经到达最大)
+	 * @return true表示还可以出行，false表示已经达到最大出行次数
+	 */
+	public boolean isTrain()
+	{
+		if(firstTime == 0)
+		{
+			return true;
+		}
+		
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String feedTimeStr = time.format(firstTime);
+		String nowTimeStr = time.format(System.currentTimeMillis());
+		if(feedTimeStr.equals(nowTimeStr))//同一天
+		{
+			if(activePoint <= 0)
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		else
+		{
+			return true;
+		}
+	}
+	
+	/**
+	 * 宠物出行
+	 * @param type 1.嬉戏 2.锻炼 3.探险
+	 */
+	public boolean petTrain(PlayerController target,int type)
+	{
+//		System.out.println("出行前：宠物出行时间："+trainTime+" 出行状态："+trainState+"  剩下活跃度:"+activePoint);
+		if(trainState != 0)
+		{
+			return false;
+		}
+		
+		
+
+		if(!isTrain())
+		{
+			target.sendAlert(ErrorCode.ALERT_RUNNING_PET_COUNT_OVER);
+			return false;
+		}
+		if(type != 1 && type != 2 && type != 3)
+		{
+			return false;
+		}
+		
+//		PetTrain pt = getPetTrain();
+//		if(pt != null)
+//		{
+//			if(conState == 1)
+//			{
+//				if(pt.exeExp[type-1] > 0 && pt.strInt[type-1] == 0)
+//				{
+//					target.sendGetGoodsInfo(1, false, "\u5BA0\u7269\u7684\u7ECF\u9A8C\u503C\u5DF2\u6EE1\u8DB3" +
+//								"\u8FDB\u5316\u6761\u4EF6，\u8BF7\u63D0\u5347\u4EB2\u5BC6\u5EA6!");
+//					return false;
+//				}
+//			}
+//			else if(conState == 2)
+//			{
+//				if(pt.strInt[type-1] > 0 && pt.exeExp[type-1] == 0)
+//				{
+//					target.sendGetGoodsInfo(1, false, "\u5BA0\u7269\u7684\u4EB2\u5BC6\u5EA6\u5DF2\u6EE1\u8DB3" +
+//								"\u8FDB\u5316\u6761\u4EF6，\u8BF7\u63D0\u5347\u7ECF\u9A8C\u503C!");
+//					return false;
+//				}
+//			}
+//		}
+		
+		trainState = type;
+		
+		if(firstTime == 0 && trainTime == 0 && activePoint > 0)
+		{
+			trainTime = System.currentTimeMillis();
+			activePoint--;
+			firstTime = trainTime;
+			return true;
+		}
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String trainTimeStr = time.format(firstTime);
+		String nowTimeStr = time.format(System.currentTimeMillis());
+		if(trainTimeStr.equals(nowTimeStr))//同一天
+		{
+			if(activePoint > 0 && trainTime == 0)
+			{
+				activePoint--;
+				trainTime = System.currentTimeMillis();
+			}
+		}
+		else
+		{
+			trainTime = System.currentTimeMillis();
+			firstTime = trainTime;
+			Pet pet = (Pet) DataFactory.getInstance().getGameObject(id);
+			Pet newPet = (Pet) Pet.cloneObject(pet);
+			activePoint = newPet.activePoint - 1;
+		}
+		
+//		System.out.println("出行后：宠物出行时间："+trainTime+" 出行状态："+trainState+"  剩下活跃度:"+activePoint);
+		return true;
+	}
+	
+	/**
+	 * 出行完成
+	 * type 1正常结束 2强制结束
+	 */
+	public void trainOver(PlayerController target,int type)
+	{
+		if(trainState == 0)
+			return; 	
+		if(trainTime == 0)
+			return;	
+		
+		PetTrain pt = getPetTrain();
+		if(pt == null)
+			return;
+
+		if(type == 1)
+		{
+			long t = System.currentTimeMillis() - trainTime;
+			if( t < gameTime)
+			{
+				ByteBuffer buffer = new ByteBuffer();
+				buffer.writeInt((int) (gameTime-t));
+				target.getNetConnection().sendMessage(new SMsg(SMsg.S_PLAYER_PET_DOWMTIME_COMMAND,buffer));
+				return;
+			}
+		}
+		else if(type == 2)
+		{
+			Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+			if(bag.money < OVERMONEY)
+			{
+				target.sendAlert(ErrorCode.ALERT_SHOP_NO_MONEY);
+				return;
+			}
+			bag.money -= OVERMONEY;
+			bag.sendAddGoods(target, null);
+		}
+		else
+			return;
+	
+
+		if(trainState <= 0 || trainState >= 4)
+			return;
+		
+		String trainStr = "";
+		
+		if(trainState == 1)
+			trainStr += "\u5B09\u620F";
+		else if(trainState == 2)
+			trainStr += "\u953B\u70BC";
+		else if(trainState == 3)
+			trainStr += "\u63A2\u9669";
+		
+		long inti = intimacyPoint;
+		int si = pt.strInt[trainState-1];
+		int min = (int) (si * TRAINMIN);
+		int max = (int) (si * TRAINMAX);
+		int result = (int) (Math.random() * (max - min) + min);
+		setInti(result,target);
+		long nowInti = intimacyPoint - inti;
+		if(nowInti > 0)
+		{
+			target.sendGetGoodsInfo(1,false, "\u606D\u559C\u4F60\u7684\u5BA0\u7269\u5728" +
+					"\u521A\u624D\u7684"+trainStr+"\u4E2D\u83B7\u5F97"+nowInti+"\u70B9\u4EB2\u5BC6\u5EA6！");
+		}
+		
+		long exp = experience;
+		si = pt.exeExp[trainState-1];
+		min = (int) (si * TRAINMIN);
+		max = (int) (si * TRAINMAX);
+		result = (int) (Math.random() * (max - min) + min);
+		boolean flag = target.addPetExp(result);
+		long nowExp = experience - exp;
+		if(nowExp > 0 && flag)
+		{
+			target.sendGetGoodsInfo(1,false, "\u606D\u559C\u4F60\u7684\u5BA0\u7269\u5728" +
+					"\u521A\u624D\u7684"+trainStr+"\u4E2D\u83B7\u5F97"+nowExp+"\u70B9\u7ECF\u9A8C\u503C！");
+		}		
+		
+		Mail mail = new Mail("\u5BA0\u7269\u4FE1\u606F");
+		mail.setTitle(trainStr);
+		mail.setContent(DataFactory.getInstance().getPetWords(trainState));
+		
+		int dropId = pt.dropId[trainState-1];
+
+		if(dropId != 0)
+		{
+			BoxDropProp bdp = (BoxDropProp)DataFactory.getInstance().getBDP(dropId);
+			if(bdp != null)
+			{
+				Goods goods = bdp.getGoods(true);
+				if(goods != null)
+				{
+					mail.addAttach(goods);
+				}
+			}
+		}
+		
+		mail.send(target);
+		
+		trainState = 0;
+		trainTime = 0;
+		
+//		System.out.println("掉线后经验："+(nextExp-requireExp)+"  掉线后亲密度："+intimacyPoint);
+//		System.out.println("掉线：出行状态："+trainState+"  出行时间："+trainTime+"  得到经验或者亲密度："+result);
+
+	}
+	
+	
+	
+	/**
+	 * 宠物变身
+	 * @param target
+	 * @param beforeLevel
+	 */
+	public void changePetModel(PlayerController target,int beforeLevel)
+	{
+		if(level <= beforeLevel)
+			return;
+		if(upMap == null)
+			return;
+//		System.out.println("之前等级 ："+beforeLevel+"  现在等级："+level);
+		for (int i = beforeLevel+1; i <= level; i++) 
+		{
+			PetUpRule pur = (PetUpRule) upMap.get(i);
+//			System.out.println(i+"-----"+pur.level+"  ---  "+pur.upState);
+			if(pur == null)
+				continue;
+			if(pur.upState == 0)
+				continue;
+			PetExp pe = getExpByLevel(i);
+			if(pe == null)
+				continue;
+//			System.out.println(pe.level+"当前总经验："+experience+"  变身需要经验： "+pe.total+"  总亲密度："+intimacyPoint+"  需要亲密度："+pe.totalInt);
+			if(!checkPetUp(pe,pur,i,target))
+				continue;
+		}
+	}
+	
+	
+	public boolean checkPetUp(PetExp pe,PetUpRule pur,int i,PlayerController target)
+	{
+		if(pur.upState == 0)
+			return false;
+		if(experience >= pe.total && intimacyPoint >= pe.totalInt)
+		{
+			if(pur.upState == 1)
+			{
+//				System.out.println("变身前形象："+modelId);
+				String[] ways = Utils.split(pur.upWay, ":");
+				String[] ums = Utils.split(pur.upModelId, ":");
+				String[] atts = Utils.split(pur.upAtt, ":");
+				if(ways.length == 1 && ums.length == 1 && atts.length == 1)
+				{
+					if(!modelWay.equals(pur.upWay))
+					{
+						modelId = Integer.parseInt(pur.upModelId);
+						modelWay = pur.upWay;
+						setAttStr(pur.upAtt);
+					}
+//					conState = 0;
+				}
+				else if(ways.length > 1 && ums.length > 1 && ways.length == ums.length)
+				{
+					String[] ws = Utils.split(pur.upWay, "|");
+					String[] us = Utils.split(pur.upModelId, "|");
+					String[] as = Utils.split(pur.upAtt, "|");
+					if(ws.length == 1 && ways.length == 2 && ums.length == 2)
+					{
+						if(modelWay.equals(ways[0]))
+						{
+							if(modelId < Integer.parseInt(ums[0]))
+							{
+								modelId = Integer.parseInt(ums[0]);
+								String[] strs = Utils.split(atts[0], ",");
+								for (int k = 0; k < strs.length; k++) 
+								{
+									setAttStr(strs[k]);
+								}
+							}
+						}
+						else if(modelWay.equals(ways[1]))
+						{
+							if(modelId < Integer.parseInt(ums[1]))
+							{
+								modelId = Integer.parseInt(ums[1]);
+								String[] strs = Utils.split(atts[1], ",");
+								for (int k = 0; k < strs.length; k++) 
+								{
+									setAttStr(strs[k]);
+								}
+							}
+						}
+//						conState = 0;
+					}
+					else if(ws.length > 1 && us.length > 1 && ws.length == us.length && ws.length == 2)
+					{
+						for (int j = 0; j < us.length; j++) 
+						{
+							String[] oWays = Utils.split(us[j], ":");
+							String[] oUms = Utils.split(ws[j], ":");
+							String[] oAtts = Utils.split(as[j], ":");
+							if(oWays.length == 2 && oUms.length == 2)
+							{
+								if(modelWay.equals(oWays[0]))
+								{
+									if(modelId < Integer.parseInt(oUms[0]))
+									{
+										modelId = Integer.parseInt(oUms[0]);
+										String[] strs = Utils.split(oAtts[0], ",");
+										for (int k = 0; k < strs.length; k++) 
+										{
+											setAttStr(strs[k]);
+										}
+									}
+//									conState = 0;
+									break;
+								}
+								else if(modelWay.equals(oWays[1]))
+								{
+									if(modelId < Integer.parseInt(oUms[1]))
+									{
+										modelId = Integer.parseInt(oUms[1]);
+										String[] strs = Utils.split(oAtts[1], ",");
+										for (int k = 0; k < strs.length; k++) 
+										{
+											setAttStr(strs[k]);
+										}
+									}
+//									conState = 0;
+									break;
+								}
+								break;
+							}
+							else
+							{
+								System.out.println("Pet 894 error:"+us[j]+"  "+ws[j]);
+								return false;
+							}
+						}
+					}
+					else
+					{
+						System.out.println("Pet 901:pur.upWay:"+pur.upWay+"  pur.upModelId:"+pur.upModelId);
+						return false;
+					}
+				}
+				else
+				{
+					System.out.println("Pet 907:pur.upWay:"+pur.upWay+"  pur.upModelId:"+pur.upModelId);
+					return false;
+				}
+//				System.out.println("++++++++++++变身后形象："+modelId+"  变身后等级："+i);
+				target.sendPetModel(2,modelId);
+			}
+			else if(pur.upState == 2)
+			{
+//				System.out.println("//////////////////////////////////等级："+i);
+				String[] ways = Utils.split(pur.upWay, ":"); 
+				String[] ums = Utils.split(pur.upModelId, ":");
+				String[] atts = Utils.split(pur.upAtt, ":");
+				if(ways.length == 2 && ums.length == 2)
+				{
+					if(modelWay.length() < ways[0].length())
+					{
+						sendChangeModel(Integer.parseInt(ums[0]),Integer.parseInt(ums[1]),pur.level,atts[0],atts[1],target);
+//						setTmpPetInfo(i);
+						setDefault(Integer.parseInt(ums[0]),Integer.parseInt(ums[1]),pur.level,atts[0],atts[1]);
+//						System.out.println(" 现在等级等级等级："+level);
+						return false;
+					}
+				}
+				else if(ways.length > 2 && ums.length > 2)
+				{
+					String[] ws = Utils.split(pur.upWay, "|");
+					String[] us = Utils.split(pur.upModelId, "|");
+					String[] ua = Utils.split(pur.upAtt, "|");
+					if(ws.length == 2 && us.length == 2)
+					{
+						for (int k = 0; k < us.length; k++) 
+						{
+							String[] oWays = Utils.split(ws[k], ":");
+							String[] oUms = Utils.split(us[k], ":");
+							String[] oAtts = Utils.split(ua[k], ":");
+							if(oWays.length == 2 && oUms.length == 2)
+							{
+								if(modelWay.equals(oWays[0].substring(0, oWays[0].length()-1)))
+								{
+									if(modelWay.length() < oWays[0].length())
+									{
+										sendChangeModel(Integer.parseInt(oUms[0]),Integer.parseInt(oUms[1]),pur.level,oAtts[0],oAtts[1], target);
+//										setTmpPetInfo(i);
+										setDefault(Integer.parseInt(oUms[0]),Integer.parseInt(oUms[1]),pur.level,oAtts[0],oAtts[1]);
+										return false;
+									}
+								}
+							}
+							else
+							{
+								System.out.println("Pet error:"+ws[k]+"  "+us[k]);
+								return false;
+							}
+						}
+					}
+					return false;
+				}	
+				else
+				{
+					System.out.println("Pet error:"+pur.upWay+"  "+pur.upModelId);
+					return false;
+				}
+			}
+		}
+//		else if(experience >= pe.total && intimacyPoint < pe.totalInt)//经验到了，亲密度没到
+//		{
+//			conState = 1;
+//			setTmpPetInfo(i);
+//			return false;
+//		}
+//		else if(experience < pe.total && intimacyPoint >= pe.totalInt)//经验不够，亲密度到了
+//		{
+//			conState = 2;
+//			isAddInt = false;
+////			moreInt = intimacyPoint - pe.totalInt;
+//			intimacyPoint = pe.totalInt;
+//			return false;
+//		}
+//		else if(experience < pe.total && intimacyPoint < pe.totalInt)//经验值不够，亲密度也不够
+//		{
+//			conState = 0;
+//		}
+		return true;
+	}
+	
+	
+	
+//	public void setTmpPetInfo(int level)
+//	{
+//		if(level > 1)
+//		{
+//			this.level = level;
+//			PetExp pe = getExpByLevel(level+1);
+//			requireExp = pe.levelExp;
+////			moreExp = experience - pe.total;
+//			experience = getExpByLevel(level).total;
+//			setExpObj(pe);
+//		}
+//	}
+	
+	private void setDefault(int id1,int id2,int level,String att1,String att2)
+	{
+		if(cmi1 == 0)
+			cmi1 = id1;
+		if(cmi2 == 0)
+			cmi2 = id2;
+		if(tmpLevel == 0)
+			tmpLevel = level;
+		if(!att1.isEmpty())
+			this.att1 = att1;
+		if(!att2.isEmpty())
+			this.att2 = att2;
+	}
+	
+	public void sendChangeModel(int id1,int id2,int level,String att1,String att2,PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeByte(4);//通知客户端变身形象
+		buffer.writeInt(id1);
+		buffer.writeUTF(att1);
+		buffer.writeInt(id2);
+		buffer.writeUTF(att2);
+		buffer.writeInt(level);
+		PetExp exp = getExpByLevel(level);
+		if(exp == null)
+			return;
+		buffer.writeUTF(exp.totalInt+"");
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_PLAYER_PETINFO_OPTION_COMMAND,buffer));
+		
+		target.isPetUp = true;
+	}
+
+
+	
+	public void setGrow(int index)
+	{
+		if(growPoint <= 0)
+			return;
+		if(attStr.isEmpty())
+		{
+			return;
+		}
+		for (int j = 0; j < index; j++)
+		{
+			String[] strs = Utils.split(attStr, ":");
+			int ran = (int) (Math.random() * strs.length);
+			for (int i = 0; i < strs.length; i++) 
+			{
+				if(ran == i)
+				{
+					int value = Integer.parseInt(getVariable(strs[i]));
+					value += growPoint;
+					setVariable(strs[i], String.valueOf(value));
+					setPetInfoToPlayer(strs[i],growPoint);
+					break;
+				}
+			}
+		}
+	}
+	
+
+	
+	public void initPetExpAndInt()
+	{
+//		moreExp = 0;
+//		moreInt = 0;
+		cmi1 = 0;
+		cmi2 = 0;
+		tmpLevel = 0;
+//		isAddInt = true;
+	}
+	
+	
+	public void setInti(long inti,PlayerController target)
+	{
+//		if(conState != 2)
+//		{
+			long intim = intimacyPoint;
+			intimacyPoint += inti;
+			for (int i = 1; i < getUpMapSize(); i++) 
+			{
+				PetExp pe = getExpByLevel(i);
+				if(upMap != null && pe != null)
+				{
+					if(intimacyPoint < pe.totalInt && experience < pe.total)
+						break;
+					PetUpRule pur = (PetUpRule) upMap.get(i);
+					if(intim < pe.totalInt)
+						checkInti(pe,pur,target);
+				}
+			}
+			if(inti > 0)
+				target.sendPetInfo(target, target.getID());
+//		}
+	}
+	
+	
+	public void checkInti(PetExp pe,PetUpRule pur,PlayerController target)
+	{
+		if(pur.upState == 0)
+			return;
+		if(experience >= pe.total && intimacyPoint >= pe.totalInt)
+		{
+			if(pur.upState == 1)
+			{
+//				System.out.println("变身前形象："+modelId);
+				String[] ways = Utils.split(pur.upWay, ":");
+				String[] ums = Utils.split(pur.upModelId, ":");
+				String[] atts = Utils.split(pur.upAtt, ":");
+				if(ways.length == 1 && ums.length == 1 && atts.length == 1)
+				{
+//					System.out.println(modelWay+"  1323  "+pur.upWay);
+					if(!modelWay.equals(pur.upWay))
+					{
+						modelId = Integer.parseInt(pur.upModelId);
+						modelWay = pur.upWay;
+						setAttStr(pur.upAtt);
+					}
+//					conState = 0;
+				}
+				else if(ways.length > 1 && ums.length > 1 && ways.length == ums.length)
+				{
+					String[] ws = Utils.split(pur.upWay, "|");
+					String[] us = Utils.split(pur.upModelId, "|");
+					String[] as = Utils.split(pur.upAtt, "|");
+					if(ws.length == 1 && ways.length == 2 && ums.length == 2)
+					{
+						if(modelWay.equals(ways[0]))
+						{
+//							System.out.println(modelId+"    1341     "+ums[0]);
+							if(modelId < Integer.parseInt(ums[0]))
+							{
+								modelId = Integer.parseInt(ums[0]);
+								String[] strs = Utils.split(atts[0], ",");
+								for (int k = 0; k < strs.length; k++) 
+								{
+									setAttStr(strs[k]);
+								}
+							}
+//							conState = 0;
+						}
+						else if(modelWay.equals(ways[1]))
+						{
+//							System.out.println(modelId+"    1355     "+ums[1]);
+							if(modelId < Integer.parseInt(ums[1]))
+							{
+								modelId = Integer.parseInt(ums[1]);
+								String[] strs = Utils.split(atts[1], ",");
+								for (int k = 0; k < strs.length; k++) 
+								{
+									setAttStr(strs[k]);
+								}
+							}
+//							conState = 0;
+						}
+					}
+					else if(ws.length > 1 && us.length > 1 && ws.length == us.length && ws.length == 2)
+					{
+						for (int j = 0; j < us.length; j++) 
+						{
+							String[] oWays = Utils.split(us[j], ":");
+							String[] oUms = Utils.split(ws[j], ":");
+							String[] oAtts = Utils.split(as[j], ":");
+							if(oWays.length == 2 && oUms.length == 2)
+							{
+								if(modelWay.equals(oWays[0]))
+								{
+//									System.out.println(modelId+"  1379 "+oUms[0]);
+									if(modelId < Integer.parseInt(oUms[0]))
+									{
+										modelId = Integer.parseInt(oUms[0]);
+										String[] strs = Utils.split(oAtts[0], ",");
+										for (int k = 0; k < strs.length; k++) 
+										{
+											setAttStr(strs[k]);
+										}
+									}
+//									conState = 0;
+									break;
+								}
+								else if(modelWay.equals(oWays[1]))
+								{
+//									System.out.println(modelId+"  1394 "+oUms[1]);
+									if(modelId < Integer.parseInt(oUms[1]))
+									{
+										modelId = Integer.parseInt(oUms[1]);
+										String[] strs = Utils.split(oAtts[1], ",");
+										for (int k = 0; k < strs.length; k++) 
+										{
+											setAttStr(strs[k]);
+										}
+									}
+//									conState = 0;
+									break;
+								}
+								break;
+							}
+							else
+							{
+								System.out.println("Pet 894 error:"+us[j]+"  "+ws[j]);
+								return;
+							}
+						}
+					}
+					else
+					{
+						System.out.println("Pet 901:pur.upWay:"+pur.upWay+"  pur.upModelId:"+pur.upModelId);
+						return;
+					}
+				}
+				else
+				{
+					System.out.println("Pet 907:pur.upWay:"+pur.upWay+"  pur.upModelId:"+pur.upModelId);
+					return;
+				}
+				target.checkPetExp(this);
+//				System.out.println("++++++++++++变身后形象："+modelId+"  变身后等级："+i);
+				target.sendPetModel(2,modelId);
+
+			}
+			else if(pur.upState == 2)
+			{
+//				System.out.println("//////////////////////////////////等级："+i);
+				String[] ways = Utils.split(pur.upWay, ":"); 
+				String[] ums = Utils.split(pur.upModelId, ":");
+				String[] atts = Utils.split(pur.upAtt, ":");
+				if(ways.length == 2 && ums.length == 2)
+				{
+					if(modelWay.length() < ways[0].length())
+					{
+						sendChangeModel(Integer.parseInt(ums[0]),Integer.parseInt(ums[1]),pur.level,atts[0],atts[1],target);
+						setDefault(Integer.parseInt(ums[0]),Integer.parseInt(ums[1]),pur.level,atts[0],atts[1]);
+						return;
+					}
+//					System.out.println(" 现在等级等级等级："+level);
+				}
+				else if(ways.length > 2 && ums.length > 2)
+				{
+					String[] ws = Utils.split(pur.upWay, "|");
+					String[] us = Utils.split(pur.upModelId, "|");
+					String[] ua = Utils.split(pur.upAtt, "|");
+					if(ws.length == 2 && us.length == 2)
+					{
+						for (int k = 0; k < us.length; k++) 
+						{
+							String[] oWays = Utils.split(ws[k], ":");
+							String[] oUms = Utils.split(us[k], ":");
+							String[] oAtts = Utils.split(ua[k], ":");
+							if(oWays.length == 2 && oUms.length == 2)
+							{
+								if(modelWay.equals(oWays[0].substring(0, oWays[0].length()-1)))
+								{
+									if(modelWay.length() < oWays[0].length())
+									{
+										sendChangeModel(Integer.parseInt(oUms[0]),Integer.parseInt(oUms[1]),pur.level,oAtts[0],oAtts[1], target);
+										setDefault(Integer.parseInt(oUms[0]),Integer.parseInt(oUms[1]),pur.level,oAtts[0],oAtts[1]);
+										return;
+									}
+								}
+							}
+							else
+							{
+								System.out.println("Pet error:"+ws[k]+"  "+us[k]);
+								return;
+							}
+						}
+					}
+					return;
+				}	
+				else
+				{
+					System.out.println("Pet error:"+pur.upWay+"  "+pur.upModelId);
+					return;
+				}
+			}
+		}
+//		else if(experience >= pe.total && intimacyPoint < pe.totalInt)//经验到了，亲密度没到
+//		{
+//				conState = 1;
+//		}
+//		else if(experience < pe.total && intimacyPoint >= pe.totalInt)//经验不够，亲密度到了
+//		{
+//			conState = 2;
+//			isAddInt = false;
+//			moreInt = intimacyPoint - pe.totalInt;
+//			intimacyPoint = pe.totalInt;
+//		}
+//		else if(experience < pe.total && intimacyPoint < pe.totalInt)//经验不够，亲密度不够
+//		{
+//			conState = 0;
+//		}
+	}
+
+	public void setAttStr(String att)
+	{
+		if(attStr.isEmpty())
+			attStr += att;
+		else
+		{
+			if(attStr.indexOf(att) == -1)
+				attStr += ":" + att;
+		}
+	}
+	
+	private void initVariable(String att)
+	{
+		if(att.equals("power"))
+		{
+			if(power <= 0)
+				return;
+		}
+		else if(att.equals("nimble"))
+		{
+			if(nimble <= 0)
+				return;
+		}
+//		else if(att.equals("physique"))
+//		{
+//			if(physique <= 0)
+//				return;
+//		}
+		else if(att.equals("wisdom"))
+		{
+			if(wisdom <= 0)
+				return;
+		}
+		else if(att.equals("spirit"))
+		{
+			if(spirit <= 0)
+				return;
+		}
+		else if(att.equals("life"))
+		{
+			if(life <= 0)
+				return;
+		}
+		else if(att.equals("magic"))
+		{
+			if(magic <= 0)
+				return;
+		}
+		
+		setAttStr(att);
+	}
+	
+	public boolean setVariable(String key,String value)
+	{
+		if(key.equals("power"))
+		{
+			power = Integer.parseInt(value);
+			initVariable("power");
+			return true;
+		}
+		else if(key.equals("nimble"))
+		{
+			nimble = Integer.parseInt(value);
+			initVariable("nimble");
+			return true;
+		}
+		else if(key.equals("wisdom"))
+		{
+			wisdom = Integer.parseInt(value);
+			initVariable("wisdom");
+			return true;
+		}
+		else if(key.equals("spirit"))
+		{
+			spirit = Integer.parseInt(value);
+			initVariable("spirit");
+			return true;
+		}
+		else if(key.equals("life"))
+		{
+			life = Integer.parseInt(value);
+			initVariable("life");
+			return true;
+		}
+		else if(key.equals("magic"))
+		{
+			magic = Integer.parseInt(value);
+			initVariable("magic");
+			return true;
+		}
+		else 
+		{
+			return super.setVariable(key, value);
+		}
+	}
+
+	
+	
+	public int getNextModelOne(PetExp pe,PetUpRule pur)
+	{
+		int result = 0;
+		String[] ways = Utils.split(pur.upWay, ":");
+		String[] ums = Utils.split(pur.upModelId, ":");
+
+		if(ways.length == 1)
+			result = Integer.parseInt(pur.upModelId);
+		else
+		{
+			String[] ws = Utils.split(pur.upWay, "|");
+			String[] us = Utils.split(pur.upModelId, "|");
+			if(ws.length == 1 && ways.length == 2 && ums.length == 2)
+			{
+				if(modelWay.equals(ways[0]))
+				{
+					result = Integer.parseInt(ums[0]);
+				}
+				else if(modelWay.equals(ways[1]))
+				{
+					result = Integer.parseInt(ums[1]);
+				}
+			}
+			else if(ws.length > 1 && us.length > 1 && ws.length == us.length && ws.length == 2)
+			{
+				for (int j = 0; j < us.length; j++) 
+				{
+					String[] oWays = Utils.split(us[j], ":");
+					String[] oUms = Utils.split(ws[j], ":");
+					if(oWays.length == 2 && oUms.length == 2)
+					{
+						if(modelWay.equals(oWays[0]))
+						{
+							result = Integer.parseInt(oUms[0]);
+							break;
+						}
+						else if(modelWay.equals(oWays[1]))
+						{
+							result = Integer.parseInt(oUms[1]);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public int[] getNextModelTwo(PetExp pe,PetUpRule pur)
+	{
+		int[] result = new int[2];
+		String[] ways = Utils.split(pur.upWay, ":"); 
+		String[] ums = Utils.split(pur.upModelId, ":");
+		if(ways.length == 2 && ums.length == 2)
+		{
+			result[0] = Integer.parseInt(ums[0]);
+			result[1] = Integer.parseInt(ums[1]);
+		}
+		else if(ways.length > 2 && ums.length > 2)
+		{
+			String[] ws = Utils.split(pur.upWay, "|");
+			String[] us = Utils.split(pur.upModelId, "|");
+			if(ws.length == 2 && us.length == 2)
+			{
+				for (int k = 0; k < us.length; k++) 
+				{
+					String[] oWays = Utils.split(ws[k], ":");
+					String[] oUms = Utils.split(us[k], ":");
+					if(oWays.length == 2 && oUms.length == 2)
+					{
+						if(modelWay.equals(oWays[0].substring(0, oWays[0].length()-1)))
+						{
+							result[0] = Integer.parseInt(oUms[0]);
+							result[1] = Integer.parseInt(oUms[1]);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	public PetTrain getPetTrain()
+	{
+		List list = (List) DataFactory.getInstance().getAttachment(DataFactory.PET_TRAIN_LIST);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			PetTrain pt = (PetTrain) list.get(i);
+			if(pt == null)
+				continue;
+			if(level >= pt.minLevel && level <= pt.maxLevel)
+				return pt;
+		}
+		return null;
+	}
+
+
+}

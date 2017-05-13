@@ -1,0 +1,17 @@
+<dialog>
+
+<!--该NPC名为至尊签王，发布的任务 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="107001201">//特殊形象让我们变得与众不同!|//现在什么都有个有效期，我们的特殊形象也一样!|//特殊形象是不能炼化的哦，所以在兑换之前就把你的日常形象练好点吧!</text>
+		</words>
+   		 <options>
+                  	<item textId="15010305" text="特殊形象兑换" command="changeBossCoat" />
+		</options>
+	</s01>
+   </default> 
+</dialog>

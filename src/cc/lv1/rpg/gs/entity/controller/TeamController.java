@@ -1,0 +1,652 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DC;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.MarkChar;
+import cc.lv1.rpg.gs.data.UseChar;
+import cc.lv1.rpg.gs.entity.ConfirmJob;
+import cc.lv1.rpg.gs.entity.TeamInvitation;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.impl.Role;
+import cc.lv1.rpg.gs.entity.impl.battle.PlayerBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import cc.lv1.rpg.gs.util.FontConver;
+/**
+ * 队伍控制器
+ * @author dxw
+ *
+ */
+public class TeamController extends PlayerContainer
+{
+	public static final int CLEAR_ALL = 0;
+	public static final int CLEAR_ONE = 1;
+	
+	
+    private PlayerController leader;
+    
+    private List applyList = new ArrayList(20);
+    
+    public TeamController(int id)
+    {
+    	this.id = id;
+    	this.name = DC.getString(DC.BATTLE_7);
+    }
+    
+    
+    public List getApplyList()
+    {
+    	return applyList;
+    }
+    
+    public PlayerController getApplyById(int playerId)
+    {
+    	for (int i = 0; i < applyList.size();i++)
+    	{
+    		PlayerController player = (PlayerController)applyList.get(i);
+    		if(player.getID() == playerId)
+    			return player;
+		}
+    	return null;
+    }
+    
+    public void addApply(PlayerController target)
+    {
+    	if(getApplyById(target.getID()) == null && applyList.size() < 20)
+    		applyList.add(target);
+    }
+    
+    /**
+     * 申请列表是否已达最大
+     * @return
+     */
+    public boolean isMaxApply()
+    {
+    	return applyList.size() > 19;
+    }
+    
+	public PlayerController[] getPlayers()
+	{
+		int size = getPlayerCount();
+		PlayerController [] players = new PlayerController[size]; 
+		for(int i = 0 ; i < size ; i ++)
+		{
+			players[i] = (PlayerController)playerList.get(i);
+			
+		}
+		return players;
+	}
+	
+	public boolean isTeamPlayer(PlayerController target)
+	{
+		for(int i = 0 ; i < getPlayerCount() ; i ++)
+		{
+			PlayerController player = (PlayerController)playerList.get(i);
+			if(player.getID() == target.getID())
+				return true;
+		}
+		return false;
+	}
+
+
+	public PlayerController getLeader()
+	{
+		return leader;
+	}
+	
+	public void setLeader(PlayerController leader)
+	{
+		this.leader = leader;
+	}
+	
+	public boolean isLeader(PlayerController player)
+	{
+		if(leader == null || player == null)
+			return false;
+		
+		return player.getID() == leader.getID();
+	}
+
+	/**
+	 * 队伍是否活动
+	 * 当队长下线或者队长跟其他队员处于不同位置则解散
+	 */
+	public boolean isActive()
+	{
+		if (leader == null)
+			return false;
+		if (!leader.isOnline())
+			return false;
+		if (playerList.size() <= 1)
+			return false;
+		return true;
+	}
+	
+	/**
+	 * 加入组
+	 */
+	public void addPlayer(PlayerController target)
+	{
+		target.setTeam(this);
+		super.addPlayer(target);
+		
+//		leader.getRoom().flushRoomTeamInfo();
+	}
+	
+	
+	/**
+	 * 更新组
+	 */
+	public void updateTeam()
+	{	
+		
+	}
+	
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(playerList.size());
+
+		for (int i = 0; i < playerList.size(); i++) 
+		{
+			PlayerController player = (PlayerController) playerList.get(i);
+			if(player == null || !player.isOnline())
+				continue;
+			if(player.getParent() instanceof BattleController)
+				player.getPlayer().sendAlwaysValue(buffer,(PlayerBattleTmp) player.getAttachment());
+			else
+				player.getPlayer().sendAlwaysValue(buffer, null);
+			if(isLeader(player))
+				buffer.writeBoolean(true);
+			else
+				buffer.writeBoolean(false);
+			
+			player.sendExpBuff();
+
+			BuffBox box = (BuffBox) player.getPlayer().getExtPlayerInfo("buffBox");
+			Bag bag = (Bag) player.getPlayer().getExtPlayerInfo("bag");
+			for (int j = 0; j < box.getEffectList().size(); j++) 
+			{
+				TimeEffect effect = (TimeEffect) box.getEffectList().get(j);
+				bag.sendExpBuff(player, effect.id, true, 0);
+			}
+		}
+	}
+	
+	public void sendActivePointTo()
+	{
+		for (int i = 0; i < playerList.size(); i++) 
+		{
+			PlayerController player = (PlayerController) playerList.get(i);
+			if(player == null || !player.isOnline())
+				continue;
+			player.sendActivePoint();
+		}
+	}
+	
+	
+	/**
+	 * 发送申请加入队伍的所有人的信息
+	 * @param target
+	 */
+	public void sendApplyList(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeUTF(name);
+		buffer.writeByte(target.teamState);
+		int size = applyList.size();
+		buffer.writeByte(size); 
+		int i = 0;
+		for (i = 0; i < size; i++) 
+		{
+			PlayerController player = (PlayerController)applyList.get(i);
+			buffer.writeInt(player.getID());
+			buffer.writeInt(player.getPlayer().level);
+			buffer.writeUTF(player.getName());
+			buffer.writeByte(player.getPlayer().upProfession);
+		}
+
+		List roomPlayers = target.getRoom().getPlayerList();
+		size = 0;
+		for (i = 0; i < roomPlayers.size(); i++) 
+		{
+			PlayerController player = (PlayerController) roomPlayers.get(i);
+			if(player.getTeam() != null)
+				continue;
+			if(player.getID() == target.getID())
+				continue;
+			size++;
+		}
+		buffer.writeInt(size);
+		for (i = 0; i < roomPlayers.size(); i++) 
+		{
+			PlayerController player = (PlayerController) roomPlayers.get(i);
+			if(player.getTeam() != null)
+				continue;
+			if(player.getID() == target.getID())
+				continue;
+			buffer.writeInt(player.getID());
+			buffer.writeInt(player.getPlayer().level);
+			buffer.writeUTF(player.getName());
+			buffer.writeByte(player.getPlayer().upProfession);
+			buffer.writeByte(player.teamState);
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_TEAM_APPLY_LIST_COMMAND,buffer));
+	}
+	
+	/**
+	 * 玩家离开组
+	 * @param target
+	 */
+	public void playerLeaveTeam(PlayerController target)
+	{
+		if(target.getTeam() == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_PLAYER_NOTIN_TEAM);
+			return;
+		}
+		int size = playerList.size();
+		ByteBuffer buffer = new ByteBuffer(16);
+		if(size == 2)
+		{
+			PlayerController player1 = (PlayerController) playerList.get(0);
+			PlayerController player2 = (PlayerController) playerList.get(1);
+			player1.setTeam(null);
+			player2.setTeam(null);
+			buffer.writeBoolean(true);
+			dispatchMsg(SMsg.S_LEADER_DISBAND_TEAM_COAMMAND, buffer);
+			
+			playerList.clear();
+			leader = null;
+			applyList = new ArrayList(20);
+			
+		}
+		else if(size > 2)
+		{
+			if(isLeader(target))
+			{
+				PlayerController player = getNextLeader();
+				player.getPlayer().state = Role.STATE_TEAMLEADER;
+				setLeader(player);
+				buffer.writeInt(player.getID());
+			}
+			else
+			{
+				buffer.writeInt(0);//是其它队员离开
+			}
+			buffer.writeInt(target.getID());//离开队伍的玩家
+			dispatchMsg(SMsg.S_MEMBER_LEAVE_TEAM_COMMAND, buffer);
+			target.setTeam(null);
+			removePlayer(target);
+		}
+	}
+	
+	/**
+	 * 获取新队长
+	 * @return 新队长
+	 */
+	public PlayerController getNextLeader()
+	{
+		for (int i = 0; i < playerList.size(); i++) 
+		{
+			PlayerController player = (PlayerController) playerList.get(i);
+			if(player.getID() != leader.getID())
+			{
+				return player;
+			}
+		}
+		return null;
+	}
+	
+
+	
+	/**
+	 * 队长解散组
+	 * @param target
+	 */
+	private void leaderDisbandTeam(PlayerController target)
+	{
+		if(target.getID() != leader.getID())
+		{
+			target.sendAlert(ErrorCode.ALERT_NOT_POWER_ERROR);
+			return;
+		}
+		for (int i = 0; i < playerList.size(); i++) 
+		{
+			PlayerController player = (PlayerController) playerList.get(i);
+			if(player == null)
+				continue;
+			if(!player.isOnline())
+				continue;
+			player.setTeam(null);
+			player.getPlayer().state = Role.STATE_LEISURE;
+		}
+		ByteBuffer buffer = new ByteBuffer(1);
+		buffer.writeBoolean(true);
+		dispatchMsg(SMsg.S_LEADER_DISBAND_TEAM_COAMMAND, buffer);
+
+		leader.getRoom().removeTeam(this);
+		
+		playerList.clear();
+		leader = null;
+		applyList = new ArrayList(20);
+	}
+	
+	/**
+	 * 队长 T 成员
+	 * @param target
+	 * @param id
+	 */
+	private void leaderKickMember(PlayerController target, ByteBuffer buffer)
+	{
+		int id = buffer.readInt();
+		PlayerController player = getPlayer(id);;
+		if(player == null)
+		{
+			target.sendAlert(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			return;
+		}
+		if(player.getID() == target.getID())
+		{
+			target.sendAlert(ErrorCode.ALERT_NOT_TARGET_SELF);
+			return;
+		}
+		if(target.getTeam().getPlayerCount() <= 2)
+		{
+			leaderDisbandTeam(target);
+		}
+		else
+		{
+			player.setTeam(null);
+			removePlayer(player);
+			
+			ByteBuffer buff = new ByteBuffer(4);
+			buff.writeInt(id);
+			dispatchMsg(SMsg.S_LEADER_T_MEMBER_COMMAND, buff);
+		}
+		
+		ByteBuffer buff = new ByteBuffer(4);
+		buff.writeInt(id);
+		player.getNetConnection().sendMessage(new SMsg(SMsg.S_LEADER_T_MEMBER_COMMAND,buff));
+	}
+	
+	/**
+	 * 转让队长
+	 * @param target
+	 * @param id
+	 */
+	private void leaderToMember(PlayerController target, ByteBuffer buffer)
+	{
+		int id = buffer.readInt();
+		if(!isLeader(target))
+		{
+			target.sendAlert(ErrorCode.ALERT_NOT_POWER_ERROR);
+			return;
+		}
+		//要转让给谁当队长
+		PlayerController player = null;
+		if(getPlayer(id) == null)
+		{
+			target.sendAlert(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			return;
+		}
+		player = getPlayer(id);
+		if(player.getID() == target.getID())
+		{
+			target.sendAlert(ErrorCode.ALERT_NOT_TARGET_SELF);
+			return;
+		}
+		
+		leaderToOther(target,player);
+		
+	}
+	
+	/**
+	 * 队长设置
+	 * @param source
+	 * @param target
+	 */
+	public void leaderToOther(PlayerController source,PlayerController target)
+	{
+		//设置状态
+		source.getPlayer().state = Role.STATE_TEAMMEMBER;
+		target.getPlayer().state = Role.STATE_TEAMLEADER;
+		setLeader(target);
+		ByteBuffer buffer = new ByteBuffer(4);
+		buffer.writeInt(target.getID());//新队长ID
+		dispatchMsg(SMsg.S_LEADER_TRANSFER_COMMAND, buffer);	
+	}
+	
+	
+	private void removeApplyTarget(int targetId)
+	{
+		for (int i = 0; i < applyList.size(); i++) 
+		{
+			PlayerController target = (PlayerController) applyList.get(i);
+			if(target.getID() == targetId)
+			{
+				applyList.remove(i);
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * 批准玩家加入队伍
+	 * @param target
+	 * @param inBuffer
+	 */
+	public void agreePlayerRequest(PlayerController player,ByteBuffer inBuffer)
+	{
+		int targetId = inBuffer.readInt();
+		
+		PlayerController target = player.getRoom().getPlayer(targetId);
+		if(target == null)
+		{
+			player.sendAlert(ErrorCode.ALERT_PLAYER_NOTAT_ROOM);
+			removeApplyTarget(targetId);
+			return;
+		}
+		if(target.isAuto)
+		{
+			player.sendAlert(ErrorCode.ALERT_TARGET_PLAYER_AUTO_BATTLEING);
+			removeApplyTarget(targetId);
+			return;
+		}
+		PlayerController applyPlayer = getApplyById(targetId);
+		if(applyPlayer == null)
+		{
+			player.sendAlert(ErrorCode.ALERT_PLAYER_ISNOT_APPLY);
+			removeApplyTarget(targetId);
+			return;
+		}
+		if(leader.getID() != player.getID())
+		{
+			player.sendAlert(ErrorCode.ALERT_NOT_POWER_ERROR);
+			return;
+		}
+		
+		if(player.getRoom().isCopyPartyRoom)
+		{
+			if(player.getRoom().getCopy() != null && !player.getRoom().getCopy().isTeam)
+			{
+				player.sendAlert(ErrorCode.ALERT_ROOM_ISNOT_TEAM);
+				removeApplyTarget(targetId);
+				return;
+			}
+		}
+		if(player.getRoom().isGoldPartyRoom || player.getRoom().isGoldPartyPKRoom)
+			return;
+		
+		if(playerList.size() > 4)
+		{
+			player.sendAlert(ErrorCode.ALERT_TEAM_PLAYERS_TOO_MUCH);
+			removeApplyTarget(targetId);
+			return;
+		}
+		
+		if(target.getTeam() != null)
+		{
+			player.sendAlert(ErrorCode.ALERT_PLAYER_IN_TEAM);
+			removeApplyTarget(targetId);
+			return;
+		}
+		if(target.teamState == 0)
+		{
+			ByteBuffer buff = new ByteBuffer();
+			buff.writeUTF(target.getName());
+			player.clientMessageChain(new AppMessage(SMsg.C_PLAYER_REQUEST_TEAM_COMMAND,buff));
+		}
+		else if(target.teamState == 1)
+		{
+			player.sendAlert(ErrorCode.ALERT_PLAYER_REFUSE_TEAM);
+			removeApplyTarget(targetId);
+			return;
+		}
+		else if(target.teamState == 2)
+		{
+			player.autoAddTeam(target);
+		}	
+	}
+	
+	/**
+	 * 清空队伍列表或者删除某一个申请
+	 * @param target
+	 * @param inBuffer
+	 */
+	public void clearApplyList(PlayerController target,ByteBuffer inBuffer)
+	{
+		if(leader.getID() != target.getID())
+		{
+			target.sendAlert(ErrorCode.ALERT_NOT_POWER_ERROR);
+			return;
+		}
+		int type = inBuffer.readByte();
+		int playerId = inBuffer.readInt();
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeByte(type);
+		if(type == CLEAR_ALL)
+		{
+			applyList.clear();
+		}
+		else if(type == CLEAR_ONE)
+		{
+			PlayerController player = getApplyById(playerId);
+			if(player != null)
+			{
+				applyList.remove(player);
+			}
+		}
+		buffer.writeInt(playerId);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_TEAM_CLEAR_APPLY_COMMAND,buffer));
+	}
+	
+	/**
+	 * 设置队伍信息
+	 * @param target
+	 * @param inBuffer
+	 */
+	public void setTeamInfo(PlayerController target,ByteBuffer inBuffer)
+	{
+		if(leader.getID() != target.getID())
+		{
+			target.sendAlert(ErrorCode.ALERT_NOT_POWER_ERROR);
+			return;
+		}
+		String newName = inBuffer.readUTF();
+		newName = MarkChar.replace(newName);
+		
+		if(!UseChar.isCanReg(newName))
+		{
+			target.sendAlert(ErrorCode.ALERT_HUOXINGWEN);
+			return;
+		}
+		
+		
+		if(newName.trim().length() == 0)
+			return;
+		name = newName;
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(id);
+		buffer.writeUTF(name);
+		List list = target.getRoom().getPlayerList();
+		for (int i = 0; i < list.size(); i++) 
+		{
+			PlayerController player = (PlayerController) list.get(i);
+			if(!player.isOnline())
+				continue;
+			if(!player.isLookTeam)
+				continue;
+			player.getNetConnection().sendMessage(new SMsg(SMsg.S_TEAM_SET_INFO_COMMAND, buffer));
+		}
+	}
+	
+	
+	
+	/**
+	 * 队伍消息通道
+	 * @param target
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		ByteBuffer buffer = msg.getBuffer();
+		
+		RoomController room = target.getRoom();
+		
+		if(type == SMsg.C_LEADER_TRANSFER_COMMAND)
+		{
+			leaderToMember(target,buffer);
+			
+			room.flushRoomTeamInfo();
+		}
+		else if(type == SMsg.C_LEADER_DISBAND_TEAM_COAMMAND)
+		{
+			leaderDisbandTeam(target);
+			
+			room.flushRoomTeamInfo();
+		}
+		else if(type == SMsg.C_LEADER_T_MEMBER_COMMAND)
+		{
+			leaderKickMember(target,buffer);
+			
+//			room.flushRoomTeamInfo();
+		}
+		else if(type == SMsg.C_MEMBER_LEAVE_TEAM_COMMAND)
+		{
+			int size = playerList.size();
+			
+			target.getRoom().deleteTeam(this);
+			
+			playerLeaveTeam(target);
+			
+			if(size == 2)
+				room.flushRoomTeamInfo();
+		}
+		else if(type == SMsg.C_TEAM_AGREE_APPLY_COMMAND)
+		{
+			agreePlayerRequest(target, buffer);
+			
+//			room.flushRoomTeamInfo();
+		}
+		else if(type == SMsg.C_TEAM_CLEAR_APPLY_COMMAND)
+		{
+			clearApplyList(target,buffer);
+		}
+		else if(type == SMsg.C_TEAM_SET_INFO_COMMAND)
+		{
+			setTeamInfo(target,buffer);
+		}
+	}
+	
+}

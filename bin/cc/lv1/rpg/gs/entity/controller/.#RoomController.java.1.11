@@ -1,0 +1,289 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.RoomExit;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.net.SMsg;
+
+/**
+ * 房间控制器
+ * @author dxw
+ *
+ */
+public class RoomController extends PlayerContainer
+{
+	private static final MonsterGroupController[] NULL_MONSTER_GROUP = new MonsterGroupController[0];
+	
+	private static final NpcController[] NULL_NPC_LIST = new NpcController[0];
+	
+	private static final PlayerController[] NULL_PLAYER_LIST = new PlayerController[0];
+	
+	private WorldManager worldManager;
+	
+	private AreaController area;
+	
+	/** 包含在本房间的monster */
+	private MonsterGroupController[] monsterGroups = NULL_MONSTER_GROUP;
+	
+	/** 包含在本房间的npc */
+	private NpcController[] npcList = NULL_NPC_LIST;
+	
+	/** 能否战斗 */
+	private boolean fightAble;
+
+	/** 能否PK */
+	private boolean pkAble;
+	
+	/** 复活点 */
+	private int rebirthId;
+	
+	/** 0左下 1左上 2上左 3上右 4右上 5右下 6下右 7下左 */
+	private RoomExit [] exits  = new RoomExit[8];
+	
+
+	private ArrayList monstersNode = null;
+	
+
+	public RoomController()
+	{
+	}
+	
+	/**
+	 * 初始化
+	 * @param node
+	 */
+	public void init(XMLNode node)
+	{
+		id = Integer.parseInt(node.getName().substring(1));
+		
+		name = node.getSubNode("name").getData();
+		
+		fightAble = node.getSubNode("fight").equals("1");
+		
+		pkAble = node.getSubNode("pk").equals("1");
+			
+		String rebirth = node.getSubNode("rebirth").getData();
+		
+		rebirthId = Integer.parseInt(rebirth.substring(1));
+		
+		monstersNode = node.getSubNode("monsters").getSubNodes();
+		
+	}
+	
+	/**
+	 * 发送自身所有信息
+	 * @param target
+	 */
+	public void sendInfo(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer(256);
+		writeTo(buffer);
+		SMsg msg = new SMsg(SMsg.S_ROOM_INFO_COMMAND,buffer);
+		target.getNetConnection().sendMessage(msg);
+	}
+	
+	public void copyTo(GameObject gameobject)
+	{
+		super.copyTo(gameobject);
+
+		RoomController roomController = (RoomController)gameobject;
+		roomController.worldManager = worldManager;
+		
+		roomController.fightAble = fightAble;
+		roomController.pkAble = pkAble;
+		roomController.rebirthId = rebirthId;
+		roomController.monstersNode = monstersNode;
+	}
+
+	/**
+	 * 发送房间信息给客户端
+	 */
+	public void writeTo(ByteBuffer buffer)
+	{
+		super.writeTo(buffer);
+		buffer.writeBoolean(fightAble);
+		buffer.writeBoolean(pkAble);
+		buffer.writeInt(rebirthId);
+		
+		for(int i = 0 ; i < 8 ; i ++)
+		{
+			if(exits[i]==null)
+				buffer.writeBoolean(false);
+			else
+				buffer.writeBoolean(true);
+		}
+		writePlayers(buffer);
+	}
+	
+	/**
+	 * 发送所有怪物属性
+	 * @param buffer
+	 */
+	public void writeMonsters(ByteBuffer buffer)
+	{
+		int monsterLength = monsterGroups.length;
+		buffer.writeInt(monsterLength);
+		for (int i = 0; i < monsterLength; i++) 
+		{
+			monsterGroups[i].writeTo(buffer);
+		}
+	}
+	
+	/**
+	 * 发送房间内所有的NPC信息
+	 * @param buffer
+	 */
+	public void writeNpcs(ByteBuffer buffer)
+	{
+		int npcLength = npcList.length;
+		buffer.writeByte(npcLength);
+
+		for(int i = 0 ; i < npcLength ; i ++)
+		{
+			npcList[i].getNpc().writeTo(buffer);
+		}
+	}
+	
+	/**
+	 * 发送房间内的所有玩家信息
+	 * @param buffer
+	 */
+	public void writePlayers(ByteBuffer buffer)
+	{
+		buffer.writeInt(playerList.size()); //这个size不可信 
+	
+		for(int i = 0 ; i != playerList.size() ; i ++)
+		{
+			PlayerController everyone = (PlayerController)playerList.get(i);
+			everyone.getPlayer().writeTo(buffer);
+		}
+	}
+	
+	public void update(long timeMillis)
+	{
+		
+	}
+
+	public void ExitLinking()
+	{
+		for (int i = 0; i < exits.length; i++)
+		{
+			if(exits[i] == null)
+				continue;
+
+			AreaController areaTarget = worldManager.getAreaById(exits[i].targetArea);
+			
+			if(areaTarget == null)
+			{
+				MainFrame.println("Exit : no exit area "+exits[i].targetArea);
+				continue;
+			}
+			RoomController roomTarget = areaTarget.getRoomById(exits[i].targetRoomId);
+			
+			if(roomTarget == null)
+			{
+				MainFrame.println("Exit : no exit room "+exits[i].targetRoomId+" by "+exits[i].targetArea);
+				continue;
+			}
+			
+			exits[i].targetRC = roomTarget;
+		}
+	}
+	
+	/**
+	 * 把NPC添加到房间中
+	 * @param npc
+	 */
+	public void addNpcList(NpcController npc)
+	{
+		NpcController[] npcs = new NpcController[npcList.length+1];
+		for (int i = 0; i < npcList.length; i++)
+		{
+			npcs[i] = npcList[i];
+		}
+		npcs[npcList.length] = npc;
+		npcList = npcs;
+	}
+	
+	/**
+	 * 把monsterGroup添加到房间中
+	 * @param monsterGroup
+	 */
+	public void addMonsterGroupList(MonsterGroupController monsterGroup)
+	{
+		MonsterGroupController[] nMonsterGroup = new MonsterGroupController[monsterGroups.length+1];
+		for (int i = 0; i < monsterGroups.length; i++)
+		{
+			nMonsterGroup[i] = monsterGroups[i];
+		}
+		nMonsterGroup[monsterGroups.length] = monsterGroup;
+		monsterGroups = nMonsterGroup;
+	}
+	
+    /** 与客户端通信 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		if(type == SMsg.C_ROOM_INFO_COMMAND)
+		{
+			addPlayer(target);
+			sendInfo(target);
+		}
+	}
+	
+	public void setWorld(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+	
+	public void setParent(AreaController area)
+	{
+		this.area = area;
+	}
+
+	public void setExits(RoomExit[] exits)
+	{
+		this.exits = exits;
+	}
+
+	public RoomExit[] getExits()
+	{
+		return exits;
+	}
+	
+	public NpcController[] getNpcList()
+	{
+		return npcList;
+	}
+	
+	public ArrayList getMonstersNode()
+	{
+		return monstersNode;
+	}
+
+	public MonsterGroupController[] getMonsterGroups()
+	{
+		return monsterGroups;
+	}
+	
+	public List getPlayerList()
+	{
+		return playerList;
+	}
+
+	public String toString()
+	{
+		return " player "+playerList.size()+
+		" npc : "+
+		npcList.length+
+		" monster : "+
+		monsterGroups.length;
+	}
+}

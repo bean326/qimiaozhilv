@@ -1,0 +1,279 @@
+package cc.lv1.rpg.gs.util;
+
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.dao.DatabaseAccessor;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.CenterGoods;
+import cc.lv1.rpg.gs.entity.ShopCenter;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.Storage;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Mail;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+
+public class SaverChanger
+{
+	/**
+	 * 在需要增加的变量前，包括saveTo和loadFrom
+	 * 加
+	 * 如 
+	 *    if(isNewSave)
+	 * 		 name = buffer.readInt();
+	 * 
+	 *    if(isNewSave)
+	 * 		 name = buffer.writeInt(100000);
+	 */
+	public static boolean isNewSave = false; 
+	
+	public void procress()
+	{
+		GameServer.getInstance().initialWithoutNetServer();
+		GameServer.getInstance().getWorldManager().setGameServer(GameServer.getInstance());
+		DatabaseAccessor databaseAccessor = GameServer.getInstance().getDatabaseAccessor();
+		
+		List list = null;
+		int i = 0;
+		do
+		{
+			SaverChanger.isNewSave = true;//增加 为 false  减少为true
+			list = databaseAccessor.loadPlayers(i,i+10000);
+			i += 10000;
+			doSomePlayers(list);
+			System.out.println("-------------list size ------------  "+list.size());
+			
+			
+			SaverChanger.isNewSave = false;//增加  为 true  减少为false
+			databaseAccessor.savePlayers(list);
+			
+		}while(list.size() > 0);
+
+		
+		SaverChanger.isNewSave = true;//增加 为 false  减少为true
+			databaseAccessor.loadWorldInfo(GameServer.getInstance().getWorldManager());
+			
+		doSomeGameserver();
+			
+		SaverChanger.isNewSave = false;//增加  为 true  减少为false
+			databaseAccessor.createOrUpdateWorldInfo(GameServer.getInstance().getWorldManager());
+		
+		
+		System.out.println("add var success");
+	}
+	
+	private void doSomeGameserver()
+	{
+/*		List list = ShopCenter.getInstance().getCenterGoods();
+		int size = list.size();
+		for (int i = 0; i < size; i++)
+		{
+			CenterGoods cg =(CenterGoods)list.get(i);
+			Goods goods = cg.getGoods();
+			if(goods != null && goods instanceof GoodsEquip)
+			{
+				GoodsEquip equip = (GoodsEquip) goods;
+				GoodsEquip ge = check(equip);
+				clearGem(ge);
+				cg.setGoods(ge);
+			}
+		}*/
+		
+	}
+	
+	private void doSomePlayers(List list)
+	{	
+		int size = list.size();//清除荣誉值
+/*		for (int j = 0; j < size; j++)
+		{
+			Player player = (Player)list.get(j);
+			Goods[] goodsList = null;
+			Bag bag = (Bag) player.getExtPlayerInfo("bag");
+			goodsList = bag.getGoodsList();
+			for (int i = 0; i < goodsList.length; i++) 
+			{
+				if(goodsList[i] == null)
+					continue;
+				if(goodsList[i] instanceof GoodsEquip)
+				{
+					GoodsEquip equip = (GoodsEquip) goodsList[i];
+					goodsList[i] = check(equip);
+					clearGem(goodsList[i]);
+					goodsList[i].pickUpBind();
+				}
+			}
+			
+			
+			Storage storage = (Storage) player.getExtPlayerInfo("storage");
+			goodsList = storage.getGoodsList();
+			for (int i = 0; i < goodsList.length; i++) 
+			{
+				if(goodsList[i] == null)
+					continue;
+				if(goodsList[i] instanceof GoodsEquip)
+				{
+					GoodsEquip equip = (GoodsEquip) goodsList[i];
+					goodsList[i] = check(equip);
+					clearGem(goodsList[i]);
+					goodsList[i].pickUpBind();
+				}
+			}
+
+		}*/
+		
+		//1045000011    8小时2倍卡 2张
+		//1045000134    代金卷 3张
+		
+		for (int j = 0; j < size; j++)
+		{
+			Player player = (Player)list.get(j);
+			
+			Mail mail = new Mail("\u6E38\u620F\u7BA1\u7406\u5458",System.currentTimeMillis());
+			mail.setTitle("\u7CFB\u7EDF\u90AE\u4EF6");//系统邮件
+			
+			
+			Goods [] goods = DataFactory.getInstance().makeGoods(1045000011,2);
+			if(goods != null)
+			{
+				mail.addAttach(goods[0]);
+			}
+			
+			goods = DataFactory.getInstance().makeGoods(1045000134,3);
+			if(goods != null)
+			{
+				mail.addAttach(goods[0]);
+			}
+			mail.sendOffLine(player);
+		}
+	}
+	
+	public GoodsEquip check(GoodsEquip oldGoods)
+	{
+		GoodsEquip goods = (GoodsEquip) DataFactory.getInstance().getGameObject(oldGoods.id);
+		GoodsEquip equip = goods.makeNewBetterEquip(oldGoods.quality);
+		String str = oldGoods.extAtt.toString();
+		boolean flag = false;
+		if(oldGoods.power - getGemAtt(str,"power") > equip.power)
+			flag = true;
+		if(oldGoods.agility - getGemAtt(str,"agility")> equip.agility)
+			flag = true;
+		if(oldGoods.spirit - getGemAtt(str,"spirit") > equip.spirit)
+			flag = true;
+		if(oldGoods.wisdom - getGemAtt(str,"wisdom") > equip.wisdom)
+			flag = true;
+		if(oldGoods.phyAtt - getGemAtt(str,"phyAtt") > equip.phyAtt)
+			flag = true;
+		if(oldGoods.sptAtt - getGemAtt(str,"sptAtt") > equip.sptAtt)
+			flag = true;
+		if(oldGoods.phyDef - getGemAtt(str,"phyDef") > equip.phyDef)
+			flag = true;
+		if(oldGoods.sptDef - getGemAtt(str,"sptDef") > equip.sptDef)
+			flag = true;
+		if(oldGoods.lifePoint - getGemAtt(str,"lifePoint") > equip.lifePoint)
+			flag = true;
+		if(oldGoods.magicPoint - getGemAtt(str,"magicPoint") > equip.magicPoint)
+			flag = true;
+		if(oldGoods.phySmiteParm - getGemAtt(str,"phySmiteParm") > equip.phySmiteParm)
+			flag = true;
+		if(oldGoods.sptSmiteParm - getGemAtt(str,"sptSmiteParm") > equip.sptSmiteParm)
+			flag = true;
+		if(oldGoods.phySmiteRate - getGemAtt(str,"phySmiteRate") > equip.phySmiteRate)
+			flag = true;
+		if(oldGoods.sptSmiteRate - getGemAtt(str,"sptSmiteRate") > equip.sptSmiteRate)
+			flag = true;
+		if(oldGoods.curePoint - getGemAtt(str,"curePoint") > equip.curePoint)
+			flag = true;
+		if(oldGoods.noDefPhyHurt - getGemAtt(str,"noDefPhyHurt") > equip.noDefPhyHurt)
+			flag = true;
+		if(oldGoods.noDefSptHurt - getGemAtt(str,"noDefSptHurt") > equip.noDefSptHurt)
+			flag = true;
+		if(oldGoods.sptHurtAvoid - getGemAtt(str,"sptHurtAvoid") > equip.sptHurtAvoid)
+			flag = true;
+		if(oldGoods.phyHurtAvoid - getGemAtt(str,"phyHurtAvoid") > equip.phyHurtAvoid)
+			flag = true;
+
+		if(flag)
+		{
+			equip.objectIndex = oldGoods.objectIndex;
+			equip.bindMode = oldGoods.bindMode;
+			equip.useFlag = oldGoods.useFlag;
+			return equip;
+		}
+		else
+			return oldGoods;
+		
+	}
+	
+	/**
+	 * 
+	 * @param oldEquip 内存中的物品
+	 * @param newGoods 背包，仓库，寄卖中心物品
+	 */
+	public void clearGem(Goods goods)
+	{
+		if(!(goods instanceof GoodsEquip))
+			return;
+		GoodsEquip newGoods = (GoodsEquip) goods;
+		if(newGoods.extAtt.length() == 0)
+			return;
+		GoodsEquip ge = (GoodsEquip) DataFactory.getInstance().getGameObject(newGoods.id);
+		GoodsEquip oldEquip = ge.makeNewBetterEquip(newGoods.quality);
+		String[] exts = Utils.split(newGoods.extAtt.toString(), "|");
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < exts.length; i++)
+		{
+			String[] strs = Utils.split(exts[i], ":");
+			if(newGoods.attStr.indexOf(strs[0]) == -1)
+			{
+				continue;
+			}
+			int point = getGemAtt(newGoods.extAtt.toString(), strs[0]);
+			int oldPoint = Integer.parseInt(oldEquip.getVariable(strs[0]));
+			int newPoint = Integer.parseInt(newGoods.getVariable(strs[0]));
+//			System.out.println("att:"+strs[0]);
+//			System.out.println("point:"+point);
+//			System.out.println("oldPoint:"+oldPoint);
+//			System.out.println("newPoint:"+newPoint);
+//			System.out.println("---------------------------------");
+			if(newPoint - point == oldPoint)
+			{	
+				if(sb.length() > 0)
+					sb.append("|");
+				sb.append(exts[i]);
+			}
+			else if(newPoint - point > oldPoint)
+			{
+				newGoods.setVariable(strs[0], String.valueOf(oldPoint));
+			}
+			else
+				continue;
+		}
+		newGoods.extAtt = new StringBuffer(sb);
+	}
+	
+	public int getGemAtt(String strs,String str)
+	{
+		if(strs.isEmpty())
+			return 0;
+		int result = 0;
+		String[] gems = Utils.split(strs, "|");
+		for (int i = 0; i < gems.length; i++)
+		{
+			String[] atts = Utils.split(gems[i], ":");
+			if(atts[0].equals(str))
+			{
+				result += Integer.parseInt(atts[1]);
+			}
+		}
+		return result;
+	}
+
+	public static void main(String[] args)
+	{
+		new SaverChanger().procress();
+//		new SaverChanger().test();
+	}
+	
+}

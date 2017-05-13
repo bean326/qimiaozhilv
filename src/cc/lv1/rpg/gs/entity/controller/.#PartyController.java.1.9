@@ -1,0 +1,355 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordListener;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.impl.Reward;
+import cc.lv1.rpg.gs.entity.impl.Top;
+import cc.lv1.rpg.gs.net.SMsg;
+/**
+ * 活动控制器
+ * @author dxw
+ *
+ */
+public class PartyController extends PlayerContainer
+{
+	/** 排行榜要显示的名次 */
+	public static final int REWARDRANK = 20;
+	/**
+	 * 每小时
+	 */
+	protected static final int HOUR = 1000*60*60;
+
+	/**
+	 * 剩余开始时间   系统自动初始化
+	 */
+	protected long lessBeginTime = 0;
+	
+	/**
+	 * 举行活动的时间   系统自动初始化
+	 */
+	protected long partyTime = 0;
+	
+	
+	/**
+	 * 是否进入准备阶段   系统自动初始化
+	 */
+	protected boolean isReady = false;
+	
+	/**
+	 * 活动是否开始了   系统自动初始化
+	 */
+	protected boolean isStarted = false;
+	
+	/**
+	 * 活动是否结束了   系统自动初始化
+	 */
+	protected boolean isEnded = true;
+	
+	
+	/**
+	 * 玩家点数
+	 */
+	protected HashMap playerPoint = null;
+	
+	/**
+	 * 排行玩家
+	 */
+	protected List topPlayers = null;
+	
+	
+	public void init()
+	{
+		if(topPlayers == null)
+			topPlayers = new ArrayList(20); //创建排名
+		if(playerPoint == null)
+			playerPoint = new  HashMap(200); //创建暂存名单
+		if(playerList == null)
+			playerList = new ArrayList(100);
+	}
+	
+	
+	public void addPlayerPoint(PlayerController target,int point)
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append(target.getPlayer().accountName+":"+target.getName());
+		Object obj = playerPoint.get(sb.toString());
+		if(obj != null)
+		{
+			String[] strs = Utils.split(obj.toString(), ":");
+			int value = Integer.parseInt(strs[0]) + point;
+			playerPoint.put(sb.toString(), value+":"+strs[1]);
+			
+//			System.out.println("加入个人排行！"+target.getName());
+			setRank(target, topPlayers, 1, value);
+		}
+	}
+	
+	
+	
+	
+	
+	public void addPlayer(PlayerController target)
+	{
+		if(isPlayerIn(target))
+			return;
+		
+		//玩家名字没在活动中是时，加入
+		Object obj = playerPoint.get(target.getPlayer().accountName+":"+target.getName());
+		if(obj == null)
+		{
+			//value:count
+			//荣誉值:次数限制(从休息室到PK场，次数到达最大时就不能再进了)
+			playerPoint.put(target.getPlayer().accountName+":"+target.getName(), "0:0"); 
+			
+		}
+		
+		super.addPlayer(target);
+	}
+	
+	
+	protected boolean isMoveRoom(PlayerController target)
+	{
+		CampPartyController cpc = CampPartyController.getInstance();
+		FamilyPartyController fpc = FamilyPartyController.getInstance();
+		if(!cpc.isReady() && !fpc.isReady())
+		{
+			System.out.println("party is not ready!");
+			 return false;
+		}
+		if(playerPoint == null)
+		{
+			System.out.println("playerPoint is null!");
+			return false;
+		}
+		Object obj = playerPoint.get(target.getPlayer().accountName+":"+target.getName());
+		if(obj == null)
+		{
+			System.out.println("obj is null!");
+			return false;
+		}
+		else
+		{
+			String[] strs = Utils.split(obj.toString(), ":");
+			if(cpc.isReady())
+				return Integer.parseInt(strs[1]) < CampPartyController.MAXLOSECOUNT;
+			else if(fpc.isReady())
+			{
+				return Integer.parseInt(strs[1]) < FamilyPartyController.MAXLOSECOUNT;
+			}
+		}
+		return true;
+	}
+	
+	protected void setInRoomCount(PlayerController target)
+	{
+		Object obj = playerPoint.get(target.getPlayer().accountName+":"+target.getName());
+		if(obj != null)
+		{
+			String[] strs = Utils.split(obj.toString(), ":");
+			playerPoint.put(target.getPlayer().accountName+":"+target.getName(), strs[0]+":"+Integer.parseInt(strs[1])+1);
+		}
+	}
+	
+	/**
+	 * 玩家下线时或活动结束时
+	 */
+	public void removePlayer(PlayerController target)
+	{
+		target.getPlayer().setDefaultRoom(DataFactory.INITROOM);
+		
+		//玩家下线后不清楚map内容
+		super.removePlayer(target);
+	}
+	
+	/**
+	 * 玩家在活动里面
+	 * @param target
+	 * @return
+	 */
+	public boolean isPlayerIn(PlayerController target)
+	{
+		return super.getPlayer(target.getID()) != null;
+	}
+	
+	public boolean isReady()
+	{
+		return isReady;
+	}
+
+	public boolean isStarted()
+	{
+		return isStarted;
+	}
+
+	public boolean isEnded()
+	{
+		return isEnded;
+	}
+	
+	/**
+	 * 发送活动奖励
+	 */
+	public void sendPartyReward()
+	{
+		
+	}
+	
+	
+	/**
+	 * 设置荣誉排行榜
+	 */
+	public void setRank(PlayerController target,List topList,int type,int honorPoint)
+	{
+		String name = "";
+		if(type == 1)//玩家个人排行
+			name = target.getPlayer().accountName+":"+target.getName();
+		else if(type == 2)//家族排行
+		{
+			if(target.getFamily() == null)
+				return;
+			name = target.getFamily().name;
+		}
+		else 
+			return;
+		if(topList.size() == 0)
+		{
+			Reward reward = new Reward();
+			reward.name = name;
+			reward.point = honorPoint;
+			reward.rank = 1;
+			reward.logTime = WorldManager.currentTime;
+			if(type == 2)
+			{
+				reward.leaderName = target.getFamily().leaderName;
+				reward.playerCount = target.getFamily().getPlayerCount();
+			}
+			topList.add(reward);
+		}else
+		{
+			boolean isInRank = false;
+			//如果玩家已经在前10，则更新玩家的荣誉点数
+			for(int has = 0;has < topList.size();has++)
+			{
+				Reward reward = (Reward) topList.get(has);
+				if(reward.name.equals(name))
+				{
+					reward.point = honorPoint;
+					if(type == 2)
+					{
+						reward.leaderName = target.getFamily().leaderName;
+						reward.playerCount = target.getFamily().getPlayerCount();
+					}
+					isInRank = true;
+					break;
+				}
+			}
+			
+			//如果玩家没有在排行榜中，则加入到排行榜
+			if(isInRank == false)
+			{
+				Reward reward = new Reward();
+				reward.name = name;
+				reward.point = honorPoint;
+				reward.logTime = WorldManager.currentTime;
+				if(type == 2)
+				{
+					reward.leaderName = target.getFamily().leaderName;
+					reward.playerCount = target.getFamily().getPlayerCount();
+				}
+				topList.add(reward);
+			}
+			
+			if (topList.size() > 1) 
+			{
+			//对排行榜中的玩家进行排序	
+				for (int cur = 0; cur < topList.size() - 1; cur++)
+				{
+					
+					for (int next = cur + 1; next < topList.size(); next++) 
+					{
+						Reward reward1 = (Reward)topList.get(cur);
+						Reward reward2 = (Reward)topList.get(next);
+						if (reward1.point < reward2.point) 
+						{
+							Reward temp = reward1;
+							topList.set(cur, reward2);
+							topList.set(next, temp);
+						}
+						else if(reward1.point == reward2.point)
+						{
+							if(reward1.logTime > reward2.logTime)
+							{
+								Reward temp = reward1;
+								topList.set(cur, reward2);
+								topList.set(next, temp);
+							}
+						}
+					}
+				}	
+			}
+			//移除排行于第10名之后的玩家
+			if (topList.size() > REWARDRANK) 
+			{
+				for (int i = REWARDRANK; i < topList.size(); i++) 
+				{
+					topList.remove(i);
+				}
+			}
+			
+			//设置玩家的名次
+			for(int rank = 0;rank < topList.size();rank++)
+			{
+				Reward reward = (Reward) topList.get(rank);
+				reward.rank = rank + 1;
+			}
+		}
+	}
+	
+	
+	private void sendTopPlayer(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		int size = topPlayers==null?0:topPlayers.size();
+		buffer.writeByte(size);
+//		System.out.println("玩家排行："+size);
+		for (int i = 0; i < size; i++)
+		{
+			Reward reward = (Reward) topPlayers.get(i);
+			buffer.writeInt(reward.rank);
+			buffer.writeUTF(reward.name);
+			buffer.writeInt(reward.point);
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_PARTY_PLAYER_REWARD_COMMAND,buffer));
+	}
+	
+	/**
+	 * 接收活动内消息
+	 * 
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target,AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_GET_PARTY_PLAYER_REWARD_COMMAND)
+		{
+			sendTopPlayer(target);
+		}
+		else if(type == SMsg.C_GET_PLAYER_HONOUR_COMMAND)
+		{
+			
+		}
+
+	}
+	
+	
+}

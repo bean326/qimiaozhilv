@@ -1,0 +1,17 @@
+<dialog>
+
+<!--该NPC名为斗士第四名，发布的任务 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="107000901">我是斗士第四名</text>
+		</words>
+   		 <options>
+                  
+		</options>
+	</s01>
+   </default> 
+</dialog>

@@ -1,0 +1,1081 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.BattleController;
+import cc.lv1.rpg.gs.entity.controller.MonsterController;
+import cc.lv1.rpg.gs.entity.controller.PVEController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.controller.RoomController;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.battle.PlayerBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.Effect;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * 背包
+ * @author dxw
+ *
+ */
+public class Bag extends PlayerExtInfo
+{
+	/** 元宝(RMB) */
+	public int money; 
+
+	/** 游戏币 */
+	public int point; 
+	
+	/** 总的背包空间(默认) */
+	private int bagSize = 60;
+	
+	/** 背包中的物品 */
+	private Goods[] goodsList = new Goods[bagSize];
+
+	public String getName()
+	{
+		return "bag";
+	}
+
+
+	public void loadFrom(ByteBuffer buffer)
+	{
+		bagSize = buffer.readInt();
+		money = buffer.readInt();
+		point = buffer.readInt();
+		loadBagGoods(buffer); 
+	}
+
+
+	public void saveTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(bagSize);
+		buffer.writeInt(money);
+		buffer.writeInt(point);
+		saveBagGoods(buffer);//存背包
+	}
+	
+	/**
+	 * 发送背包所有信息
+	 * @param buffer
+	 */
+	public void writeToNotUseGoods(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		int count = 0;
+		buffer.writeInt(bagSize);
+		buffer.writeInt(money);
+		buffer.writeInt(point);
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				count++;	
+			}
+		}
+		buffer.writeInt(count);
+		for (int j = 0; j < goodsList.length; j++) 
+		{
+			if(goodsList[j] != null)
+			{
+				Goods goods = goodsList[j];
+				buffer.writeInt(j);
+				buffer.writeInt(goods.goodsCount);
+				buffer.writeBoolean(goods.useFlag);
+				goods.writeTo(buffer);
+			}
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_PLAYER_BAG_COMMAND,buffer));
+	}
+	
+	/** 
+	 * 发送角色身上装备信息
+	 * @param buffer
+	 */
+	public void getPlayerEquipSet(PlayerController target,ByteBuffer buffer)
+	{
+		int count = 0;
+		List list = new ArrayList();
+		for (int i = 0; i < goodsList.length; i++) {
+			Goods goods = (Goods) goodsList[i];
+			if(goods == null)
+				continue;
+			if(goods.useFlag && goods.type == 1)
+			{
+				count++;
+				list.add(goods);
+			}
+		}
+		//PVPInfo pvp = (PVPInfo) target.getPlayer().getExtPlayerInfo("PVPInfo");
+		//pvp.writeTo(buffer);发送玩家的PK信息
+		EquipSet equip = (EquipSet) target.getPlayer().getExtPlayerInfo("equipSet");
+		equip.writeTo(buffer);
+		buffer.writeByte(count);
+		for (int i = 0; i < count; i++) {
+			Goods goods = (Goods) list.get(i);
+			goods.writeTo(buffer);
+			buffer.writeInt(((GoodsEquip)goods).equipLocation);
+		}
+	}
+	
+	/**
+	 * 保存背包
+	 * @param buffer
+	 */
+	public void saveBagGoods(ByteBuffer buffer)
+	{
+		int number = 0;
+		//记录物品数量
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+				number++;
+		}
+		buffer.writeInt(number);
+		//记录物品信息
+		for(int j=0; j<goodsList.length; j++){
+			if(goodsList[j] != null)
+			{
+				Goods goods = goodsList[j];
+				buffer.writeInt(goods.id);
+				buffer.writeLong(goods.objectIndex);
+				buffer.writeInt(goods.type);
+				buffer.writeBoolean(goods.useFlag);
+				buffer.writeInt(goods.repeatNumber);
+				buffer.writeInt(goods.goodsCount);
+				buffer.writeInt(j);
+			}
+		}
+	}
+	
+	/**
+	 * 取背包
+	 * @param buffer
+	 */
+	public void loadBagGoods(ByteBuffer buffer)
+	{
+		int len = buffer.readInt();
+		for(int i=0; i<len; i++){
+			int id = buffer.readInt();
+			long objectIndex = buffer.readLong();
+			int type = buffer.readInt();
+			boolean useFlag = buffer.readBoolean();
+			int repeatNumber = buffer.readInt();
+			int goodsCount = buffer.readInt();
+			int location = buffer.readInt();
+			
+			Goods goods = (Goods)DataFactory.getInstance().getGameObject(id);
+			Goods newGoods = (Goods) RPGameObject.cloneObject(goods);
+			
+			newGoods.objectIndex = objectIndex;
+			newGoods.type = type;
+			newGoods.useFlag = useFlag;
+			newGoods.repeatNumber = repeatNumber;
+			newGoods.goodsCount = goodsCount;
+			newGoods.id = id;
+			synchronized (goodsList) 
+			{
+				goodsList[location] = newGoods;
+			}
+		}
+		
+	}
+
+	public void addGoods(PlayerController target,int goodsId , int goodsCount)
+	{
+		Goods goods = (Goods)DataFactory.getInstance().getGameObject(goodsId);
+		
+		if(goods == null)
+			return;
+		
+		
+		Goods newGoods = (Goods) RPGameObject.cloneObject(goods);
+		newGoods.objectIndex = target.getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+		newGoods.goodsCount = goodsCount;
+		
+		ByteBuffer buffer = new ByteBuffer();
+		addGoodsToBag(target,newGoods,buffer);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_ADD_GOODS_COMMAND,buffer));
+	}
+	
+
+	
+	public boolean isAddGoodsBagFull(PlayerController target,Goods goods)
+	{
+		if(goods.repeatNumber <= 1)
+		{
+			if(isBagFull(target))
+				return false;
+		}
+		else
+		{
+			List sameGoodsList = getSameGoods(goods.id);
+			if(sameGoodsList.size() == 0)
+			{
+				if(isBagFull(target))
+					return false;
+			}
+			else
+			{
+				int count = 0;
+				for (int i = 0; i < sameGoodsList.size(); i++)
+				{
+					Goods sGoods = (Goods) sameGoodsList.get(i);
+					count += sGoods.repeatNumber - sGoods.goodsCount;
+				}
+				if(goods.goodsCount > count)
+				{
+					if(isBagFull(target))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * 添加物品到玩家背包中
+	 * @param target
+	 * @param goods
+	 */
+	public boolean addGoodsToBag(PlayerController target,Goods goods,ByteBuffer buffer)
+	{
+		PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting");
+		buffer.writeInt(goods.goodsCount);
+		if(goods.repeatNumber <= 1)
+		{
+			if(isBagFull(target))
+				return false;
+			int location = getNullLocation();
+			goodsList[location] = goods;
+			sendGoodsInfo(0,goods,location,buffer);
+		}
+		else
+		{
+			List sameGoodsList = getSameGoods(goods.id);
+			if(sameGoodsList.size() == 0)
+			{
+				if(isBagFull(target))
+					return false;
+				int location = getNullLocation();
+				goodsList[location] = goods;
+				sendGoodsInfo(0,goods,location,buffer);
+			}
+			else
+			{
+				buffer.writeByte(1);
+				int count = 0;
+				for (int i = 0; i < sameGoodsList.size(); i++)
+				{
+					Goods sGoods = (Goods) sameGoodsList.get(i);
+					count += sGoods.repeatNumber - sGoods.goodsCount;
+				}
+				if(goods.goodsCount > count)
+				{
+					if(isBagFull(target))
+						return false;
+					buffer.writeByte(1);
+					buffer.writeByte(sameGoodsList.size());
+					for (int i = 0; i < sameGoodsList.size(); i++)
+					{
+						Goods sGoods = (Goods) sameGoodsList.get(i);
+						sGoods.goodsCount = sGoods.repeatNumber;
+						sendGoodsInfo(1,sGoods,-1,buffer);
+					}
+					count = goods.goodsCount - count;
+					Goods newGoods = (Goods) RPGameObject.cloneObject(goods);
+					newGoods.objectIndex = target.getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					newGoods.goodsCount = count;
+					goodsList[getNullLocation()] = newGoods;
+					sendGoodsInfo(1,newGoods,-1,buffer);
+				}
+				else
+				{
+					buffer.writeByte(0);	
+					buffer.writeByte(sameGoodsList.size());
+					for (int i = 0; i < sameGoodsList.size(); i++)
+					{
+						Goods sGoods = (Goods) sameGoodsList.get(i);
+						if(goods.goodsCount <= sGoods.repeatNumber - sGoods.goodsCount)
+						{
+							sGoods.goodsCount += goods.goodsCount;
+							goods.goodsCount = 0;
+						}
+						else
+						{
+							goods.goodsCount -= sGoods.repeatNumber - sGoods.goodsCount;
+							sGoods.goodsCount = sGoods.repeatNumber;
+						}
+						sendGoodsInfo(1,sGoods,-1,buffer);
+					}	
+				}
+			}
+			ps.updatePlayerBar(goods.id, getGoodsCount(goods.id));
+		}
+		
+		TaskInfo info = (TaskInfo)target.getPlayer().getExtPlayerInfo("taskInfo");
+		info.onPlayerGotItem(goods, target);
+		return true;
+	}
+
+	
+	private void sendGoodsInfo(int type,Goods goods,int location,ByteBuffer buffer)
+	{
+		if(type == 0)
+		{
+			buffer.writeByte(0);
+			goods.writeTo(buffer);
+			buffer.writeInt(goods.goodsCount);
+			buffer.writeInt(location);
+		}
+		else if(type == 1)
+		{
+			buffer.writeUTF(goods.objectIndex+"");
+			buffer.writeInt(goods.goodsCount);
+			buffer.writeInt(getGoodsLocation(goods.objectIndex));
+		}
+	}
+	
+
+	
+	
+	/**
+	 * 从背包中删除物品(丢弃物品)
+	 * @param target 目标玩家
+	 * @param buffer 参数
+	 */
+	public void deleteGoodsFromBag(PlayerController target, ByteBuffer buffer) 
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		Object goodsObject = getGoodsByObjectIndex(objectIndex);
+		if(goodsObject == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		int count = getGoodsCount(goods.id) - goods.goodsCount;
+		if(goods.bindMode != 2)
+		{
+			if(goods.useFlag)
+				goods.onRemoveImpl(target);
+			synchronized (goodsList) 
+			{
+				goodsList[getGoodsLocation(goods.objectIndex)] = null;
+			}
+		}
+		PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting");
+		ps.updatePlayerBar(goods.id,count);
+		ByteBuffer buff = new ByteBuffer(8);
+		buff.writeUTF(objectIndex+"");
+		buff.writeInt(goods.goodsCount);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_DELETE_GOODS_FROM_BAG_COMMAND, buff));
+		
+		
+		TaskInfo info = (TaskInfo)target.getPlayer().getExtPlayerInfo("taskInfo");
+		info.onPlayerLostItem(goods, target);
+	}
+	
+
+	/**
+	 * 改变物品在背包中的位置
+	 * @param target
+	 * @param buffer
+	 */
+	public void changeGoodsLocation(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		int newLocation = buffer.readInt();
+		Object goodsObject = getGoodsByObjectIndex(objectIndex);
+		if(goodsObject == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		if(newLocation > goodsList.length-1)
+		{
+			target.sendAlert(ErrorCode.ALERT_GOODS_LOCATION_ERROR);
+			return;
+		}
+		goodsList[getGoodsLocation(objectIndex)] = null;
+		goodsList[newLocation] = goods;
+		ByteBuffer buff = new ByteBuffer(8);
+		buff.writeUTF(objectIndex+"");
+		buff.writeInt(newLocation);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_CHANGE_BAG_GOODS_LOCATION_COMMAND,buff));
+	}
+	
+	
+	/**
+	 * 使用物品
+	 * @param target
+	 * @param buffer
+	 */
+	public void useGoods(PlayerController target,ByteBuffer buffer)
+	{
+		String objectIndex = buffer.readUTF();
+		int goodsId = buffer.readInt();
+		Goods goods = null;
+		if(objectIndex.isEmpty())
+			goods = getGoodsById(goodsId);
+		else
+			goods = getGoodsByObjectIndex(Long.parseLong(objectIndex));
+		if(goods == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}	
+		ByteBuffer buff = new ByteBuffer(32);
+		boolean result = goods.onUseImpl(target,buff);
+		if(!result)
+			return;
+
+		if(goods instanceof GoodsEquip)
+		{
+			EquipSet equipSet = (EquipSet) target.getPlayer().getExtPlayerInfo("equipSet");
+			equipSet.writeTo(buff);
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_PUT_ON_EQUIP_COMMAND,buff));
+		}
+		else if(goods instanceof GoodsProp)
+		{
+			GoodsProp prop = (GoodsProp) goods;
+			if(prop.type == 8)//技能书
+			{
+				buff.writeInt(prop.skillId);
+				target.getNetConnection().sendMessage(new SMsg(SMsg.S_STUDY_SKILL_COMMAND,buff));
+			}
+			else if(prop.type == 2)
+			{
+				if(target.getParent() instanceof BattleController)
+				{
+					buff = target.getAttachment().getEffectBuffer();
+					target.getParent().dispatchMsg(SMsg.S_EAT_DRUG_COMMAND, buff);
+				}
+				else
+				{
+					if(target.getTeam() == null)
+					{
+						target.getNetConnection().sendMessage(new SMsg(SMsg.S_EAT_DRUG_COMMAND,buff));
+					}
+					else
+					{
+						target.getTeam().dispatchMsg(SMsg.S_EAT_DRUG_COMMAND, buff);
+					}
+				}
+			}
+			removeGoods(target,prop.objectIndex,1);
+		}
+	}
+	
+	
+	/**
+	 * 脱下装备
+	 * @param target
+	 * @param buffer
+	 */
+	public void takeOffEquip(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		Object goodsObject = getGoodsByObjectIndex(objectIndex);
+		if(goodsObject == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}	
+		if(!(goodsObject instanceof GoodsEquip))
+		{
+			target.sendAlert(ErrorCode.ALERT_GOODS_TYPE_ERROR);
+			return;
+		}
+		Goods equip = (GoodsEquip) goodsObject;
+		boolean result = equip.onRemoveImpl(target);
+		if(!result)
+		{
+			target.sendAlert(ErrorCode.ALERT_GOODSEQUIP_TAKEOFF_ERROR);
+			return;
+		}
+		EquipSet equipSet = (EquipSet) target.getPlayer().getExtPlayerInfo("equipSet");
+		ByteBuffer buff = new ByteBuffer();
+		equipSet.writeTo(buff);
+		buff.writeUTF(objectIndex+"");
+		buff.writeInt(getGoodsLocation(objectIndex));
+		buff.writeInt(((GoodsEquip)equip).equipLocation);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_TAKE_OFF_EQUIP_COMMAND,buff));
+	}
+	
+	/**
+	 * 取得玩家快捷栏列表
+	 * @param target
+	 */
+	public void getPlayerShotcutBar(PlayerController target)
+	{
+		PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting");
+		ByteBuffer buffer = new ByteBuffer(128);
+		ps.writeTo(buffer);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_PLAYER_SHORTCUT_BAR_COMMAND,buffer));
+	}
+	
+	/**
+	 * 设置玩家快捷栏列表
+	 * @param target
+	 * @param buffer
+	 */
+	public void setPlayerShortcutBar(PlayerController target,ByteBuffer buffer)
+	{	
+		int location = buffer.readInt();
+		int id = buffer.readInt();
+		int type = buffer.readInt();//1为物品，0为技能
+		int count = 0;
+		if(type == 1)
+		{
+			Object goodsObject = getGoodsById(id);
+			if(goodsObject == null)
+			{
+				//物品不存在
+				target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+				return;
+			}	
+			count = getGoodsCount(id);
+		}
+		else if(type == 0)
+		{
+			SkillTome st = (SkillTome) target.getPlayer().getExtPlayerInfo("skillTome");
+			Object obj = st.getSkill(id);
+			if(obj == null || !(obj instanceof Skill))
+			{
+				//物品不存在
+				target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+				return;
+			}	
+			count = 0;
+		}
+		PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting"); 
+		ps.addPlayerBar(location,id,count);
+		ByteBuffer buff = new ByteBuffer(16);
+		buff.writeInt(location);
+		buff.writeInt(id);
+		buff.writeInt(type);
+		buff.writeInt(count);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SET_PLAYER_SHORTCUT_BAR_COMMAND,buff));
+	}
+	
+	/**
+	 * 取消物品快捷方式 
+	 * @param target
+	 * @param buffer
+	 */
+	public void cancelGoodsShortcut(PlayerController target,ByteBuffer buffer)
+	{
+		int location = buffer.readInt();
+		PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting"); 
+		ps.deletePlayerBar(location);
+		ByteBuffer buff = new ByteBuffer(4);
+		buff.writeInt(location);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_CANCEL_GOODS_SHORTCUT_COMMAND,buff));
+	}
+	
+	/**
+	 * 取得物品具体信息
+	 * @param target
+	 * @param buffer
+	 */
+	public void getGoodsInfo(PlayerController target,ByteBuffer buffer)
+	{
+		int id = buffer.readInt();
+		Object goodsObject = DataFactory.getInstance().getGameObject(id);
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}	
+		Goods goods = (Goods) goodsObject;
+		ByteBuffer buff = new ByteBuffer(128);
+		goods.writeTo(buff);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_GOODS_INFO_COMMAND,buff));
+	}
+
+	/**
+	 * 拆分物品
+	 * @param target
+	 * @param buffer
+	 */
+	public void splitGoods(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		int count = buffer.readInt();
+		Object goodsObject = getGoodsByObjectIndex(objectIndex);
+		if(goodsObject == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		if(goods.repeatNumber > 1)
+		{
+			if(count < goods.goodsCount)
+			{
+				goods.goodsCount -= count; 
+				updateGoodsList(goods);
+			}
+			else
+			{
+				target.sendAlert(ErrorCode.ALERT_GOODS_COUNT_OVERRUN);
+				return;
+			}
+		}
+		else
+		{
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_SPLIT);
+			return;
+		}
+		if(isBagFull(target))
+			return;
+		int newLocation = getNullLocation();
+		Goods newGoods = (Goods) RPGameObject.cloneObject(goods);
+		newGoods.objectIndex = target.getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+		newGoods.goodsCount = count;
+		goodsList[newLocation] = newGoods;
+		
+		ByteBuffer buff = new ByteBuffer(20);
+		buff.writeUTF(goods.objectIndex+"");
+		buff.writeInt(goods.goodsCount);
+		buff.writeInt(getGoodsLocation(goods.objectIndex));
+		buff.writeUTF(newGoods.objectIndex+"");
+		buff.writeInt(newGoods.goodsCount);
+		buff.writeInt(newLocation);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SPLIT_GOODS_COMMAND,buff));
+	}
+	
+	/**
+	 * 叠加物品
+	 * @param target
+	 * @param buffer
+	 */
+	public void superposeGoods(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex1 = Long.parseLong(buffer.readUTF());
+		long objectIndex2 = Long.parseLong(buffer.readUTF());
+		Object goodsObject1 = getGoodsByObjectIndex(objectIndex1);
+		Object goodsObject2 = getGoodsByObjectIndex(objectIndex2);
+		if(goodsObject1 == null || goodsObject2 == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods1 = (Goods) goodsObject1;
+		Goods goods2 = (Goods) goodsObject2;
+		ByteBuffer buff = new ByteBuffer(20);
+		if(goods1.id == goods2.id && goods1.repeatNumber > 1)
+		{
+			int count = goods1.goodsCount + goods2.goodsCount;
+			if(count <= goods2.repeatNumber)
+			{
+				goods2.goodsCount = count;
+				goods1.goodsCount = 0;
+			}
+			else 
+			{
+				goods2.goodsCount = goods2.repeatNumber;
+				goods1.goodsCount = count - goods1.repeatNumber;	
+			}
+			buff.writeUTF(goods1.objectIndex+"");
+			buff.writeInt(getGoodsLocation(goods1.objectIndex));
+			buff.writeInt(goods1.goodsCount);
+			buff.writeUTF(goods2.objectIndex+"");
+			buff.writeInt(getGoodsLocation(goods2.objectIndex));
+			buff.writeInt(goods2.goodsCount);
+			updateGoodsList(goods1);
+			updateGoodsList(goods2);
+		}
+		else
+		{
+			//不能叠加
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_SUPERPOSE);
+			return;
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SUPERPOSE_GOODS_COMMAND,buff));
+	}
+	
+
+	
+	
+	public Goods[] getGoodsList() {
+		return goodsList;
+	}
+	
+	
+	/**
+	 * 判断玩家背包是否满了(true为满了，false为还有空位置)
+	 * @return
+	 */
+	public boolean isBagFull(PlayerController target)
+	{
+		if(getNullLocation() == -1)
+		{
+			target.sendAlert(ErrorCode.ALERT_BAG_IS_FULL);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 根据流水获取物品在背包的位置
+	 * @param objectIndex
+	 * @return
+	 */
+	public int getGoodsLocation(long objectIndex)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].objectIndex == objectIndex)
+				{
+					return i;
+				}
+			}
+		}
+		return 0;
+	}
+	
+	/**
+	 * 获取一个空位
+	 * @return
+	 */
+	public int getNullLocation()
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] == null && i <= 47)//第47顺位后的位置空间是属于穿在身上的装备的，是隐藏的
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/**
+	 * 获取背包中物品数量没有到达最大迭加数量的物品
+	 * @param id
+	 * @return
+	 */
+	public Goods getGoods(int id)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].id == id && goodsList[i].goodsCount < goodsList[i].repeatNumber)
+				{
+					return goodsList[i];
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取所有同类物品(数量小于可堆叠数量的)
+	 * @return
+	 */
+	public List getSameGoods(int id)
+	{
+		List list = new ArrayList();
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] == null)
+				continue;
+			if(goodsList[i].id == id && goodsList[i].goodsCount < goodsList[i].repeatNumber)
+				list.add(goodsList[i]);
+		}
+		return list;
+	}
+
+	/**
+	 * 根据ID获取背包中物品
+	 * @param id
+	 * @return
+	 */
+	public Goods getGoodsById(int id)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].id == id)
+				{
+					return goodsList[i];
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据流水号获取物品
+	 * @param objectIndex
+	 * @return
+	 */
+	public Goods getGoodsByObjectIndex(long objectIndex)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] == null)
+				continue;
+			Goods goods = goodsList[i];
+			if(goods.objectIndex == objectIndex)
+			{
+				return goods;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取同类物品的总数量
+	 * @param goods
+	 * @return
+	 */
+	public int getGoodsCount(int id)
+	{
+		int count = 0;
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].id == id)
+				{
+					count += goodsList[i].goodsCount;
+				}
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * 更新背包
+	 * @param goods
+	 */
+	public void updateGoodsList(Goods goods)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].objectIndex == goods.objectIndex)
+				{
+					if(goods.goodsCount <= 0)
+						goodsList[i] = null;
+					else
+						goodsList[i] = goods;
+					break;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 获取背包中同类物品
+	 * @param id
+	 * @return
+	 */
+	public List getGoodsSameId(int id)
+	{
+		List list = new ArrayList();
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].id == id)
+				{
+					list.add(goodsList[i]);
+				}
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * 获取装备面板上是否有同类装备已经装备
+	 * @param equipList
+	 * @param location
+	 * @return  有同类装备则返回已经装备的装备，没有则返回NULL
+	 */
+	public Goods getSameLocationGoods(int location)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null && goodsList[i].type == 1 && goodsList[i].useFlag)
+			{
+				GoodsEquip equip = (GoodsEquip) goodsList[i];
+				if(equip.equipLocation == location)
+					return equip;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * (背包)客户端消息通道
+	 * @param target
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target,AppMessage msg)
+	{
+		int type = msg.getType();
+		ByteBuffer buffer = msg.getBuffer();
+		if(type == SMsg.C_DELETE_GOODS_FROM_BAG_COMMAND)
+		{
+			deleteGoodsFromBag(target,buffer);
+		}
+		else if(type == SMsg.C_GET_PLAYER_BAG_COMMAND)
+		{
+			writeToNotUseGoods(target);
+		}
+		else if(type == SMsg.C_TAKE_OFF_EQUIP_COMMAND)
+		{
+			takeOffEquip(target,buffer);
+		}
+		else if(type == SMsg.C_USE_GOODS_COMMAND)
+		{
+			useGoods(target,buffer);
+		}
+		else if(type == SMsg.C_CHANGE_BAG_GOODS_LOCATION_COMMAND)
+		{
+			changeGoodsLocation(target,buffer);
+		}
+		else if(type == SMsg.C_GET_PLAYER_SHORTCUT_BAR_COMMAND)
+		{
+			getPlayerShotcutBar(target);
+		}
+		else if(type == SMsg.C_SET_PLAYER_SHORTCUT_BAR_COMMAND)
+		{
+			setPlayerShortcutBar(target,buffer);
+		}
+		else if(type == SMsg.C_CANCEL_GOODS_SHORTCUT_COMMAND)
+		{
+			cancelGoodsShortcut(target,buffer);
+		}
+		else if(type == SMsg.C_GET_GOODS_INFO_COMMAND)
+		{
+			getGoodsInfo(target,buffer);
+		}
+		else if(type == SMsg.C_SPLIT_GOODS_COMMAND)
+		{
+			splitGoods(target,buffer);
+		}
+		else if(type == SMsg.C_SUPERPOSE_GOODS_COMMAND)
+		{
+			superposeGoods(target,buffer);
+		}
+	}
+
+
+	public int getBagSize() {
+		return bagSize;
+	}
+
+
+	public void setBagSize(int bagSize) {
+		this.bagSize = bagSize;
+	}
+	
+	
+
+
+	public boolean checkGoodsEnough(int goodId, int goodCount)
+	{
+		int count = 0;
+		
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			if(goodsList[i] == null)
+				continue;
+			
+			if(goodsList[i].id == goodId)
+			{
+				if(goodsList[i].goodsCount >= goodCount) 
+					return true;
+				else
+				{
+					count += goodsList[i].goodsCount;
+					
+					if(count >= goodCount)
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	
+	public boolean removeGoods(PlayerController target,long objectIndex , int goodCount)
+	{
+
+		int count = goodCount;
+		
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			if(goodsList[i] == null)
+				continue;
+			
+			if(goodsList[i].objectIndex == objectIndex)
+			{
+				if(count <= 0)
+					break;
+				
+				if(goodsList[i].repeatNumber > 1) //可叠加
+				{
+					if(count >= goodsList[i].goodsCount)
+					{
+						sendDeleteGoods(target,goodsList[i].objectIndex+"",goodsList[i].goodsCount);
+						count -= goodsList[i].goodsCount;
+						goodsList[i].goodsCount = 0;
+					}
+					else
+					{
+						sendDeleteGoods(target,goodsList[i].objectIndex+"",count);
+						goodsList[i].goodsCount -= count;
+					}
+				}
+				else
+				{
+					sendDeleteGoods(target,goodsList[i].objectIndex+"",goodsList[i].goodsCount);
+					goodsList[i].goodsCount = 0;
+					count--;
+				}
+				PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting");
+				ps.updatePlayerBar(goodsList[i].id, goodsList[i].goodsCount);
+				updateGoodsList(goodsList[i]);
+			}
+		}
+		return true;
+	}
+	
+	public void sendDeleteGoods(PlayerController target,String objectIndex,int goodsCount)
+	{
+		ByteBuffer buff = new ByteBuffer(2);
+		buff.writeUTF(objectIndex);
+		buff.writeInt(goodsCount);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_DELETE_GOODS_FROM_BAG_COMMAND, buff));
+	}
+
+
+}

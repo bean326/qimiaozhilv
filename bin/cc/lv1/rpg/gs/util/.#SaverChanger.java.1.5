@@ -1,0 +1,164 @@
+package cc.lv1.rpg.gs.util;
+
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.dao.DatabaseAccessor;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Mail;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+
+public class SaverChanger
+{
+	/**
+	 * 在需要增加的变量前，包括saveTo和loadFrom
+	 * 加
+	 * 如 
+	 *    if(isNewSave)
+	 * 		 name = buffer.readInt();
+	 * 
+	 *    if(isNewSave)
+	 * 		 name = buffer.writeInt(100000);
+	 */
+	public static boolean isNewSave = false; 
+	
+	public void procress()
+	{
+		GameServer.getInstance().initialWithoutNetServer();
+		GameServer.getInstance().getWorldManager().setGameServer(GameServer.getInstance());
+		DatabaseAccessor databaseAccessor = GameServer.getInstance().getDatabaseAccessor();
+		
+		List list = null;
+		int i = 0;
+		do
+		{
+			SaverChanger.isNewSave = true;//增加 为 false  减少为true
+			list = databaseAccessor.loadPlayers(i,i+10000);
+			i += 10000;
+			doSomePlayers(list);
+			System.out.println("-------------list size ------------  "+list.size());
+			
+			
+			SaverChanger.isNewSave = false;//增加  为 true  减少为false
+			databaseAccessor.savePlayers(list);
+			
+		}while(list.size() > 0);
+
+		
+		SaverChanger.isNewSave = true;//增加 为 false  减少为true
+			databaseAccessor.loadWorldInfo(GameServer.getInstance().getWorldManager());
+		SaverChanger.isNewSave = false;//增加  为 true  减少为false
+			databaseAccessor.createOrUpdateWorldInfo(GameServer.getInstance().getWorldManager());
+		
+		
+		System.out.println("add var success");
+	}
+	
+	private void doSomePlayers(List list)
+	{
+		int size = list.size();//清除荣誉值
+		for (int j = 0; j < size; j++)
+		{
+			Player player = (Player)list.get(j);
+			Bag bag = (Bag) player.getExtPlayerInfo("bag");
+			Goods[] goodsList = bag.getGoodsList();
+			for (int i = 0; i < goodsList.length; i++) 
+			{
+				if(goodsList[i] == null)
+					continue;
+				if(goodsList[i] instanceof GoodsEquip)
+				{
+					GoodsEquip equip = (GoodsEquip) goodsList[i];
+					goodsList[i] = check(equip);
+				}
+			}
+			
+			Mail mail = new Mail("GM",System.currentTimeMillis());
+			mail.setTitle("\u7CFB\u7EDF\u90AE\u4EF6");
+			Goods[] goods = DataFactory.getInstance().makeGoods(1045000059, 2);
+			mail.addAttach(goods[0]);
+			mail.send(new PlayerController(player));
+
+		}
+	}
+	
+	public GoodsEquip check(GoodsEquip oldGoods)
+	{
+		GoodsEquip goods = (GoodsEquip) DataFactory.getInstance().getGameObject(oldGoods.id);
+		GoodsEquip equip = goods.makeNewBetterEquip(oldGoods.quality);
+		String str = oldGoods.extAtt.toString();
+		boolean flag = false;
+		if(oldGoods.power - getGemAtt(str,"power") > equip.power)
+			flag = true;
+		if(oldGoods.agility - getGemAtt(str,"agility")> equip.agility)
+			flag = true;
+		if(oldGoods.spirit - getGemAtt(str,"spirit") > equip.spirit)
+			flag = true;
+		if(oldGoods.wisdom - getGemAtt(str,"wisdom") > equip.wisdom)
+			flag = true;
+		if(oldGoods.phyAtt - getGemAtt(str,"phyAtt") > equip.phyAtt)
+			flag = true;
+		if(oldGoods.sptAtt - getGemAtt(str,"sptAtt") > equip.sptAtt)
+			flag = true;
+		if(oldGoods.phyDef - getGemAtt(str,"phyDef") > equip.phyDef)
+			flag = true;
+		if(oldGoods.lifePoint - getGemAtt(str,"lifePoint") > equip.lifePoint)
+			flag = true;
+		if(oldGoods.magicPoint - getGemAtt(str,"magicPoint") > equip.magicPoint)
+			flag = true;
+		if(oldGoods.phySmiteParm - getGemAtt(str,"phySmiteParm") > equip.phySmiteParm)
+			flag = true;
+		if(oldGoods.sptSmiteParm - getGemAtt(str,"sptSmiteParm") > equip.sptSmiteParm)
+			flag = true;
+		if(oldGoods.phySmiteRate - getGemAtt(str,"phySmiteRate") > equip.phySmiteRate)
+			flag = true;
+		if(oldGoods.sptSmiteRate - getGemAtt(str,"sptSmiteRate") > equip.sptSmiteRate)
+			flag = true;
+		if(oldGoods.curePoint - getGemAtt(str,"curePoint") > equip.curePoint)
+			flag = true;
+		if(oldGoods.noDefPhyHurt - getGemAtt(str,"noDefPhyHurt") > equip.noDefPhyHurt)
+			flag = true;
+		if(oldGoods.noDefSptHurt - getGemAtt(str,"noDefSptHurt") > equip.noDefSptHurt)
+			flag = true;
+		if(oldGoods.sptHurtAvoid - getGemAtt(str,"sptHurtAvoid") > equip.sptHurtAvoid)
+			flag = true;
+		if(oldGoods.phyHurtAvoid - getGemAtt(str,"phyHurtAvoid") > equip.phyHurtAvoid)
+			flag = true;
+
+		if(flag)
+		{
+			equip.objectIndex = oldGoods.objectIndex;
+			return equip;
+		}
+		else
+			return oldGoods;
+		
+	}
+	
+	public int getGemAtt(String strs,String str)
+	{
+		if(strs.isEmpty())
+			return 0;
+		int result = 0;
+		String[] gems = Utils.split(strs, "|");
+		for (int i = 0; i < gems.length; i++)
+		{
+			String[] atts = Utils.split(gems[i], ":");
+			if(atts[0].equals(str))
+			{
+				result += Integer.parseInt(atts[1]);
+			}
+		}
+		return result;
+	}
+
+	public static void main(String[] args)
+	{
+		new SaverChanger().procress();
+	}
+	
+}

@@ -1,0 +1,19 @@
+<dialog>
+
+<!--该NPC名为奇妙炼金术士 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="1009">//我是帅气、善良、有为、犀利的炼金术士。对于那些勤劳，又对生活抱有希望的人，我总是不时给他们惊喜!|//越高级地图的宝石，价值和属性都越高，所以在炼金的时候，出现惊喜的几率也会大一些哦。|//运动员和超能力是强大的火力输出，军官能大幅度提高队伍的能力，护士是不可或缺的后勤保障。</text>
+		</words>
+   		 <options>
+			 <item textId="15010306" text="炼金" command="goldBox" />
+			 <item textId="15010307" text="宝石互换" command="eachOtherChange" />
+			 <item textId="1021150006">openAlchemy</item> 
+		</options>
+	</s01>
+   </default>
+</dialog>

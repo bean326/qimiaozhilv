@@ -1,0 +1,584 @@
+package cc.lv1.rpg.gs.dao;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.MD5;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.connection.ConnectionFactory;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.net.impl.SaveJob;
+import cc.lv1.rpg.gs.net.impl.ValidateJob;
+
+public class DatabaseAccessor 
+{ 
+ 
+	private static ConnectionFactory cf;
+	
+	private String dbhost;
+	
+	private String dbport;
+	
+	private String dbname;
+	
+	private String user;
+	
+	private String pwd;
+	
+	public DatabaseAccessor(String dbhost,String dbport,String dbname, String user, String pwd)
+	{
+		this.dbhost = dbhost;
+		this.dbport = dbport;
+		this.dbname = dbname;
+		this.user = user;
+		this.pwd = pwd;
+		this.initial();
+	}
+	
+	private void initial()
+	{
+		cf = new ConnectionFactory.SqlServerFactory(dbhost,dbport,dbname,user,pwd);
+	}
+	
+	/** 保存player信息 */
+	public void savePlayer(Player player)
+	{
+		CallableStatement callableStatement = null;
+		Connection conn = null;
+
+		ByteBuffer buffer = new ByteBuffer(4096 * 10);
+		player.saveTo(buffer);
+		byte[] data = buffer.getBytes();
+		
+		try 
+		{
+
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call PlayerSave(?,?,?,?,?)}");
+				callableStatement.setBytes(1, data);
+				callableStatement.setString(2, player.accountName);
+				callableStatement.setInt(3, player.id);
+				callableStatement.setString(4,player.name);
+				callableStatement.setInt(5, 0);
+				callableStatement.execute();
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/**读取player信息*/
+	public void loadPlayer(String accountName ,ValidateJob.PlayerLoader loader)
+	{
+		
+ 		CallableStatement callableStatement = null;
+		Connection conn = null;
+		
+		byte[] data = null;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call PlayerLoad(?)}");
+				callableStatement.setString(1, accountName);
+				ResultSet result = callableStatement.executeQuery();
+				while(result.next())
+				{
+					data = result.getBytes("playerdata");
+				}
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			if(loader != null)
+				loader.loadPlayer(ValidateJob.PlayerLoader.EXCEPT_PLAYER, null);
+			return;
+		} 
+			
+		if (data == null)
+		{
+			if(loader != null)
+				loader.loadPlayer(ValidateJob.PlayerLoader.NEW_PLAYER, null);
+		}
+		else
+		{
+			Player player = new Player();	
+			ByteBuffer buffer = new ByteBuffer(data);
+			player.loadFrom(buffer);
+			player.initial();
+
+			if(loader != null)
+				loader.loadPlayer(ValidateJob.PlayerLoader.OLD_PLAYER, player);
+		}
+	}
+	
+	/**
+	 * 取得所有玩家
+	 * @return
+	 */
+	public List loadPlayers()
+	{
+		Statement statement = null;
+		Connection conn = null;
+		List list = new ArrayList();
+		byte[] data = null;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				statement = conn.createStatement();
+				ResultSet result = statement.executeQuery("select playerData from playerInfo");
+				while(result.next())
+				{
+					data = result.getBytes("playerdata");
+					Player player = new Player();	
+					ByteBuffer buffer = new ByteBuffer(data);
+					player.loadFrom(buffer);
+					player.initial();
+					list.add(player);
+				}
+				statement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		return list;
+	}
+	
+	/**
+	 * 保存玩家
+	 * @param list
+	 */
+	public void savePlayers(List list)
+	{
+		int size = list.size();
+		for (int i = 0; i < size; i++)
+		{
+			this.savePlayer((Player)list.get(i));
+		}
+	}
+	
+	/** 删除角色 ***/
+	public boolean delPlayer(Player player)
+	{
+ 		CallableStatement callableStatement = null;
+		Connection conn = null;
+		
+		boolean result = false;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{?=call PlayerRemove(?,?)}");
+				callableStatement.setInt(2, player.id);
+				callableStatement.setString(3, player.accountName);
+				callableStatement.registerOutParameter(1, Types.INTEGER);
+				callableStatement.execute();
+
+				result = callableStatement.getInt(1)==1;
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * 取得一个新的角色id
+	 * @return
+	 */
+	public int getNewPlayerId() 
+	{
+ 		CallableStatement callableStatement = null;
+		Connection conn = null;
+
+		int index = 0;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call GameRoleIndexLoad(?)}");
+				callableStatement.registerOutParameter(1, Types.INTEGER);
+				callableStatement.execute();
+				index = callableStatement.getInt(1);
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		return index;
+	}
+	
+	/**
+	 * 取得物品流水号
+	 * @return
+	 */
+	public int getGoodsObjIndex()
+	{
+ 		CallableStatement callableStatement = null;
+		Connection conn = null;
+
+		int index = 0;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call GameGoodsIndexLoad(?)}");
+				callableStatement.registerOutParameter(1, Types.INTEGER);
+				callableStatement.execute();
+				index = callableStatement.getInt(1);
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		return index;
+	}
+	
+	/**
+	 * 检查有无相同的名字
+	 * @param playerName
+	 * @return
+	 */
+	public boolean checkHeroName(String playerName)
+	{
+		CallableStatement callableStatement = null;
+		Connection conn = null;
+		int result = 0;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{?=call GameRoleName(?)}");
+				callableStatement.registerOutParameter(1, Types.INTEGER);
+				callableStatement.setString(2, playerName);
+				callableStatement.execute();
+				result = callableStatement.getInt(1);
+				callableStatement.close();
+			}	
+			cf.recycleConnection(conn);
+		} 
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return result == 1;
+	}
+	
+	
+	/**
+	 * 取得家族流水号
+	 * @return
+	 */
+	public int getFamilyObjIndex()
+	{
+ 		CallableStatement callableStatement = null;
+		Connection conn = null;
+
+		int index = 0;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call GameFamilyIndexLoad(?)}");
+				callableStatement.registerOutParameter(1, Types.INTEGER);
+				callableStatement.execute();
+				index = callableStatement.getInt(1);
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		return index;
+	}
+	
+	
+	public boolean createOrUpdateWorldInfo(WorldManager world)
+	{
+		CallableStatement callableStatement = null;
+		Connection conn = null;
+		
+		
+		ByteBuffer buffer = new ByteBuffer(4096 * 10);
+		world.saveTo(buffer);
+		byte[] data = buffer.getBytes();
+		
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call createOrUpdateServerInfo(?,?,?,?,?)}");	
+				callableStatement.setInt(1, world.getGameServer().id);
+				callableStatement.setString(2, world.getGameServer().name);
+				callableStatement.setString(3, "test localhost");
+				callableStatement.setInt(4,0);
+				callableStatement.setBytes(5, data);
+				callableStatement.execute();
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		}
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+
+	public void loadWorldInfo(WorldManager world)
+	{
+		
+ 		CallableStatement callableStatement = null;
+		Connection conn = null;
+		
+		byte[] data = null;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{
+				callableStatement = conn.prepareCall("{call LoadServerInfo(?)}");
+				callableStatement.setInt(1, world.getGameServer().id);
+				ResultSet result = callableStatement.executeQuery();
+				while(result.next())
+				{
+					data = result.getBytes("S_DATA");
+				}
+				callableStatement.close();
+			}
+			cf.recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		
+		if(data == null)
+		{
+			System.out.println("load server data is null");
+			return;
+		}
+		world.loadFrom(new ByteBuffer(data));
+	}
+	
+	
+	
+	/**
+	 * 临时，检查是否有相同名字
+	 * @param name
+	 */
+	public boolean checkUserName(String name,String pwd)
+	{
+		PreparedStatement statement = null;
+		Connection conn = null;
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{	
+				statement = conn.prepareStatement("select password,state from UserInfo where name=?");
+				statement.setString(1, name);
+				ResultSet rs = statement.executeQuery();
+				while(rs.next())
+				{
+					if(rs.getInt(2) == 1 && pwd == null)
+						return true;
+
+					if(rs.getString(1).equals(MD5.getInstance().getMD5String(pwd)))
+						return true;
+				}
+			}	
+		} 
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if(statement != null)
+					statement.close();
+				
+				cf.recycleConnection(conn);
+			} 
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+			
+		}
+		return false;
+	}
+	
+	/**
+	 * 临时，注册名字
+	 * @param name
+	 * @param pwd
+	 * @return
+	 */
+	public boolean regUser(String name,String pwd)
+	{
+		PreparedStatement statement = null;
+		Connection conn = null;
+	
+		try 
+		{
+			conn = cf.getConnection();
+			synchronized(conn)
+			{	
+				statement = conn.prepareStatement("insert into UserInfo(name,password,state,lasttime) values(?,?,?,?)");
+
+				statement.setString(1, name);
+				statement.setString(2, MD5.getInstance().getMD5String(pwd));
+				statement.setInt(3, 1);
+				statement.setDate(4, new Date(System.currentTimeMillis()));
+				
+				statement.execute();
+				return true;
+			}	
+		} 
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				statement.close();
+				cf.recycleConnection(conn);
+			} 
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
+	public static void main(String[] args)
+	{
+		DatabaseAccessor da = new DatabaseAccessor("localhost","1433","rpg2008","sa","dengxianwen");
+		
+/*		for (int i = 0; i < 3000; i++)
+		{
+			System.out.println("创建账号 "+"robot"+i+" --- "+da.regUser("robot"+i,"123456"));
+			try
+			{
+				Thread.sleep(50);
+			} 
+			catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+		
+		
+/*
+		XMLNode nativityNode = Utils.getXMLNode(GameServer.getAbsolutePath()+"data/nativity.txt");
+		ArrayList nativitys = nativityNode.getSubNodes();
+		DataFactory dataFactory = DataFactory.getInstance();
+		dataFactory.putAttachment(DataFactory.ATTACH_NATIVITY, nativitys);
+		
+		
+
+		
+		for (int i = 0; i < 3000; i++)
+		{
+			
+			try
+			{
+				Thread.sleep(10);
+			} 
+			catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			int roldId = da.getNewPlayerId();//获取一个新的角色ID
+			
+			Player player = new Player();
+			player.id = roldId;
+			player.accountName = "robot"+i;
+			player.name = "robot"+i;
+			if(i%2==0)
+				player.sex = 1;
+			else
+				player.sex = 0;
+			
+			player.profession = 1;
+			
+			player.initial();
+			
+			player.hitPoint = player.maxHitPoint;
+			player.magicPoint = player.maxMagicPoint;
+			
+			player.setPlayerModelMotionId();
+
+			DataFactory.getInstance().setNativity(player);
+			
+			player.setSkill();
+			
+			da.savePlayer(player);
+			
+			System.out.println("创建角色  "+i);
+		}
+*/
+
+		
+	}
+
+
+
+}

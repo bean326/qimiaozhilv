@@ -1,0 +1,164 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.net.SMsg;
+/**
+ * 玩家控制器
+ * @author dxw
+ *
+ */
+public class PlayerController extends SpriteController
+{
+	
+	private WorldManager worldManager;
+	
+	private NetConnection netConnection;
+	
+	private Player player;
+	
+	private boolean online;
+	
+	private TeamController team;
+
+	public PlayerController(Player player)
+	{
+		this.player = player;
+	}
+
+	/** 获得玩家所在区域 */
+	public AreaController getArea()
+	{
+ 		return worldManager.getAreaById(player.areaId);
+	}
+	
+	/** 获得玩家所在房间 */
+	public RoomController getRoom()
+	{
+		RoomController room = null;
+
+ 		AreaController area = getArea();
+		if(area != null)
+		{
+			room = area.getRoomById(player.roomId);	
+		}
+		return room;
+	}
+	
+	public void close()
+	{
+		netConnection.close();
+	}
+	
+	public void sendAlert(int alert)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(alert);
+		netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+	}
+	
+	public void sendError(String error)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeUTF(error);
+		netConnection.sendMessage(new SMsg(SMsg.S_ERROR_MESSAGE,buffer));
+	}
+
+	public void sendException(int exception)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(exception);
+		netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE,buffer));
+	}
+	
+	public String getName()
+	{
+		return player.name;
+	}
+
+	public int getID()
+	{
+		return player.id;
+	}
+
+	public long getObjectIndex()
+	{
+		return 0;
+	}
+	
+	public Player getPlayer()
+	{
+		return player;
+	}
+
+	public void setPlayer(Player player)
+	{
+		this.player = player;
+	}
+
+	public WorldManager getWorldManager()
+	{
+		return worldManager;
+	}
+
+	public void setWorldManager(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+
+	public boolean isOnline()
+	{
+		return online;
+	}
+
+	public void setOnline(boolean online)
+	{
+		this.online = online;
+	}
+
+	public NetConnection getNetConnection()
+	{
+		return netConnection;
+	}
+
+	public void setNetConnection(NetConnection netConnection)
+	{
+		this.netConnection = netConnection;
+	}
+
+	public TeamController getTeam()
+	{
+		return team;
+	}
+
+	public void setTeam(TeamController team)
+	{
+		this.team = team;
+	}
+
+	public void clientMessageChain(AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_PLAYER_INFO_COMMAND)
+		{
+			sendInfo();
+		}
+		
+	}
+
+	/**
+	 * 发送自己的完整信息
+	 */
+	public void sendInfo()
+	{	
+		ByteBuffer buffer = new ByteBuffer(64);
+		player.writeTo(buffer);
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_INFO_COMMAND,buffer));
+	}
+
+	
+}

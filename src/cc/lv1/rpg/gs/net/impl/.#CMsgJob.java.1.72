@@ -1,0 +1,958 @@
+package cc.lv1.rpg.gs.net.impl;
+
+import java.io.UnsupportedEncodingException;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.job.i.NetJob;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.MD5;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.dao.DatabaseAccessor;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.MailRemind;
+import cc.lv1.rpg.gs.entity.controller.BattleController;
+import cc.lv1.rpg.gs.entity.controller.FamilyController;
+import cc.lv1.rpg.gs.entity.controller.MonsterController;
+import cc.lv1.rpg.gs.entity.controller.PVEController;
+import cc.lv1.rpg.gs.entity.controller.PVPController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import cc.lv1.rpg.gs.util.Code;
+/**
+ * 客户端消息事物
+ * @author balan
+ *
+ */
+public class CMsgJob extends NetJob
+{
+	private AppMessage msg;
+	
+	private WorldManager worldmanager;
+
+	private NetConnection netConnection;
+	
+	public CMsgJob(WorldManager worldManager, AppMessage msg)
+	{
+		this.msg = msg;
+		this.worldmanager = worldManager;
+		netConnection = (NetConnection)msg.getSource();
+		
+		if(netConnection.getExceptionMsg() == null)
+			netConnection.setExceptionMsg(msg.getType());
+	}
+
+	public NetConnection getConnection()
+	{
+		return netConnection;
+	}
+
+
+	public void run()
+	{
+		
+		if(netConnection.getReceiveMsgCount() > 1000) 
+		{
+			if(netConnection.getReceiveMsgCount() < 1003)
+			{
+				MainFrame.println(netConnection.getIP()+" msg: "
+						+Integer.toHexString(msg.getType())
+						+" RMC: "+netConnection.getReceiveMsgCount());
+			}
+			
+			if(netConnection.getReceiveMsgCount() > 1500) //手点击的1分钟300次，狂点
+			{
+				
+				MainFrame.println(netConnection.getIP()+" msg: "
+						+Integer.toHexString(msg.getType())
+						+" RMC: "+netConnection.getReceiveMsgCount());
+				
+				if(netConnection.getInfo() instanceof PlayerController)
+				{
+					PlayerController player = (PlayerController)netConnection.getInfo();
+
+					MainFrame.println(" accountName : "
+							+player.getPlayer().accountName
+							+" playerName : "+player.getName());
+					
+					player.wgCount = 0xffff; 
+					
+					//封号
+					GameServer.getInstance().getDatabaseAccessor().changeAccountState(player.getPlayer().accountName, 1);
+				}
+				
+				//封ip
+				worldmanager.changeProIpState(netConnection.getIP(), 1);
+				
+				netConnection.close();
+			}
+		}
+		
+
+		
+/*		ByteBuffer buffer = null;
+		String name = "";
+		int message = msg.getType();
+		if(message == SMsg.C_USE_GOODS_COMMAND || message == SMsg.C_BATTLE_ACTION_COMMAND
+				|| message == SMsg.C_BATTLE_PLAYER_BATTLEEND || message == SMsg.C_PLAYER_FEED_PET_COMMAND
+				|| message == SMsg.C_BUY_GOODS_COMMAND || message == SMsg.C_PLAYER_PETINFO_OPTION_COMMAND
+				|| message == SMsg.C_MONEY_BOX_COMMMAND || message == SMsg.C_CLICK_NPC_COMMAND)
+		{
+			buffer = new ByteBuffer(msg.getBuffer().getBytes());
+			if(message == SMsg.C_USE_GOODS_COMMAND)
+			{
+				ByteBuffer buff = new ByteBuffer(buffer.getBytes());
+				if(netConnection.getInfo() instanceof PlayerController)
+				{
+					PlayerController target = (PlayerController) netConnection.getInfo();
+					if(!(target.getParent() instanceof BattleController))
+					{	
+						String oIndex = buff.readUTF();
+						int id = buff.readInt();	
+						Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+						Goods goods = null;
+						if(oIndex.isEmpty())
+							goods = bag.getGoodsById(id);
+						else
+							goods = bag.getGoodsByObjectIndex(Long.parseLong(oIndex));
+						if(goods != null)
+							name = goods.name;
+					}
+					
+				}
+			}
+		}
+		*/
+		long bTime = System.currentTimeMillis();
+		clientMessageChain();
+		long aTime = System.currentTimeMillis();
+		
+		if(netConnection != null)
+		{
+			if(aTime - bTime > GameServer.OVERTIME)
+			{
+				MainFrame.println("msg:"+Integer.toHexString(msg.getType())+"  pt:"+(aTime - bTime));
+			}
+		}
+/*
+		if(netConnection.getInfo() instanceof PlayerController)
+		{
+			PlayerController target = (PlayerController) netConnection.getInfo();
+
+			if(aTime - bTime > GameServer.OVERTIME)
+			{
+				System.out.println("message:"+Integer.toHexString(msg.getType())+"   processTime:"+(aTime - bTime)
+						+"  player:"+target.getName()+"  acount:"+target.getPlayer().accountName);
+				MainFrame.println("message:"+Integer.toHexString(msg.getType())+"   processTime:"+(aTime - bTime)
+						+"  player:"+target.getName()+"  acount:"+target.getPlayer().accountName);
+				if(message == SMsg.C_USE_GOODS_COMMAND)
+				{
+					if(!(target.getParent() instanceof BattleController))
+					{
+						String oIndex = buffer.readUTF();
+						int id = buffer.readInt();
+						MainFrame.println("playerName:"+target.getName()+"  goodsIndex:"+oIndex+"  goodsId:"+id+"  goodsName:"+name+"  room:"+target.getRoom().name);
+					}
+				}
+				else if(message == SMsg.C_BATTLE_ACTION_COMMAND)
+				{
+					int type = buffer.readByte();
+					if(type == 1)
+					{
+						int skillId = buffer.readInt();
+						int targetIndex = buffer.readByte();
+						MainFrame.println("playerName:"+target.getName()+"  skillId:"+skillId+"  targetIndex:"+targetIndex+"  roomName:"+target.getRoom().name);
+						if(target.getParent() instanceof PVEController)
+						{
+							PVEController pve = (PVEController) target.getParent();
+							MonsterController[] mc = pve.getMonsters();
+							PlayerController[] ps = pve.getPlayers();
+							if(targetIndex > mc.length)
+							{
+								MainFrame.println("目标越界！   "+targetIndex+"========allLength"+mc.length);
+							}
+							else
+							{
+								if(mc[targetIndex] != null)
+									MainFrame.println("攻击目标："+mc[targetIndex].getName()+"  目标生命："+mc[targetIndex].getMonster().hitPoint);
+								else 
+									MainFrame.println("攻击目标为空!");
+								MainFrame.println("战斗中玩家：");
+								for (int i = 0; i < ps.length; i++)
+								{
+									if(ps[i] == null)
+									{
+										MainFrame.println("第"+i+"个玩家为空!");
+									}
+									else
+									{
+										MainFrame.println("index:"+i+"  playerName:"+ps[i].getName()+"  hitPoint:"+ps[i].getPlayer().hitPoint);
+									}
+								}
+								MainFrame.println("怪物组中其它怪物：");
+								for (int i = 0; i < mc.length; i++)
+								{
+									if(mc[i] == null)
+									{
+										MainFrame.println("第"+i+"个怪为空!");
+									}
+									else
+									{
+										MainFrame.println("index:"+i+"  monserName:"+mc[i].getName()+"  hitPoint:"+mc[i].getMonster().hitPoint);
+									}
+								}
+							}
+						}
+						else if(target.getParent() instanceof PVPController)
+						{
+							PVPController pvp = (PVPController) target.getParent();
+							PlayerController[] ps1 = pvp.getPlayers();
+							PlayerController[] ps2 = pvp.getTargetPlayers();
+							System.out.println("第一组队员::::::::::");
+							for (int i = 0; i < ps1.length; i++)
+							{
+								if(ps1[i] == null)
+								{
+									MainFrame.println("第"+i+"个怪为空!");
+								}
+								else
+								{
+									MainFrame.println("index:"+i+"  playerName:"+ps1[i].getName()+"  hitPoint:"+ps1[i].getPlayer().hitPoint);
+								}
+							}
+							System.out.println("第二组队员::::::::::");
+							for (int i = 0; i < ps2.length; i++)
+							{
+								if(ps2[i] == null)
+								{
+									MainFrame.println("第"+i+"个怪为空!");
+								}
+								else
+								{
+									MainFrame.println("index:"+i+"  playerName:"+ps2[i].getName()+"  hitPoint:"+ps2[i].getPlayer().hitPoint);
+								}
+							}
+						}
+					}
+					else if(type == 2)
+					{
+						int goodsId = buffer.readInt();
+						int targetIndex = buffer.readByte();
+						MainFrame.println("playerName:"+target.getName()+"  goodsId:"+goodsId+"  targetIndex:"+targetIndex);
+					}
+				}
+				else if(message == SMsg.C_BATTLE_PLAYER_BATTLEEND)
+				{
+					
+				}
+				else if(message == SMsg.C_BUY_GOODS_COMMAND)
+				{
+					int id = buffer.readInt();					
+					int goodsId = buffer.readInt();
+					int count = buffer.readInt();
+					MainFrame.println("playerName:"+target.getName()+"  goodsId:"+goodsId+"  goodsCount:"+count+"  shopId:"+id);
+				}
+				else if(message == SMsg.C_PLAYER_PETINFO_OPTION_COMMAND)
+				{
+					int type = buffer.readByte();
+					MainFrame.println("  type:"+type);
+					if(type == 1)
+					{
+						MainFrame.println("playerName:"+target.getName()+"  petName:"+buffer.readUTF());
+					}
+					else if(type == 4)
+					{
+						int modelWay = msg.getBuffer().readByte();
+						int modelId = msg.getBuffer().readInt();
+						String att = msg.getBuffer().readUTF();
+						MainFrame.println("playerName:"+target.getName()+"  modelWay:"+modelWay+"  modelId:"+modelId+"  att:"+att);
+					}
+					else if(type == 5)
+					{
+						MainFrame.println("playerName:"+target.getName()+"  isStroll:"+buffer.readBoolean());
+					}
+					else if(type == 6)
+					{
+						//宠物出行方式
+						MainFrame.println("playerName:"+target.getName()+"  trainType:"+buffer.readByte());
+					}
+					else if(type == 7)
+					{
+						//1正常结束 2.强制结束
+						MainFrame.println("playerName:"+target.getName()+"  overType:"+buffer.readByte());
+					}
+				}
+				else if(message == SMsg.C_PLAYER_FEED_PET_COMMAND)
+				{
+					int foodId = buffer.readInt();
+					MainFrame.println("playerName:"+target.getName()+"  goodsId:"+foodId);
+				}
+				else if(message == SMsg.C_MONEY_BOX_COMMMAND)
+				{
+					
+				}
+				else if(message == SMsg.C_CLICK_NPC_COMMAND)
+				{
+					MainFrame.println("request npc:"+buffer.readUTF()+"  room:"+target.getRoom().name);
+				}
+			}
+		}*/
+	}
+	
+	public String toString()
+	{
+		return "msg type : "+msg.getType();
+	}
+	
+	/**
+	 * 与客户端通信
+	 * @param conn
+	 */
+	public void clientMessageChain()
+	{
+		if(msg == null)
+			return;
+
+		int type = msg.getType();
+		int markType = msg.getMarkType();
+		
+		if(markType == SMsg.T_LOGIN_COMMAND)
+		{
+
+			if(type == SMsg.C_LOGIN_COMMAND)
+			{
+				processPlayerLogin();
+			}
+			else if(type == SMsg.C_CREATE_ROLE_COMMAND)
+			{
+				processPlayerCreate();
+			}
+			else if(type == SMsg.C_DELETE_ROLE_COMMAND)
+			{
+				//processPlayerRoleDelete();
+			}
+			else if(type == SMsg.C_ROLENAME_REPEAT_COMMAND)
+			{
+				processCheckRoleName();
+			}
+			else if(type == SMsg.C_PLAYER_ENTER_GAME_COMMAND)
+			{
+				processPlayerEnterGame();
+			}
+			else if(type == SMsg.C_PLAYER_HEART_PING_COMMAND)
+			{
+				SMsg smsg = new SMsg(SMsg.S_PLAYER_HEART_PING_COMMAND
+						,new ByteBuffer(1));
+				netConnection.sendMessage(smsg);
+
+				if(netConnection.getAttachment() != null)
+				{
+					if(netConnection.getAttachment() instanceof Map)
+					{
+						Map map = (Map)netConnection.getAttachment();
+						Integer i =(Integer)map.get(SMsg.C_PLAYER_HEART_PING_COMMAND);
+
+						if(i != null)
+						{
+							if(i > 5)
+							{
+								if(netConnection.getInfo() == null)
+									netConnection.close();
+								else if(!(netConnection.getInfo() instanceof PlayerController))
+									netConnection.close();
+							}
+						}
+					}
+				}
+			}
+			else if(type == SMsg.C_PLAYER_REG_COMMAND)
+			{
+				processReg();
+			}
+			else if(type == SMsg.C_PLAYER_CHANGEPWD_COMMAND)
+			{
+				changePwd();
+			}
+			else if(type == SMsg.C_PLAYER_INPUTMAIL_COMMAND)
+			{
+				changeMail();
+			}
+			else if(type == SMsg.C_PLAYER_LOGIN_COMMAND)
+			{
+				processPlayerLoginByTrue();
+			}
+		}
+		else
+		{
+			worldmanager.clientMessageChain(msg);
+		}
+	}
+	
+
+
+	private void changeMail()
+	{
+		String accountName = msg.getBuffer().readUTF();
+		String pwd = msg.getBuffer().readUTF();
+		String email = msg.getBuffer().readUTF();
+		
+		
+		ByteBuffer buffer = new ByteBuffer();
+		if(!worldmanager.getDatabaseAccessor().updateEmail(accountName, pwd, email))
+		{
+			buffer.writeInt(ErrorCode.ALERT_MAIL_ALTER_FAIL);
+			netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+			return;
+		}	
+		buffer.writeByte(1);
+		buffer.writeUTF(accountName);
+		buffer.writeUTF(pwd);
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_INPUTMAIL_COMMAND,buffer));
+	}
+
+	/**
+	 * 修改密码
+	 */
+	private void changePwd()
+	{
+		String accountName = msg.getBuffer().readUTF();
+		String oldPwd = msg.getBuffer().readUTF();
+		String newPwd = msg.getBuffer().readUTF();
+
+		ByteBuffer buffer = new ByteBuffer();
+		if(!worldmanager.getDatabaseAccessor().updatePwd(accountName, oldPwd, newPwd))
+		{
+			buffer.writeInt(ErrorCode.ALERT_PWD_ALTER_FAIL);
+			netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+			return;
+		}	
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_CHANGEPWD_COMMAND,buffer));
+	}
+
+	/**
+	 * 注册
+	 */
+	private void processReg()
+	{
+		String name = msg.getBuffer().readUTF();
+		String pwd = msg.getBuffer().readUTF();
+		
+		int result = 0;
+		
+		if(-1 != name.indexOf("insert") 
+				|| -1 != name.indexOf("select") 
+				|| -1 != name.indexOf("update"))
+		{
+			result = -1;
+		}
+		if(-1 != pwd.indexOf("insert") 
+			|| -1 != pwd.indexOf("select") 
+			|| -1 != pwd.indexOf("update"))
+		{
+			result = -1;
+		}
+		
+		DatabaseAccessor da = null;
+		
+
+		if(name.length() <= 3)
+		{
+			ByteBuffer buffer = new ByteBuffer();
+			buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_SAMENAME);	
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE,buffer));
+			return;
+		}
+		
+		if(pwd.equals("") || pwd.length() < 6)
+		{
+			ByteBuffer buffer = new ByteBuffer();
+			buffer.writeInt(ErrorCode.ALERT_PWD_LESS);	
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE,buffer));
+			return;
+		}
+		
+		
+		if(result == 0)
+		{
+			da = worldmanager.getDatabaseAccessor();
+			if(1 == da.checkUserName(name, null))
+			{
+				ByteBuffer buffer = new ByteBuffer();
+				buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_SAMENAME);	
+				netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE,buffer));
+				return;
+			}	
+		}
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeBoolean(result == -1?false:da.regUser(name, pwd));	
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_REG_COMMAND,buffer));
+	}
+
+	/**
+	 * 玩家进入游戏
+	 * @param conn
+	 */
+	public void processPlayerEnterGame()
+	{
+		Object playerObj = netConnection.getInfo();
+		
+		if(!(playerObj instanceof Player))
+		{//说明是外挂
+			if(playerObj instanceof PlayerController)
+			{
+				return;
+			}
+			else
+			{
+				netConnection.close();
+				return;
+			}
+		}
+		
+		Player player = (Player)playerObj;
+		worldmanager.processEnterGame(player, netConnection);
+		ByteBuffer buffer = new ByteBuffer(1);
+		buffer.writeBoolean(true);
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_ENTER_GAME_COMMAND,buffer));
+	}
+	
+	/**
+	 * 检测角色名是否已存在
+	 * @param conn
+	 * @param roleName
+	 */
+	public void processCheckRoleName()
+	{
+		String roleName = msg.getBuffer().readUTF();
+		
+		ByteBuffer buffer = new ByteBuffer(2);
+		boolean flag = false;
+		if(worldmanager.getDatabaseAccessor().checkPlayerName(roleName))
+		{
+			flag = true;//alert 已有相同名字
+		}
+		buffer.writeBoolean(flag);
+		netConnection.sendMessage(new SMsg(SMsg.S_ROLENAME_REPEAT_COMMAND, buffer));
+	}
+	
+	/**
+	 * 处理玩家角色删除
+	 * @param conn
+	 * @param id
+	 * @param accountName
+	 */
+	public void processPlayerRoleDelete()
+	{
+		Object playerObj = netConnection.getInfo();
+		
+		if(!(playerObj instanceof Player))
+		{
+			return;
+		}
+		
+		netConnection.setInfo("delete");
+		ByteBuffer buffer = new ByteBuffer(8);
+		boolean flag = false;
+		
+		Player player = (Player)playerObj;
+		if(player.familyId != 0)
+		{
+			FamilyController family = worldmanager.getFamilyById(player.familyId);
+			if(family != null)
+			{
+				PlayerController target = worldmanager.processEnterGame(player, netConnection);
+				target.familyOut();
+				
+				worldmanager.removePlayerController(target);
+				netConnection.setInfo(null);
+			}
+		}
+		
+		if(worldmanager.getDatabaseAccessor().delPlayer(player))
+		{
+			flag = true;
+		}
+		buffer.writeBoolean(flag);
+		netConnection.sendMessage(new SMsg(SMsg.S_DELETE_ROLE_COMMAND,buffer));
+	}
+	
+	
+	/**
+	 * 连接运营商正式的登录
+	 * 
+	 */
+	private void processPlayerLoginByTrue()
+	{
+		/**
+		 *  utf 用户名
+			gameid utf
+			serverid  utf
+			sign utf
+			time utf 
+		 */
+		
+		boolean isActive = msg.getBuffer().readBoolean(); // true 不验证 false 需要验证
+		
+		String accountname = "";
+		
+		if(isActive)
+		{
+			accountname = msg.getBuffer().readUTF();//帐户名
+			String serverid = msg.getBuffer().readUTF();
+			String sign = msg.getBuffer().readUTF();
+			String time = msg.getBuffer().readUTF();	
+			
+			try
+			{
+				String eSign = MD5.getInstance().getMD5String((accountname+time+GameServer.getInstance().key).getBytes("utf-8")).toLowerCase().trim();
+				if(!eSign.equals(sign))
+					return;
+			} 
+			catch (UnsupportedEncodingException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			accountname = msg.getBuffer().readUTF();//帐户名
+			String serverid = msg.getBuffer().readUTF();
+			String sign = msg.getBuffer().readUTF();
+			String time = msg.getBuffer().readUTF();	
+	
+			try
+			{
+				accountname = java.net.URLDecoder.decode(accountname,"utf-8");
+			} 
+			catch (UnsupportedEncodingException e)
+			{
+				e.printStackTrace();
+			}
+			/*
+			 * Key =123456
+				登录
+				Sign=md5("Uname=$Uname&ServerId=$ServerId&Key=$Key&Time =$Time ")
+			 */
+			String data ="Uname="+accountname+"&ServerId="+serverid+"&Key="+GameServer.getInstance().key+"&Time="+time;
+			String m = null;
+			try
+			{
+				
+				m = MD5.getInstance().getMD5String(data.getBytes("utf-8"));
+			} 
+			catch (UnsupportedEncodingException e)
+			{
+				e.printStackTrace();
+			}
+
+			if(!(m.equalsIgnoreCase(sign)))
+			{
+				ByteBuffer buffer = new ByteBuffer(4);
+				buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_ERROR);
+				netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+				netConnection.close();
+				return;
+			}
+		
+		}
+		
+		
+		List conns = worldmanager.getConnections();
+		String ip = netConnection.getIP().split(":")[0];
+		for (int i = 0; i < conns.size(); i++)
+		{
+			NetConnection net = (NetConnection)conns.get(i);
+			
+			if(net == null)
+			{
+				System.out.println("Cmsg login null");
+				continue;
+			}
+			
+			if(net.getIP().equals(netConnection.getIP()))
+				continue;
+			
+			if(!(net.getIP().split(":")[0].equals(ip)))
+				continue;
+			
+			if(net.getInfo() instanceof PlayerController)
+			{
+				PlayerController target = (PlayerController)net.getInfo();
+				if(target.getPlayer().accountName.equals(accountname))
+				{
+					NetConnection oldNet = worldmanager.getConnByIpAndPort(net.getIP());
+					if(oldNet != null)
+					{
+						//System.out.println("-------------");
+						oldNet.close();
+						return;
+					}
+				}
+			}
+		}
+		
+		if(netConnection.getInfo()!=null)
+		{ 
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			netConnection.close();
+			return;
+		}
+		
+		//验证玩家是否在，在则T下玩家
+		NetConnection targetNc = worldmanager.checkPlayerIsOnline(accountname);
+		if(targetNc != null)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.ALERT_LOGIN_OTHERPLAYERLOGIN);
+			targetNc.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+			targetNc.close();
+			//return;
+		}
+		
+		netConnection.setInfo("validate");
+
+		worldmanager.getJobObserver().addJob(GameServer.JOB_DATABASEJOB, new ValidateJob(worldmanager,netConnection,accountname));
+	}
+	
+	
+	/**
+	 * 处理玩家登陆
+	 * @param conn
+	 * @param acountname
+	 */
+	private void processPlayerLogin()
+	{
+		
+		String accountname = msg.getBuffer().readUTF();//帐户名
+		String password = msg.getBuffer().readUTF();//密码(暂时不用)
+		
+		if(-1 != accountname.indexOf("insert") 
+				|| -1 != accountname.indexOf("select") 
+				|| -1 != accountname.indexOf("update"))
+		{
+			return;
+		}
+		if(-1 != password.indexOf("insert") 
+			|| -1 != password.indexOf("select") 
+			|| -1 != password.indexOf("update"))
+		{
+			return;
+		}
+		
+		int result = worldmanager.getDatabaseAccessor().checkUserName(accountname, password);
+		
+		if(result == -1)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.ALERT_LOGIN_FAIL);
+			netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE, buffer));
+			return;
+		}
+		
+/*		if(result == -2)
+		{
+			ByteBuffer buffer = new ByteBuffer();
+			buffer.writeUTF("该用户已被封号");
+			netConnection.sendMessage(new SMsg(SMsg.S_ERROR_MESSAGE, buffer));
+			return;
+		}*/
+		
+		if(result == -3)
+		{
+			ByteBuffer buffer = new ByteBuffer();
+			buffer.writeByte(-1);
+			buffer.writeUTF(accountname);
+			buffer.writeUTF(password);
+			netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_INPUTMAIL_COMMAND, buffer));
+			return;
+		}
+		
+		
+		List conns = worldmanager.getConnections();
+		String ip = netConnection.getIP().split(":")[0];
+		for (int i = 0; i < conns.size(); i++)
+		{
+			NetConnection net = (NetConnection)conns.get(i);
+			
+			if(net == null)
+			{
+				System.out.println("Cmsg login null");
+				continue;
+			}
+			
+			if(net.getIP().equals(netConnection.getIP()))
+				continue;
+			
+			if(!(net.getIP().split(":")[0].equals(ip)))
+				continue;
+			
+			if(net.getInfo() instanceof PlayerController)
+			{
+				PlayerController target = (PlayerController)net.getInfo();
+				if(target.getPlayer().accountName.equals(accountname))
+				{
+					NetConnection oldNet = worldmanager.getConnByIpAndPort(net.getIP());
+					if(oldNet != null)
+					{
+						//System.out.println("-------------");
+						oldNet.close();
+						return;
+					}
+				}
+			}
+		}
+
+		
+		if(netConnection.getInfo()!=null)
+		{ 
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			netConnection.close();
+			return;
+		}
+		
+		//验证玩家是否在，在则T下玩家
+		NetConnection targetNc = worldmanager.checkPlayerIsOnline(accountname);
+		if(targetNc != null)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.ALERT_LOGIN_OTHERPLAYERLOGIN);
+			targetNc.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+			targetNc.close();
+			//return;
+		}
+		
+		netConnection.setInfo("validate");
+
+		worldmanager.getJobObserver().addJob(GameServer.JOB_DATABASEJOB, new ValidateJob(worldmanager,netConnection,accountname));
+	}
+	
+	/**
+	 * 处理玩家角色创建
+	 */
+	private void processPlayerCreate()
+	{
+		ByteBuffer readBuffer = msg.getBuffer();
+		
+		String accountName = readBuffer.readUTF();//帐户名
+		String roleName = readBuffer.readUTF();//角色名
+		int roleSex = readBuffer.readInt(); //1 nan 0 nv性别
+		int profession = readBuffer.readInt();//职业（有5种）
+
+		if(netConnection.getInfo() instanceof Player)
+			return;
+		
+		
+		if(roleName.indexOf("select") !=-1 
+				||roleName.indexOf("update") !=-1
+				||roleName.indexOf("insert") !=-1
+				||roleName.indexOf("into") !=-1
+				||roleName.indexOf("delete") !=-1
+				||roleName.indexOf("order") !=-1//by
+				||roleName.indexOf("from") !=-1
+				||roleName.indexOf("where") !=-1
+				||roleName.indexOf("by") !=-1
+				||roleName.indexOf("group") !=-1
+				||roleName.indexOf("\\") !=-1
+				)
+		{
+			ByteBuffer buffer = new ByteBuffer(1);
+			buffer.writeBoolean(true);
+			netConnection.sendMessage(new SMsg(SMsg.S_ROLENAME_REPEAT_COMMAND, buffer));
+			return;
+		}
+		
+		if(worldmanager.getDatabaseAccessor().checkPlayerName(roleName))
+		{
+			ByteBuffer buffer = new ByteBuffer(1);
+			buffer.writeBoolean(true);
+			netConnection.sendMessage(new SMsg(SMsg.S_ROLENAME_REPEAT_COMMAND, buffer));
+			return;
+		}
+		
+		if(profession == 0)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.EXCEPTION_PROFESSION_NOT_EXIST);//alert 没有这个职业
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			return;
+		}
+		if(roleSex != 1 && roleSex != 0)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.EXCEPTION_SEX_NOT_EXIST);//alert 性别错误
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			return;
+		}
+		
+		if(roleName.trim().length() == 0)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.ALERT_ROLENAME_NULL_ERROR);//alert 角色名不能为空
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			return;
+		}
+		
+		int roldId = worldmanager.getDatabaseAccessor().getNewPlayerId();//获取一个新的角色ID
+		
+		
+		Player player = new Player();
+
+		player.id = roldId;
+		player.accountName = accountName;
+		player.name = roleName;
+		player.sex = roleSex;
+		player.profession = profession;
+		player.date = WorldManager.date;
+		
+		if(profession == 1)
+			player.upProfession = 1;
+		else if(profession == 2)
+			player.upProfession = 3;
+		else if(profession == 3)
+			player.upProfession = 6;
+		else if(profession == 4)
+			player.upProfession = 7;
+		
+		player.initial(0);
+		
+		player.hitPoint = player.maxHitPoint;
+		player.magicPoint = player.maxMagicPoint;
+		
+		
+		
+		player.setPlayerModelMotionId();
+
+		DataFactory.getInstance().setNativity(player);
+		
+		player.setSkill();
+		
+		MailRemind.onCheckMail(new PlayerController(player), MailRemind.ONLEVELUP, 0);
+		
+		netConnection.setId(roldId);
+		netConnection.setInfo(player);
+		
+		worldmanager.getJobObserver().addJob(GameServer.JOB_DATABASEJOB, new SaveJob(worldmanager,player));
+			
+		//把创建好的角色信息发送给客户端
+		ByteBuffer buffer = new ByteBuffer(32);
+		buffer.writeInt(roldId);
+		buffer.writeUTF(player.name);
+		buffer.writeByte(player.sex);
+		buffer.writeInt(player.upProfession);
+		buffer.writeInt(player.level);
+		netConnection.sendMessage(new SMsg(SMsg.S_CREATE_ROLE_COMMAND, buffer));
+	}
+
+}

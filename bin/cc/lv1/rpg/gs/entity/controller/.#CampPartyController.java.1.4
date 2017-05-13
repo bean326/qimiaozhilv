@@ -1,0 +1,291 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+
+/**
+ * 阵营活动控制器
+ * @author dxw
+ *
+ */
+public class CampPartyController extends PlayerContainer
+{
+	/**
+	 * 0星期天 1 - 6 是星期一到星期六  活动日期
+	 */
+	private static final boolean [] PARTY_AT_WEKDAY = {true,true,true,true,true,true,true};
+	
+	/**
+	 * 每小时
+	 */
+	private static final int HOUR = 1000*60*60;
+	
+	/**
+	 * 活动需要的等级
+	 */
+	public static final int LEVEL = 200;
+	
+	/**
+	 * 剩余开始时间
+	 */
+	private static long lessBeginTime = 0;
+	
+	/**
+	 * 举行活动的时间
+	 */
+	private static long partyTime = 0;
+	
+	
+	/**
+	 * 是否进入准备阶段
+	 */
+	private boolean isReady = false;
+	
+	/**
+	 * 活动是否开始了
+	 */
+	private boolean isStarted = false;
+	
+	/**
+	 * 活动是否结束了
+	 */
+	private boolean isEnded = true;
+	
+
+	/**
+	 * 开拓点数
+	 */
+	private int kaiTuoPoint;
+	
+	/**
+	 * 邪神点数
+	 */
+	private int xieShenPoint;
+	
+	/**
+	 * 排名集合
+	 * 胜利阵营荣誉最高的第1名可以获得一个特殊称号，
+	 * 2-5名可以获得一个特殊称号，
+	 * 6-20名可以获得一个特殊称号。
+	 * 失败阵营荣誉最高的第1名可以获得一个特殊称号
+	 * ，2-5名可以获得一个特殊称号，
+	 * 6-20名可以获得一个特殊称号。
+	 * 两个阵营的称号相对应，
+	 * 胜利一方的要比较牛一些。
+	 * 
+	 * 
+	 * 除了特殊称号奖励以外，
+	 * 胜利阵营第1名奖励最多的抽奖宝箱（或者其他特殊物品也可以）、
+	 * 2-5奖励其次，6-20再次。
+	 * 失败一方前20名获得的奖励只有胜利对应一方的一半。
+	 */
+	private List topPlayers = null;
+	
+	private static CampPartyController cpc;
+	
+	private CampPartyController()
+	{
+	}
+	
+	public static CampPartyController getInstance()
+	{
+		if(cpc == null)
+			cpc = new CampPartyController();
+		return cpc;
+	}
+	
+	/**
+	 * 增加双方阵营总点数
+	 * @param target
+	 * @param point
+	 * @return
+	 */
+	public boolean addPoint(PlayerController target,int point)
+	{
+		if(!isStarted)
+			return false;
+		
+		if(target.getPlayer().camp == 1)
+			kaiTuoPoint += point;
+		else
+			xieShenPoint += point;
+		
+		return true;
+	}
+	
+	public void update(long timeMillis)
+	{
+		//用boolean值得控制当天有活动没
+		if(!PARTY_AT_WEKDAY[WorldManager.weekDate])
+			return;
+		
+		
+		if(lessBeginTime <= 0 && !isReady)
+		{
+			if(WorldManager.nextDayTime < HOUR*4)
+			{
+				//当天活动结束时候
+				//小于8点后开服则当天无活动
+				return;
+			}
+			else
+			{
+				//计算活动开始时间
+				lessBeginTime = WorldManager.nextDayTime - HOUR*4;
+				lessBeginTime = lessBeginTime / 1000 *1000;		
+			}
+		}
+		
+		
+		if(!isStarted)
+		{
+			lessBeginTime -=500;
+			//活动开始前30分钟，系统开始公告（5分钟1次）
+			if(lessBeginTime <= 1800000)
+			{
+				if(lessBeginTime%300000 == 0)
+				{
+					isReady = true;  //活动进入准备阶段则玩家可以进入准备房间
+					//阵营活动即将开始
+					if(lessBeginTime >= 300000)
+					{
+						GameServer.getInstance().getWorldManager().sendEveryonePost("\u9635\u8425\u6D3B\u52A8\u5373\u5C06\u5F00\u59CB!!!");
+					}
+				}
+			}
+		}
+
+		
+		if(!isReady)
+			return;
+		
+		if(!isStarted && lessBeginTime <= 0 && partyTime <= 0)
+		{
+			partyTime = HOUR; //设置阵营活动时间
+			isStarted = true;
+			
+			//阵营活动开始
+			//GameServer.getInstance().getWorldManager().sendEveryonePost("\u9635\u8425\u6D3B\u52A8\u5F00\u59CB!!!");
+			
+			topPlayers = new ArrayList(20); //创建排名
+			super.playerList = new ArrayList(100);
+		}
+		else
+		{
+			if(!isStarted)
+				return;
+		}
+		
+		partyTime -=500;
+		
+		if(partyTime <= 0) 
+		{
+			isReady = false;
+			isStarted = false;
+			isEnded = true;
+			
+			//阵营活动结束
+			//GameServer.getInstance().getWorldManager().sendEveryonePost("\u9635\u8425\u6D3B\u52A8\u7ED3\u675F!!!");
+			
+			//通知阵营中的玩家活动结束
+			//胜利方获得该阵营所有人员的荣誉增加50%。 用一个job 
+		}
+	}
+	
+	/**
+	 * 玩家在活动里面
+	 * @param target
+	 * @return
+	 */
+	public boolean isPlayerIn(PlayerController target)
+	{
+		return super.getPlayer(target.getID()) != null;
+	}
+
+	
+	/**
+	 * 加入到活动里面
+	 */
+	public void addPlayer(PlayerController target)
+	{
+		if(target.getPlayer().camp == 0)
+			return;
+		
+		if(!isStarted)
+			return;
+
+		if(isPlayerIn(target))
+			return;
+		
+		playerCampPoint.put(target.getPlayer().accountName, 0);
+		super.addPlayer(target);
+	}
+	
+	private HashMap playerCampPoint = new HashMap(200);
+	
+	/**
+	 * 玩家下线时或活动结束时
+	 */
+	public void removePlayer(PlayerController target)
+	{
+		if(target.getPlayer().camp == 0)
+			return;
+
+		if(!isStarted)
+			return;
+		
+		playerCampPoint.remove(target.getPlayer().accountName);
+		super.removePlayer(target);
+	}
+	
+	/**
+	 * 获取玩家的休息房间
+	 * @param target
+	 * @return
+	 */
+	public int getRoomByCamp(PlayerController target)
+	{
+		int result = 0;
+		if(target.getPlayer().camp == 1)
+			result = DataFactory.KAITUOROOM;
+		else if(target.getPlayer().camp == 2)
+			result = DataFactory.XIESHENROOM;
+		return result;	
+	}
+	
+	
+	public boolean isReady()
+	{
+		return isReady;
+	}
+
+	public boolean isStarted()
+	{
+		return isStarted;
+	}
+
+	public boolean isEnded()
+	{
+		return isEnded;
+	}
+
+	/**
+	 * 接收活动内消息
+	 * 
+	 * @param msg
+	 */
+	public void clientMessageChain(AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		
+		
+	}
+	
+}

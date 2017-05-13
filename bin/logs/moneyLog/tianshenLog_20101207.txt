@@ -1,0 +1,3 @@
+account	name	count	point	money	daijin	goods
+all	all	1	0	1000	0	нч
+twh11	dfs	1	0	1000	0	нч

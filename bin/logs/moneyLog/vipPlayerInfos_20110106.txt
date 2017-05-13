@@ -1,0 +1,2 @@
+time	account	name	level	data
+2011-01-06-10:06:52	shouhu	超人	100	丢弃超大型生命药水x1

@@ -1,0 +1,149 @@
+package cc.lv1.rpg.gs.other;
+
+/**
+ * 错误指令
+ * @author balan
+ *
+ */
+public class ErrorCode {
+	
+	/** 玩家没在游戏中 */
+	public static final int EXCEPTION_LOGIN_PLAYERNOTATGAME = 100;  
+	/** 非法登陆 */
+	public static final int EXCEPTION_LOGIN_ERROR = 101;  
+	/** 玩家未登陆游戏 */
+	public static final int EXCEPTION_LOGIN_NOTINGAME = 102;  
+	/** 已经有这个名字 */
+	public static final int EXCEPTION_LOGIN_SAMENAME = 103;  
+	/** 读取玩家信息错误 */
+	public static final int EXCEPTION_LOGIN_PLAYINFOERROR = 104;  
+	/** 角色名不能为空 */
+	public static final int ALERT_ROLENAME_NULL_ERROR = 105;
+	/** 类型错误 */
+	public static final int EXCEPTION_CLASS_ERROR = 106;
+	/** 你的等级不够 */
+	public static final int ALERT_PLAYER_LEVEL_LACK = 107;
+	/** 没有这个阵营 */
+	public static final int ALERT_NOT_THE_CAMP = 108;
+	/** 你不能转这个职业 */
+	public static final int ALERT_UP_PROFESSION_ERROR = 109;
+	/** 你已经转过职了 */
+	public static final int ALERT_PLAYER_HASBEEN_UP_PROFESSION = 110;
+	
+	/** 交易邀请取消 */
+	public static final int ALERT_BUSINESS_INVITE_CANCEL = 200;
+	/**  交易已经关闭 */
+	public static final int ALERT_BUSINESS_HASBEEN_OVER = 201;
+	/** 玩家正在交易中 */
+	public static final int ALERT_BUSINESS_ING_PLAYER = 202;
+	/** 物品已绑定 不能交易 */
+	public static final int ALERT_GOODS_NOT_BUSINESS = 203;
+	/** 数量超出限制 */
+	public static final int ALERT_GOODSCOUNT_OVERRUN = 204;
+	
+	/** PVP邀请取消 */
+	public static final int ALERT_PVP_INVITE_CANCEL = 300;
+	/** 玩家已经在战斗中 */
+	public static final int ALERT_PLAYER_IS_BATTLING = 301;
+	/** 不同阵营的人不能切磋,请选择恶意攻击 */
+	public static final int ALERT_NOT_INVITE_DIFF_CAMP = 302;
+	/** 16级以前不能PK */
+	public static final int ALERT_BEFORE_SIXTEEN_NOT_PK = 303;
+	/** 不能向非队长发出请求 */
+	public static final int ALERT_REQUEST_NOT_LEADER_ERROR = 304;
+	/** 此房间不允许战斗 */
+	public static final int ALERT_ROOM_ISNOT_BATTLE = 305;
+	/** 怪物不存在 */
+	public static final int ALERT_MONSTER_IS_NOTHING = 306;
+	/** 玩家血量少于1点 */
+	public static final int ALERT_PLAYER_NOT_LIFE = 307;
+	/** 你不是队长 */
+	public static final int ALERT_PLAYER_NOT_LEADER = 308;
+	
+	/** 玩家不在同一个场景 */
+	public static final int ALERT_PLAYER_NOTAT_ROOM = 400;
+	/** 你已经在队伍中，并且你不是队长，所以你不能邀请对方！ */
+	public static final int ALERT_PLAYER_INVITE_ERROR = 401;
+	/** 你由于长时间没有操作，邀请已取消！ */
+	public static final int ALERT_TEAM_INVITE_CANCEL = 402;
+	/** 没有权限 */
+	public static final int ALERT_NOT_POWER_ERROR = 403;
+	/** 请选择除自己以外的队友 */
+	public static final int ALERT_NOT_TARGET_SELF= 404;
+	/** 玩家已经在队伍中 */
+	public static final int ALERT_PLAYER_IN_TEAM = 405;
+	/** 你已不在队伍中 */
+	public static final int ALERT_PLAYER_NOTIN_TEAM = 406;
+	
+	/** 该任务不能取消 */
+	public static final int ALERT_TASK_NOT_CANCEL = 500;
+	
+	/** 相同姓名玩家在游戏内 */
+	public static final int ALERT_LOGIN_SAMEPLAYERONLINE = 600;  
+	/** 有个家伙把你挤下线了 */
+	public static final int ALERT_LOGIN_OTHERPLAYERLOGIN = 601;  
+	
+	/** 两次密码不一致，请重新输入 */
+	public static final int ALERT_STORAGE_TWO_PASSWORD_NOSAME = 700;
+	/** 密码错误 */
+	public static final int ALERT_STORAGE_PASSWORD_ERROR = 701;
+	/** 仓库被锁住 */
+	public static final int ALERT_STORAGE_IS_LOCK = 702;
+	/** 密码错误三次,仓库将被锁24小时 */
+	public static final int ALERT_STORAGE_PASSWORD_ERROR_THRICE = 703;
+	/** 你输入的旧密码不对 */
+	public static final int ALERT_STORAGE_OLD_PASSWORD_ERROR = 704;
+	/** 仓库满了 */
+	public static final int ALERT_STORAGE_IS_FULL = 705;
+	/** 玩家要存入仓库的钱超过玩家自身的钱(游戏币) */
+	public static final int ALERT_STORAGE_SAVE_POINT_OVERRUN = 706;
+	/** 玩家要从仓库取的钱超过玩家仓库的钱(游戏币) */
+	public static final int ALERT_STORAGE_TAKE_POINT_OVERRUN = 707;
+	
+	/** 物品不能丢弃 */
+	public static final int ALERT_GOODS_NOT_DELETE = 801;
+	/** 物品暂时无法使用 */
+	public static final int ALERT_GOODS_CANNET_USE = 802; 
+	/** 物品暂时无法取下 */
+	public static final int ALERT_GOODS_CANNET_REMOVE = 803;
+	/** 玩家等级太低 */
+	public static final int ALERT_GOODS_LEVEL_LOW = 804;
+	/** 玩家性别不符 */
+	public static final int ALERT_GOODS_SEX_ERROR = 805;
+	/** 此物品不存在 */
+	public static final int ALERT_GOODS_NOT_EXIST = 806;
+	/** 数量超出限制 */
+	public static final int ALERT_GOODS_COUNT_OVERRUN = 807;
+	/** 物品不能拆分 */
+	public static final int ALERT_GOODS_NOT_SPLIT = 808;
+	/** 物品不能叠加 */
+	public static final int ALERT_GOODS_NOT_SUPERPOSE = 809;
+	/** 装备不属于玩家这个职业 */
+	public static final int ALERT_GOODS_JOB_ERROR = 810;
+	/** 装备取下失败 */
+	public static final int ALERT_GOODSEQUIP_TAKEOFF_ERROR = 811;
+	/** 不能装此物品 */
+	public static final int ALERT_GOODS_TYPE_ERROR = 812;
+	/** 使用物品失败 */
+	public static final int ALERT_GOODS_USE_ERROR = 813;
+	/** 背包已满 */
+	public static final int ALERT_BAG_IS_FULL = 814; 
+	/** 位置错误 */
+	public static final int ALERT_GOODS_LOCATION_ERROR = 815;
+	/** 没有这个技能 */
+	public static final int ALERT_SKILL_NOT_EXIST = 816;
+	/** 这个不是技能 */
+	public static final int ALERT_GOODS_NOT_SKILL = 817;
+	/** 职业错误 */
+	public static final int ALERT_PROFESSION_ERROR = 818;
+	/** 已经学习过该技能 */
+	public static final int ALERT_SKILL_IS_EXIST = 819;
+
+	/** 你没有足够的金钱来购买这个商品 */
+	public static final int ALERT_SHOP_NO_MONEY = 901;
+	/** 物品不出售 */
+	public static final int ALERT_SHOP_NOT_SALE = 904;
+	/** 物品已出售完 */
+	public static final int ALERT_SHOP_GOODS_NOT_HAVE = 905;
+
+}

@@ -1,0 +1,1430 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RoomExit;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.ext.PetTome;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.pet.Pet;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * 房间控制器
+ * @author dxw
+ *
+ */
+public class RoomController extends PlayerContainer
+{
+
+	private static final int DEFUALT_NATIVITY = -1;
+	
+	private static final MonsterGroupController[] NULL_MONSTER_GROUP = new MonsterGroupController[0];
+	
+	private static final NpcController[] NULL_NPC_LIST = new NpcController[0];
+	
+	private WorldManager worldManager;
+	
+	private AreaController area;
+	
+	/** 副本控制器 */
+	private CopyController copy;
+	
+	/** 是否活动房间 */
+	private boolean isPartyRoom = false;
+	
+	/** 是否活动PK房间 */
+	private boolean isPartyPKRoom = false;
+	
+	/** 是否副本房间 */
+	public boolean isCopyPartyRoom = false;
+	
+	
+	/** 包含在本房间的monster */
+	private MonsterGroupController[] monsterGroups = NULL_MONSTER_GROUP;
+	
+	/** 包含在本房间的npc */
+	private NpcController[] npcList = NULL_NPC_LIST;
+	
+	/** 能否战斗 */
+	private boolean fightAble;
+
+	/** 能否PK */
+	private boolean pkAble;
+	
+	/** 复活点 */
+	private int [] rebirthId = new int[3];
+	
+	/** 0左下 1左上 2上左 3上右 4右上 5右下 6下右 7下左 */
+	private RoomExit [] exits  = new RoomExit[8];
+	
+	private ArrayList monstersNode = null;
+	
+	/** 事件点数  每个房间都有事件点数，必须满足事件点数才能进行传送*/
+	private int eventPoint;
+ 
+	public RoomController()
+	{
+	}
+	
+	/**
+	 * 初始化
+	 * @param node
+	 */
+	public void init(XMLNode node)
+	{
+		id = Integer.parseInt(node.getName().substring(1));
+		
+		name = node.getSubNode("name").getData();
+
+		fightAble = node.getSubNode("fight").equals("1");
+		
+		pkAble = node.getSubNode("pk").equals("1");
+		
+		fightAble = node.getSubNode("fight").getData().equals("1");
+
+		pkAble = node.getSubNode("pk").getData().equals("1");
+			
+		String rebirth = node.getSubNode("rebirth").getData();
+		rebirth = rebirth.substring(1);
+
+		String []rebirths = Utils.split(rebirth, ":");
+		
+		for (int i = 0; i < rebirths.length; i++)
+		{
+			rebirthId[i] = Integer.parseInt(rebirths[i]);
+		}
+		
+		monstersNode = node.getSubNode("monsters").getSubNodes();
+		
+		if(id == DataFactory.PARTYPKROOM)
+		{
+			isPartyPKRoom = true;
+		}
+		if(id == DataFactory.KAITUOROOM || id == DataFactory.XIESHENROOM)
+		{
+			isPartyRoom = true;
+		}
+	}
+	
+	/**
+	 * 发送自身
+	 * @param target
+	 * @param nativityIndex 出生的index -1代表默认 其他为0-7
+	 */
+	public void sendInfo(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer(64);
+		writeTo(buffer);
+		SMsg msg = new SMsg(SMsg.S_ROOM_INFO_COMMAND,buffer);
+		target.getNetConnection().sendMessage(msg);
+	}
+	
+	public void copyTo(GameObject gameobject)
+	{
+		super.copyTo(gameobject);
+
+		RoomController roomController = (RoomController)gameobject;
+		roomController.worldManager = worldManager;
+		
+		roomController.fightAble = fightAble;
+		roomController.pkAble = pkAble;
+		roomController.rebirthId = rebirthId;
+		roomController.monstersNode = monstersNode;
+		roomController.isPartyPKRoom = isPartyPKRoom;
+		roomController.isPartyRoom = isPartyRoom;
+		roomController.isCopyPartyRoom = isCopyPartyRoom;
+	}
+
+	/**
+	 * 发送房间信息给客户端
+	 */
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(area.id);
+		
+		super.writeTo(buffer);
+
+		buffer.writeBoolean(fightAble);
+		buffer.writeBoolean(pkAble);
+		
+		int i = 0;
+		for(; i < 8 ; i ++)
+		{
+			if(exits[i]==null)
+				buffer.writeBoolean(false);
+			else
+				buffer.writeBoolean(true);
+		}
+		
+		buffer.writeInt(eventPoint);
+		
+		int npcLength = npcList.length;
+		buffer.writeInt(npcLength);
+		for(i = 0 ; i < npcLength ; i ++)
+		{
+			npcList[i].getNpc().writeBaseTo(buffer);
+		}
+		
+		int monsterLength = monsterGroups.length;
+		buffer.writeInt(monsterLength);
+		for (i = 0; i < monsterLength; i++) 
+		{
+			monsterGroups[i].writeBaseTo(buffer);
+		}
+		
+		writePlayers(buffer);
+		
+		writePlayerPet(buffer);
+		
+		if(isPartyPKRoom || isPartyRoom)
+		{
+			if(CampPartyController.getInstance().isReady())
+				buffer.writeByte(1);
+			else if(FamilyPartyController.getInstance().isReady())
+				buffer.writeByte(2);
+			else 
+				buffer.writeByte(0);
+		}
+		else if(isCopyPartyRoom)
+		{
+			buffer.writeByte(3);
+		}
+		else
+		{
+			buffer.writeByte(0);
+		}
+	}
+	
+	/**
+	 * 发送所有正在遛宠的玩家的宠物信息
+	 * @param buffer
+	 */
+	public void writePlayerPet(ByteBuffer buffer)
+	{
+		int count = 0;
+		int size = playerList.size();
+		for(int i = 0 ; i < size; i ++)
+		{
+			PlayerController everyone = (PlayerController)playerList.get(i);
+			
+			if(everyone == null)
+				continue;
+			
+			PetTome pt = (PetTome) everyone.getPlayer().getExtPlayerInfo("petTome");
+			Pet pet = pt.getActivePet();
+			if(pet == null)
+				continue;
+			
+			if(pet.isStroll)
+				count++;
+		}
+		
+		buffer.writeInt(count);
+		size = playerList.size();
+		for(int i = 0 ; i < size ; i ++)
+		{
+			PlayerController everyone = (PlayerController)playerList.get(i);
+			
+			if(everyone == null)
+				continue;
+			
+			PetTome pt = (PetTome) everyone.getPlayer().getExtPlayerInfo("petTome");
+			Pet pet = pt.getActivePet();
+			if(pet == null)
+				continue;
+			
+			if(pet.isStroll)
+			{
+				buffer.writeInt(everyone.getID());
+				buffer.writeInt(pet.modelId);
+				buffer.writeUTF(pet.name);
+			}
+		}
+		
+	}
+	
+
+	/**
+	 * 发送所有怪物属性
+	 * @param buffer
+	 */
+
+	public void writeMonsters(ByteBuffer buffer)
+	{
+		int monsterLength = monsterGroups.length;
+		buffer.writeInt(monsterLength);
+		for (int i = 0; i < monsterLength; i++) 
+		{
+			monsterGroups[i].writeTo(buffer);
+		}
+	}
+	
+	/**
+	 * 发送房间内所有的NPC信息
+	 * @param buffer
+	 */
+	public void writeNpcs(ByteBuffer buffer)
+	{
+		int npcLength = npcList.length;
+		buffer.writeByte(npcLength);
+
+		for(int i = 0 ; i < npcLength ; i ++)
+		{
+			npcList[i].getNpc().writeTo(buffer);
+		}
+	}
+	
+	/**
+	 * 发送房间内的所有玩家信息
+	 * @param buffer
+	 */
+	public void writePlayers(ByteBuffer buffer)
+	{
+		int size = playerList.size();
+		buffer.writeInt(size); //这个size不可信 
+	
+		for(int i = 0 ; i < size ; i ++)
+		{
+			PlayerController everyone = (PlayerController)playerList.get(i);
+			
+			if(everyone == null)
+				continue;
+			
+			everyone.getPlayer().writeTo(buffer);
+			buffer.writeBoolean(everyone.getParent() instanceof BattleController); //当前玩家是否在战斗
+		}
+		
+	}
+	
+	
+	
+	private static final long CHECKPLAYERTIMER = 1000*60;
+	
+	private long checkTimer = 0;
+	
+	public void update(long timeMillis)
+	{
+		super.update(timeMillis);
+		int battleSize = battleList.size();
+		for(int i = 0 ; i < battleSize ; i ++ )
+		{
+			BattleController battle = (BattleController)battleList.get(i);
+			battle.update(timeMillis);
+			if(battle.isFinish)
+			{
+				battleList.remove(i--);
+				battleSize--;
+				battle.dispatchIsBattleWithoutRoom(false, null);
+				
+				if(battle instanceof PVEController)
+				{
+					if(!battle.isWin)
+						displayMonsterGroup(battle.objectIndex);
+				}
+				
+			}
+		}
+		
+		for (int i = 0; i < monsterGroups.length; i++)
+		{
+			monsterGroups[i].update(timeMillis);
+		}
+		
+		
+	
+ 		if(timeMillis > checkTimer +CHECKPLAYERTIMER)
+		{
+			checkTimer = timeMillis;
+			
+			for(int i = 0 ; i < playerList.size() ; i ++)
+			{
+				PlayerController everyone = (PlayerController)playerList.get(i);
+				
+				if(i >1000)
+				{
+					System.out.println("RoomController update i > 1000");
+				}
+				
+				if(everyone == null)
+				{
+					playerList.remove(i);
+					i = 0;
+					System.out.println("delete null player with update RoomController");
+					continue;
+				}
+				
+				if(!everyone.isReset)
+				{
+					if(everyone.isOnline() && everyone.getRoom().id == id)
+						continue;
+					else
+						removePlayer(everyone);
+				}
+				
+				if(everyone.getNetConnection() == null)
+					removePlayer(everyone);
+			}
+		}
+
+	}
+
+	
+	private void displayMonsterGroup(long objectIndex)
+	{
+		for (int i = 0; i < monsterGroups.length; i++)
+		{
+			if(monsterGroups[i].objectIndex == objectIndex)
+			{
+				monsterGroups[i].vTimer = 0;
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * 玩家打怪
+	 * @param target
+	 * @param monsters
+	 */
+	public void playerHitMonster(PlayerController target,MonsterGroupController monsters)
+	{
+		monsterHitPlayer(monsters ,target);
+	}
+
+	/**
+	 * 怪打玩家
+	 * @param group
+	 * @param target
+	 */
+	public void monsterHitPlayer(MonsterGroupController group , PlayerController target)
+	{
+		String fightName = group.name+"-vs-"+target.getName();
+		
+		BattleController battle = null;
+//		if(isCopyPartyRoom)
+//		{
+//			battle = createCopyPVE(fightName);
+//		}
+//		else
+//		{
+			battle = createPVE(fightName);
+//		}
+
+		MonsterController [] monsters = group.getMonstersInitial();
+		
+		for (int i = 0; i < monsters.length; i++)
+		{
+			if(monsters[i] == null)
+				continue;
+			
+			if(monsters[i].getMonster().logicType == 2) //是boss
+			{
+				if(isCopyPartyRoom)
+				{
+					CopyPVEController pve = (CopyPVEController)battle;
+					pve.setBoss(true);
+				}
+				else
+				{
+					PVEController pve = (PVEController)battle;
+					pve.setBoss(true);
+				}
+				break;
+			}
+		}
+
+		PlayerController [] players = null;
+		TeamController team = target.getTeam();
+
+		if(team==null)
+		{
+			players = new PlayerController[1];
+			players[0] = target;
+		}
+		else
+		{
+			players = team.getPlayers();
+		}
+	
+		battle.setFighters(players, monsters);
+		battleList.add(battle);
+	
+		ByteBuffer buffer = new ByteBuffer(64);
+		battle.writeTo(buffer);
+		battle.dispatchMsg(SMsg.S_ROOM_PVE_COMMAND, buffer);
+	
+		for (int i = 0; i < players.length; i++) 
+		{
+			if(players[i] == null)
+				continue;
+			battle.dispatchIsBattleWithoutRoom(true,players[i]);
+		}
+		
+		
+		battle.objectIndex = group.objectIndex;
+		group.setVisibled();
+
+		battle.haloStart(players, battle);//启动光环
+	}
+	
+	/**
+	 * 玩家打玩家
+	 * @param source
+	 * @param target
+	 */
+	public void playerHitPlayer(PlayerController inviter,PlayerController target)
+	{
+		if(!inviter.isOnline() || inviter.getParent()!=this)
+			return;
+		
+		if(!target.isOnline() || target.getParent()!=this)
+			return;
+		
+		String fightName = inviter.getName()+"-vs-"+target.getName();
+		
+		BattleController battle = null;
+		
+		if(isPartyPKRoom)
+		{
+					
+			BuffBox buffBox = (BuffBox)inviter.getPlayer().getExtPlayerInfo("buffBox");
+			
+			if(buffBox.partyPKcdTime > 0)
+			{
+				inviter.sendAlert(ErrorCode.ALERT_PARTY_CDTIMING);
+				return;
+			}
+			
+			battle = createPartyPK(fightName);
+		}
+		else
+		{
+			battle = createPVP(fightName);
+		}
+		
+		PlayerController [] sources = null;
+		PlayerController [] players = null;
+		
+		TeamController team = inviter.getTeam();
+		if(team==null)
+		{
+			sources = new PlayerController[1];
+			sources[0] = inviter;
+		}
+		else
+		{
+			sources = team.getPlayers();
+		}
+		team = target.getTeam();
+		if(team==null)
+		{
+			players = new PlayerController[1];
+			players[0] = target;
+		}
+		else
+		{
+			players = team.getPlayers();
+		}
+		battle.setFighters(sources, players);
+		battleList.add(battle);
+		
+		ByteBuffer buffer = new ByteBuffer(64);
+		battle.writeTo(buffer);
+		battle.dispatchMsg(SMsg.S_ROOM_PVP_COMMAND, buffer);
+		
+		for (int i = 0; i < players.length; i++) 
+		{
+			if(players[i] == null)
+				continue;
+			battle.dispatchIsBattleWithoutRoom(true,players[i]);
+		}
+		for (int i = 0; i < sources.length; i++) 
+		{
+			if(sources[i] == null)
+				continue;
+			battle.dispatchIsBattleWithoutRoom(true,sources[i]);
+		}
+		
+		battle.haloStart(sources, battle);//启动光环
+		battle.haloStart(players, battle);//启动光环
+	}
+
+	private BattleController createPVE(String fightName)
+	{
+		BattleController battle = new PVEController();
+		battle.id = fightName.hashCode();
+		battle.name = fightName;
+		battle.setParent(this);
+		return battle;
+	}
+	
+	private BattleController createPVP(String fightName)
+	{
+		BattleController battle = new PVPController();
+		battle.id = fightName.hashCode();
+		battle.name = fightName;
+		battle.setParent(this);
+		return battle;
+	}
+	
+	
+	private BattleController createPartyPK(String fightName)
+	{
+		BattleController battle = new PartyPKController();
+		battle.id = fightName.hashCode();
+		battle.name = fightName;
+		battle.setParent(this);
+		return battle;
+	}
+	
+	private BattleController createCopyPVE(String fightName)
+	{
+		BattleController battle = new CopyPVEController();
+		battle.id = fightName.hashCode();
+		battle.name = fightName;
+		battle.setParent(this);
+		return battle;
+	}
+	
+	
+	public void ExitLinking()
+	{
+		for (int i = 0; i < exits.length; i++)
+		{
+			if(exits[i] == null)
+				continue;
+
+			AreaController areaTarget = worldManager.getAreaById(exits[i].targetArea);
+			
+			if(areaTarget == null)
+			{
+				MainFrame.println("Exit : no exit area "+exits[i].targetArea);
+				continue;
+			}
+			RoomController roomTarget = areaTarget.getRoomById(exits[i].targetRoomId);
+			
+			if(roomTarget == null)
+			{
+				MainFrame.println("Exit : no exit room "+exits[i].targetRoomId+" by "+exits[i].targetArea);
+				continue;
+			}
+			
+			exits[i].targetRC = roomTarget;
+		}
+	}
+	
+	/**
+	 * 把NPC添加到房间中
+	 * @param npc
+	 */
+	public void addNpcList(NpcController npc)
+	{
+		NpcController[] npcs = new NpcController[npcList.length+1];
+		for (int i = 0; i < npcList.length; i++)
+		{
+			npcs[i] = npcList[i];
+		}
+		npcs[npcList.length] = npc;
+		npcList = npcs;
+	}
+	
+	/**
+	 * 把monsterGroup添加到房间中
+	 * @param monsterGroup
+	 */
+	public void addMonsterGroupList(MonsterGroupController monsterGroup)
+	{
+		MonsterGroupController[] nMonsterGroup = new MonsterGroupController[monsterGroups.length+1];
+		for (int i = 0; i < monsterGroups.length; i++)
+		{
+			nMonsterGroup[i] = monsterGroups[i];
+		}
+		nMonsterGroup[monsterGroups.length] = monsterGroup;
+		monsterGroups = nMonsterGroup;
+	}
+	
+	
+	
+	/**
+	 * pvp邀请(不需要对方同意的邀请)
+	 * @param target
+	 * @param msg
+	 */
+	private void PvPInvitation(PlayerController source, AppMessage msg)
+	{
+		if(isCopyPartyRoom)
+		{
+			return;
+		}
+		
+		
+		int playerId = msg.getBuffer().readInt();
+		
+		if (source.getTeam() != null)
+		{
+			if(!source.getTeam().isLeader(source))
+			{
+				source.sendAlert(ErrorCode.ALERT_PLAYER_NOT_LEADER);
+				return;
+			}
+			for (int i = 0; i < source.getTeam().getPlayers().length; i++)
+			{
+				if(source.getTeam().getPlayers()[i].getPlayer().hitPoint <= 0)
+				{
+					source.sendAlert(ErrorCode.ALERT_OHTER_PLAYER_NOT_LIFE);
+					return;
+				}
+			}
+		}
+		else
+		{
+			if(source.getPlayer().hitPoint <= 0)
+			{
+				source.sendAlert(ErrorCode.ALERT_PLAYER_NOT_LIFE);
+				return;
+			}
+		}
+		
+		
+		PlayerController target = getPlayer(playerId);
+		if(target == null || source.getParent() != this)
+		{
+			source.sendAlert(ErrorCode.ALERT_PLAYER_NOTAT_ROOM);
+			return;
+		}
+		if(source.getID() == target.getID())
+			return;
+		if(source.getTeam() != null)
+		{
+			if(source.getTeam().isTeamPlayer(target))
+			{
+				source.sendAlert(ErrorCode.ALERT_SAME_TEAM_PLAYER);
+				return;
+			}
+		}
+		if(source.checkPlayerState())
+			return;
+		if(source.isChoose(source,0) || source.isChoose(target,0))
+			return;
+		if(isPartyPKRoom)
+		{
+			if(!FamilyPartyController.getInstance().isStarted() && !CampPartyController.getInstance().isStarted())
+			{
+				source.sendAlert(ErrorCode.ALERT_PARTY_NO_START);
+				return;
+			}
+			Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+			if(bag.getExtGoods(3) != null)
+			{
+				target.sendAlert(ErrorCode.ALERT_NOPK_STATE);
+				return;
+			}
+			if(FamilyPartyController.getInstance().isStarted())
+			{
+				if(source.getFamily() == null || target.getFamily() == null)
+					return;
+				if(source.getFamily().id == target.getFamily().id)
+				{
+					//同家族的不能PK
+					source.sendAlert(ErrorCode.ALERT_PLAYER_SAME_FAMILY);
+					return;
+				}
+			}
+			else if(CampPartyController.getInstance().isStarted())
+			{
+				if(source.getPlayer().camp == 0 || target.getPlayer().camp == 0)
+					return;
+				if(source.getPlayer().camp == target.getPlayer().camp)
+				{
+					source.sendAlert(ErrorCode.ALERT_PLAYER_SAME_CAMP);
+					return;
+				}
+			}
+		}
+		if(isPartyRoom)
+		{
+			source.sendAlert(ErrorCode.ALERT_REST_ROOM_NOPK);
+			return;
+		}
+
+		
+//		if(target.getPlayer().camp == 0)
+//		{
+//			source.sendGetGoodsInfo(1, false, "\u4E0D\u80FD\u5F3A\u884C\u653B\u51FB\u65B0\u624B\u73A9\u5BB6");
+//			return;
+//		}
+//		if(target.getTeam() != null && !target.getTeam().isLeader(target))
+//		{
+//			source.sendAlert(ErrorCode.ALERT_REQUEST_NOT_LEADER_ERROR);
+//			return;
+//		}
+		if(!pkAble)	
+		{
+			source.sendAlert(ErrorCode.ALERT_ROOM_ISNOT_BATTLE);
+			return;
+		}
+		if(source.getParent() instanceof BattleController || target.getParent() instanceof BattleController)
+		{
+			source.sendAlert(ErrorCode.ALERT_PLAYER_IS_BATTLING);
+			return;
+		}	
+		if(target.getTeam() != null)
+		{
+			for (int i = 0; i < target.getTeam().getPlayers().length; i++)
+			{
+				if(target.getTeam().getPlayers()[i].getPlayer().hitPoint <= 0)
+				{
+					source.sendAlert(ErrorCode.ALERT_PLAYER_NOT_LIFE);
+					return;
+				}
+			}
+		}
+		else
+		{
+			if(target.getPlayer().hitPoint <= 0)
+			{
+				source.sendAlert(ErrorCode.ALERT_PLAYER_NOT_LIFE);
+				return;
+			}
+		}
+			
+		playerHitPlayer(source,target);	
+	}
+
+	/**
+	 * pve邀请 战斗要去
+	 */
+	private void PvEInvitation(PlayerController target, AppMessage msg)
+	{
+		long groupIndex = Long.parseLong(msg.getBuffer().readUTF());
+		
+//		System.out.println("房间 "+id+" "+name);
+//		System.out.println("玩家  "+target.getName()+" 请求打怪.."+groupIndex);
+		if(!fightAble)	
+		{
+			target.sendAlert(ErrorCode.ALERT_ROOM_ISNOT_BATTLE);
+			return;
+		}
+		if(!target.isOnline())
+		{
+			target.sendAlert(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			target.close();
+			return;
+		}
+	
+		if(target.getPlayer().hitPoint <= 0)
+		{	
+			target.sendAlert(ErrorCode.ALERT_PLAYER_NOT_LIFE);
+			return;
+		}
+		
+		if (target.getTeam() != null)
+		{
+			if(!target.getTeam().isLeader(target))
+			{
+				target.sendAlert(ErrorCode.ALERT_PLAYER_NOT_LEADER);
+				return;
+			}
+			for (int i = 0; i < target.getTeam().getPlayers().length; i++)
+			{
+				if(target.getTeam().getPlayers()[i].getPlayer().hitPoint <= 0)
+				{
+					target.sendAlert(ErrorCode.ALERT_OHTER_PLAYER_NOT_LIFE);
+					return;
+				}
+			}
+		}
+		if(target.getParent() != this)
+		{
+			target.sendAlert(ErrorCode.ALERT_PLAYER_NOTAT_ROOM);
+			return;
+		}
+		if(target.getParent() instanceof BattleController)
+		{
+			target.sendAlert(ErrorCode.ALERT_PLAYER_IS_BATTLING);
+			return;
+		}
+		
+		MonsterGroupController mgc = getMonsterGroupByIndex(groupIndex);
+		
+		if(mgc == null || mgc.getParent() != this)
+		{
+			//MainFrame.println(id+" RoomController PvEInvitation   groupIndex :"+groupIndex);
+//			target.sendAlert(ErrorCode.ALERT_MONSTER_IS_NOTHING);
+			return;
+		}
+		if(mgc.isFight())
+		{
+//			target.sendAlert(ErrorCode.ALERT_MONSTER_IS_FIGHT);
+			return;
+		}
+		if(target.checkPlayerState())
+			return;
+		if(target.isChoose(target,0))
+			return;
+
+		playerHitMonster(target, mgc);
+	}
+
+	private void moveToNextRoom(PlayerController target,AppMessage msg)
+	{
+		NetConnection conn = target.getNetConnection();
+		long time = conn.getPingTime();
+		
+		if(time < 2000 + target.currentTimeMsg)
+		{
+			//target.sendAlert(ErrorCode.ALERT_ROOM_FIVE_CHANGE);
+			return;
+		}
+		target.currentTimeMsg = time;
+
+		if(target.checkPlayerState())
+			return;
+		if(target.checkTeamState())
+			return;
+		
+		if(target.getTeam() != null)
+		{
+			TeamController team = target.getTeam();
+			
+			if(team.leader == null)
+				return;
+			
+			if(team.leader.getID() != target.getID())
+				return;
+			
+			PlayerController []everyone = team.getPlayers();
+			for (int i = 0; i < everyone.length; i++)
+			{
+				if(everyone[i] == null)
+					continue;
+				
+				if(everyone[i].getPlayer().eventPoint < eventPoint)
+				{
+					target.sendAlert(ErrorCode.ALERT_TEAMER_EVENTPOINT_CANNOT);
+					return;
+				}
+			}
+			
+			for (int i = 0; i < everyone.length; i++)
+			{
+				if(everyone[i] == null)
+					continue;
+				
+				everyone[i].getPlayer().eventPoint = 0;
+			}	
+		}
+		else
+		{
+			
+			if(target.getPlayer().eventPoint < eventPoint)
+			{
+				target.sendAlert(ErrorCode.ALERT_PLAYER_EVENTPOINT_CANNOT);
+				return;
+			}
+			target.getPlayer().eventPoint = 0;
+		}
+
+		int exitIndex = msg.getBuffer().readByte();
+		
+		if(exitIndex > 7 || exitIndex < 0)
+			return;
+		
+		if(exits[exitIndex] == null)
+			return;
+		RoomController roomTarget = exits[exitIndex].targetRC;
+
+		if(roomTarget == null)
+		{
+			//target.sendError("该出入口没有房间");
+			return;
+		}
+		
+		
+		CampPartyController cpc = CampPartyController.getInstance();
+		FamilyPartyController fpc = FamilyPartyController.getInstance();
+
+		if(roomTarget.isPartyPKRoom || roomTarget.isPartyRoom)
+		{
+			if(cpc.isEnded() && fpc.isEnded())
+			{
+				target.sendAlert(ErrorCode.ALERT_PARTY_NO_START);
+				return;
+			}
+			if(roomTarget.isPartyPKRoom)
+			{
+				if(target.getTeam() == null)
+				{
+					Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+					if(bag.getExtGoods(3) != null)
+					{
+						target.sendAlert(ErrorCode.ALERT_NOPK_STATE);
+						return;
+					}
+				}
+				else
+				{
+					PlayerController[] pcs = target.getTeam().getPlayers();
+					for (int i = 0; i < pcs.length; i++)
+					{
+						if(pcs[i] == null || !pcs[i].isOnline())
+							continue;
+						Bag bag = (Bag) pcs[i].getPlayer().getExtPlayerInfo("bag");
+						if(bag.getExtGoods(3) != null)
+						{
+							target.sendAlert(ErrorCode.ALERT_NOPK_STATE);
+							return;
+						}
+					}
+				}
+			}
+		}
+		
+		if(target.getTeam() == null)
+		{
+			target.setDefaultLocation();
+			removePlayer(target);
+			target.setRoomExit(exits[exitIndex]);
+			target.setParent(null);
+			roomTarget.sendInfo(target);
+		}
+		else
+		{
+			PlayerController[] players = target.getTeam().getPlayers();
+			for (int i = 0; i < players.length; i++)
+			{
+				if(roomTarget.getPlayer(players[i].getID()) == null && roomTarget.area.getPlayer(players[i].getID()) == null)
+				{	
+					roomTarget.getPlayerList().add(players[i]);
+					roomTarget.area.addPlayer(players[i]);
+				}
+			}
+			if(target.getTeam().isLeader(target))
+			{
+				for (int i = 0; i < players.length; i++) 
+				{
+					players[i].setDefaultLocation();
+					removePlayer(players[i]);
+					players[i].setRoomExit(exits[exitIndex]);
+					players[i].setParent(null);
+					roomTarget.sendInfo(players[i]);
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * 在复活选择的时候，把玩家的房间ID设为目标房间ID，在复活选择完后又设置回去，这样是防止玩家到故意掉线或者F5再上线到原地
+	 * @param target
+	 */
+	public void setParentPlayer(PlayerController target)
+	{
+		target.getPlayer().worldId = area.getParentId();
+		target.getPlayer().areaId = area.id;
+		target.getPlayer().roomId = id;
+	}
+	
+	
+
+	public void addPlayer(PlayerController target)
+	{
+		if(target.getParent() != null && target.getParent() instanceof RoomController)
+		{
+//System.out.println(((RoomController)target.getParent()).id+" "+((RoomController)target.getParent()).name);		
+			if(((RoomController)target.getParent()).id != this.id)
+			{//防止直接发add消息
+				target.close();
+				return;
+			}
+		}
+		
+		int nativityIndex = 0;
+		
+		RoomExit exit = target.getRoomExit();
+	   
+		if(exit == null)
+		{
+			nativityIndex = DEFUALT_NATIVITY;
+		}
+		else
+		{
+			nativityIndex = exit.targetPosittion;
+			target.setRoomExit(null);
+		}
+
+		ByteBuffer buffer = new ByteBuffer(64);
+		
+		buffer.writeBoolean(true);
+		target.getPlayer().writeTo(buffer);
+		buffer.writeByte(nativityIndex);
+		if(target.getTeam() != null)
+		{
+			target.getTeam().dispatchMsg(SMsg.S_ROOM_IO_COMMAND,buffer);
+		}
+		
+		dispatchMsg(SMsg.S_ROOM_IO_COMMAND,buffer);
+		
+		PlayerController tempPlayer =  getPlayer(target.getID());
+		if(tempPlayer != null)
+		{
+			super.removePlayer(tempPlayer);
+			area.removePlayer(tempPlayer);
+		}
+		
+		super.addPlayer(target);
+		area.addPlayer(target);
+		
+		target.getPlayer().worldId = area.getParentId();
+		target.getPlayer().areaId = area.id;
+		target.getPlayer().roomId = id;
+		target.setParent(this);
+		target.setRoom(this);
+		
+		buffer = new ByteBuffer(15);
+		buffer.writeInt(target.getPlayer().worldId);
+		buffer.writeInt(area.id);
+		buffer.writeInt(id);
+		buffer.writeByte(nativityIndex);
+		buffer.writeInt(target.getPlayer().x);
+		buffer.writeInt(target.getPlayer().y);
+		AppMessage msg = new AppMessage(SMsg.S_ROOM_ADD_COMMAND,buffer);
+		target.getNetConnection().sendMessage(msg);
+		
+		target.sendAlwaysValue();
+		
+//		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+//		if(bag.isGift())
+//		{
+//			target.isGift = true;
+//			buffer = new ByteBuffer();
+//			target.getNetConnection().sendMessage(new SMsg(SMsg.S_NEW_PLAYER_GIFTGOODS_COMMAND,buffer));
+//		}
+//		
+//		target.checkChoose();
+		
+/*		if(target.getPlayer().eventPoint >= getEventPoint())
+		{
+			//通知客户端点数到了 可以显示GO....
+			buffer = new ByteBuffer(1);
+			target.getNetConnection().sendMessage(new SMsg
+					(SMsg.S_PLAYER_VISIABLE_COMMAND,buffer)); 
+		}*/
+		
+		PetTome pt = (PetTome) target.getPlayer().getExtPlayerInfo("petTome");
+		Pet pet = pt.getActivePet();
+		if(pet != null)
+		{
+			if(pet.isStroll)
+				target.sendPetModel(1,pet.modelId,pet.name);
+			pet.trainOver(target,1);
+			
+			target.sendPetInfo(target,target.getID());
+		}
+	}
+	
+	public void removePlayer(PlayerController target)
+	{
+		super.removePlayer(target);
+		area.removePlayer(target);
+		
+		ByteBuffer buffer = new ByteBuffer(8);
+		buffer.writeInt(area.id);
+		buffer.writeInt(id);
+		AppMessage msg = new AppMessage(SMsg.S_ROOM_REMOVE_COMMAND,buffer);
+		NetConnection conn = target.getNetConnection();
+		if(conn != null)
+			conn.sendMessage(msg);
+		
+		buffer = new ByteBuffer(5);
+		buffer.writeBoolean(false);
+		buffer.writeInt(target.getID());
+		dispatchMsg(SMsg.S_ROOM_IO_COMMAND,buffer);
+	}
+	
+	
+	public MonsterGroupController getMonsterGroupById(int groupId)
+	{
+		for(int i = monsterGroups.length-1 ; i >= 0 ; i --)
+		{
+			if(monsterGroups[i].id == groupId)
+				return monsterGroups[i];
+		}
+		return null;
+	}
+	
+	public MonsterGroupController getMonsterGroupByIndex(long objectIndex)
+	{
+		for(int i = monsterGroups.length-1 ; i >= 0 ; i --)
+		{
+			if(monsterGroups[i].objectIndex == objectIndex)
+				return monsterGroups[i];
+		}
+		return null;
+	}
+	
+	public void setCopy(CopyController copy)
+	{
+		this.copy = copy;
+	}
+	
+	public CopyController getCopy()
+	{
+		return this.copy;
+	}
+	
+	public void setWorld(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+	
+	public void setParent(AreaController area)
+	{
+		this.area = area;
+	}
+	
+	public AreaController getParent()
+	{
+		return area;
+	}
+
+	public void setExits(RoomExit[] exits)
+	{
+		this.exits = exits;
+	}
+
+	public RoomExit[] getExits()
+	{
+		return exits;
+	}
+	
+	public NpcController[] getNpcList()
+	{
+		return npcList;
+	}
+	
+	public ArrayList getMonstersNode()
+	{
+		return monstersNode;
+	}
+
+	public MonsterGroupController[] getMonsterGroups()
+	{
+		return monsterGroups;
+	}
+	
+	public List getPlayerList()
+	{
+		return playerList;
+	}
+
+	public String toString()
+	{
+		return " player "+playerList.size()+
+		" npc : "+
+		npcList.length+
+		" monster : "+
+		monsterGroups.length;
+	}
+	
+	public NpcController getNpc(int npcId)
+	{
+		int length = npcList.length;
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(npcList[i].getID() == npcId)
+				return npcList[i];
+		}
+		return null;
+	}
+	
+	public boolean isFightAble()
+	{
+		return fightAble;
+	}
+	
+	public boolean isPkAble()
+	{
+		return pkAble;
+	}
+	
+	public boolean isPartyRoom()
+	{
+		return isPartyRoom;
+	}
+	
+	public boolean isPartyPKRoom()
+	{
+		return isPartyPKRoom;
+	}
+	
+	public int getEventPoint()
+	{
+		return eventPoint;
+	}
+
+	public void setEventPoint(int eventPoint)
+	{
+		this.eventPoint = eventPoint;
+	}
+
+	public void sendCanTasks(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer(32);
+		buffer.writeInt(npcList.length);
+		for (int i = 0; i < npcList.length; i++)
+		{
+			buffer.writeInt(npcList[i].getID());
+			npcList[i].anyTask(target,buffer);
+		}
+		target.getNetConnection().sendMessage
+		(new SMsg(SMsg.S_ROOM_GET_ROOM_TASKS,buffer));
+		
+//		PetTome pt = (PetTome) target.getPlayer().getExtPlayerInfo("petTome");
+//		Pet pet = pt.getActivePet();
+//		if(pet == null)
+//			return;
+//
+//		pet.trainOver(target,1);
+		
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		if(bag.isGift())
+		{
+			target.isGift = true;
+			buffer = new ByteBuffer();
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_NEW_PLAYER_GIFTGOODS_COMMAND,buffer));
+		}
+		
+		target.checkChoose();
+	}
+	
+	/**
+	 * 传入阵营值，返回当前场景传回的重生点ID
+	 * @param i
+	 * @return
+	 */
+	public int getRebirthId(int camp)
+	{
+		return rebirthId[camp];
+	}
+	
+	public void sendPlayerMove(RoomController targetRoom,PlayerController[] players)
+	{
+		
+		int length = players.length;
+		for (int i = 0; i < length; i++) 
+		{
+			if(players[i] == null || !players[i].isOnline())
+				continue;
+			
+//			players[i].getPlayer().x = 0;
+//			players[i].getPlayer().y = 0;
+//			players[i].getPlayer().eventPoint = 0;
+			players[i].setDefaultLocation();
+			
+			players[i].setParent(null);
+			
+			removePlayer(players[i]);
+		}
+		for (int i = 0; i < length; i++)
+		{
+			if(players[i] == null || !players[i].isOnline())
+				continue;
+			targetRoom.sendInfo(players[i]);
+		}
+		for (int i = 0; i < length; i++)
+		{
+			if(players[i] == null || !players[i].isOnline())
+				continue;
+			targetRoom.addPlayer(players[i]);
+		}
+	}
+	
+	/**
+	 * 判断买东西时是否在正确房间
+	 * @param shopId
+	 * @return
+	 */
+	public boolean isNpcInRoom(int shopId)
+	{
+		for (int i = 0; i < npcList.length; i++) 
+		{
+			if(npcList[i] != null)
+			{	
+				String[] strs = Utils.split(npcList[i].getNpc().shopId, ":");
+				for (int j = 0; j < strs.length; j++) 
+				{
+					int id = Integer.parseInt(strs[j]);
+					if(id == shopId)
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+
+    /** 与客户端通信 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+	
+		if(type == SMsg.C_ROOM_INFO_COMMAND)
+		{
+			sendInfo(target);
+		}
+		else if(type == SMsg.C_ROOM_ADD_COMMAND)
+		{
+			addPlayer(target);
+		}
+		else if(type == SMsg.C_ROOM_REMOVE_COMMAND)
+		{
+			removePlayer(target);
+		}
+		else if(type == SMsg.C_ROOM_EXIT_COMMAND)
+		{
+			moveToNextRoom(target,msg);
+		}
+		else if(type == SMsg.C_ROOM_PVE_COMMAND)
+		{
+			PvEInvitation(target,msg);
+		}
+		else if(type == SMsg.C_ROOM_PLAYER_UPDATE_PLAYER)
+		{
+			target.sendAlwaysValue();
+		}
+		else if(type == SMsg.C_ROOM_GET_ROOM_TASKS)
+		{
+			sendCanTasks(target);
+		}
+		else if(type == SMsg.C_ROOM_PVP_COMMAND)
+		{
+			PvPInvitation(target,msg);
+		}
+		else if(type == SMsg.C_ROOM_INITED)//客户端初始化房间完成
+		{
+			if(getEventPoint() != 0)
+			{
+				if(target.getPlayer().eventPoint >= getEventPoint())
+				{
+					ByteBuffer buffer = new ByteBuffer(1);
+					target.getNetConnection().sendMessage(new SMsg
+							(SMsg.S_PLAYER_VISIABLE_COMMAND,buffer)); 
+				}
+			}
+		}
+	}
+}

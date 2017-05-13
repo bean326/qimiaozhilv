@@ -1,0 +1,270 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.MailBox;
+
+public class Mail extends RPGameObject
+{
+	
+	public static long ONE_DAY_TIME = 1000*60*60*24;
+	
+	public static long WEK_TIME = ONE_DAY_TIME*7;
+	
+	private Goods attach1;
+	
+	private Goods attach2;
+	
+	private String senderName;
+	
+	private String title;
+	
+	private String content;
+	
+	private long createTime;
+	
+	private boolean isRead;
+	
+	private int point;
+	
+	private int money;
+	
+	public Mail(String senderName,long currentTime)
+	{
+		this.senderName = senderName;
+		this.createTime = currentTime;
+	}
+	
+	public Mail(String senderName)
+	{
+		this(senderName,System.currentTimeMillis());
+	}
+	
+	public Mail()
+	{
+	}
+
+	public int getDay(long currentTime)
+	{ 
+		long endTime = createTime+WEK_TIME;
+		
+		if(endTime > currentTime)
+		{
+			return (int)((endTime - currentTime)  / ONE_DAY_TIME);
+		}
+		return 0;
+	}
+	
+	public String getTitle()
+	{
+		return title;
+	}
+
+	public void setTitle(String title)
+	{
+		this.title = title;
+	}
+
+	public String getContent()
+	{
+		return content;
+	}
+
+	public void setContent(String content)
+	{
+		this.content = content;
+	}
+
+	public Goods getAttach1()
+	{
+		return attach1;
+	}
+
+	public Goods getAttach2()
+	{
+		return attach2;
+	}
+
+	public String getSenderName()
+	{
+		return senderName;
+	}
+
+	public void setSenderName(String senderName)
+	{
+		this.senderName = senderName;
+	}
+
+	public boolean isRead()
+	{
+		return isRead;
+	}
+
+	public void setRead(boolean isRead)
+	{
+		this.isRead = isRead;
+	}
+	
+	
+	public int getPoint()
+	{
+		return point;
+	}
+
+	public void setPoint(int point)
+	{
+		this.point = point;
+	}
+
+	public int getMoney()
+	{
+		return money;
+	}
+
+	public void setMoney(int money)
+	{
+		this.money = money;
+	}
+
+	public boolean addAttach(Goods goods)
+	{
+		if(attach1 == null)
+		{
+			attach1 = goods;
+			return true;
+		}
+		else if(attach2 == null)
+		{
+			attach2 = goods;
+			return true;
+		}
+		return false;
+	}
+	
+	public Goods getAttach(int index)
+	{
+		if(index == 1)
+		{
+			return attach1;
+		}
+		else if(index == 2)
+		{
+			return attach2;
+		}
+		return null;
+	}
+	
+	public void loadFrom(ByteBuffer buffer)
+	{
+		senderName = buffer.readUTF();
+		title = buffer.readUTF();
+		content = buffer.readUTF();
+		createTime = buffer.readLong();
+		isRead = buffer.readBoolean();
+		
+		point = buffer.readInt();
+		money = buffer.readInt();
+		
+		
+	}
+
+	public void saveTo(ByteBuffer buffer)
+	{
+		buffer.writeUTF(senderName);
+		buffer.writeUTF(title);
+		buffer.writeUTF(content);
+		buffer.writeLong(createTime);
+		buffer.writeBoolean(isRead);
+		
+		buffer.writeInt(point);
+		buffer.writeInt(money);
+		
+		
+		
+		/**
+		 * 	private Goods attach1;
+	
+	private Goods attach2;
+	
+
+		 */
+		
+		if(attach1 != null)
+		{
+
+		}
+		if(attach2 != null)
+		{
+
+		}
+	}
+	
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(id);
+		buffer.writeUTF(senderName);
+		buffer.writeUTF(title);
+		buffer.writeUTF(content);
+		buffer.writeUTF(Utils.getCurrentTime(createTime));
+		
+		buffer.writeInt(point);
+		buffer.writeInt(money);
+		
+		if(attach1 == null)
+		{
+			buffer.writeUTF("0");
+		}
+		else
+		{
+			buffer.writeUTF(attach1.objectIndex+"");
+		}
+		if(attach2 == null)
+		{
+			buffer.writeUTF("0");
+		}
+		else
+		{
+			buffer.writeUTF(attach1.objectIndex+"");
+		}
+	}
+	
+	/**
+	 * 给在线玩家发送
+	 * @param target
+	 */
+	public void send(PlayerController target)
+	{
+		
+		if(target == null)
+			return;
+		
+		MailBox mail = (MailBox)target.getPlayer().getExtPlayerInfo("mailbox");
+		mail.addMail(target,this);
+		
+	}
+
+	public void clearAttach()
+	{
+		attach1 = null;
+		attach2 = null;
+		point = 0;
+		money = 0;
+	}
+
+	public int getAttachCount()
+	{
+		int count = 0;
+		
+		if(attach1 != null)
+			count++;
+		
+		if(attach2 != null)
+			count++;	
+			
+		return count;
+	}
+	
+}

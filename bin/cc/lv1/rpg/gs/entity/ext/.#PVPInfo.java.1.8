@@ -1,0 +1,106 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import cc.lv1.rpg.gs.entity.impl.Player;
+import vin.rabbit.util.ByteBuffer;
+
+public class PVPInfo extends PlayerExtInfo 
+{
+
+	private Player player;
+	
+	/** PK胜率(同阵营的) */
+	public int pkWinRate;
+	
+	/** PK胜利场数(同阵营的)*/
+	public int pkWinCount;
+	
+	public static long checkTime = 1000 * 60 * 5;//5分钟
+	
+	/** 被杀开始时间 */
+	public long startCheckTime;
+	
+	/** 虚弱状态 */
+	public int weakness;
+	
+	/** 荣誉值 */
+	public int honourPoint;
+	
+	public PVPInfo()
+	{
+	}
+	
+	public void setPlayer(Player player)
+	{
+		this.player = player;
+	}
+	
+	@Override
+	public String getName() 
+	{
+		return "PVPInfo";
+	}
+
+	@Override
+	public void loadFrom(ByteBuffer buffer) 
+	{
+		pkWinRate = buffer.readInt();
+		pkWinCount = buffer.readInt();
+		weakness = buffer.readInt();
+		honourPoint = buffer.readInt();
+//		startCheckTime = buffer.readLong();
+	}
+
+	@Override
+	public void saveTo(ByteBuffer buffer) 
+	{
+		buffer.writeInt(pkWinRate);
+		buffer.writeInt(pkWinCount);
+		buffer.writeInt(weakness);
+		buffer.writeInt(honourPoint);
+//		buffer.writeLong(startCheckTime);
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(pkWinRate);
+		buffer.writeInt(honourPoint);
+	}
+	
+	public void setHonourPoint(int point)
+	{
+		if(point < 0)
+			point = 0;
+		
+		honourPoint += point;
+		
+		if(honourPoint > 9999)
+			honourPoint = 9999;
+	}
+	
+	public void setWeakness()
+	{
+		if(weakness >= 2)
+			return;
+		weakness += 1;
+		if(startCheckTime == 0)
+		{
+			startCheckTime = System.currentTimeMillis();
+		}
+		if(weakness >= 2)
+		{
+			startCheckTime = System.currentTimeMillis();
+		}
+	}
+	
+	public boolean isWeakness()
+	{
+		return weakness >= 2;
+	}
+	
+	public void print()
+	{
+		System.out.println("-------------------------------------");
+		System.out.println("荣誉值："+honourPoint);
+		System.out.println("-------------------------------------");
+	}
+}

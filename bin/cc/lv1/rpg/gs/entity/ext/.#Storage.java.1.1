@@ -1,0 +1,672 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+
+/**
+ * 玩家仓库
+ * @author balan
+ *
+ */
+public class Storage extends PlayerExtInfo {
+
+	/** 仓库中的游戏币 */
+	public int point;
+	
+	/** 仓库类型(0.玩家个人仓库 1.家族仓库 2. 工会仓库 ......) */ 
+	public int storageType;
+	
+	/** 仓库密码 */
+	public String password = "";
+	
+	/** 仓库状态(等于3时仓库就被锁住了) */
+	public int state;
+	
+	/** 仓库被锁时间 */
+	public long lockTime;
+
+	/** 仓库大小(默认) */
+	private int storageSize = 150;
+	
+	/** 仓库中物品 */
+	private Goods[] goodsList = new Goods[storageSize];
+	
+	public Storage(int storageType)
+	{
+		this.storageType = storageType;
+	}
+	
+	/**
+	 * 设置仓库被锁时间
+	 */
+	public void setLockTime(){
+		Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+		lockTime = calendar.getTimeInMillis();
+	}
+	
+	@Override
+	public String getName() 
+	{
+		return "storage";
+	}
+
+	@Override
+	public void loadFrom(ByteBuffer buffer) 
+	{
+		point = buffer.readInt();
+		storageType = buffer.readInt();
+		password = buffer.readUTF();
+		state = buffer.readInt();
+		lockTime = buffer.readLong();
+		loadStorageGoods(buffer);
+	}
+
+	@Override
+	public void saveTo(ByteBuffer buffer) 
+	{
+		buffer.writeInt(point);
+		buffer.writeInt(storageType);
+		buffer.writeUTF(password);
+		buffer.writeInt(state);
+		buffer.writeLong(lockTime);
+		saveStorageGoods(buffer);
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(point);
+		int count = 0;
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			if(goodsList[i] != null)
+				count++;
+		}
+		buffer.writeInt(count);
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			Goods goods = goodsList[i];
+			if(goods != null)
+			{
+				goods.writeTo(buffer);
+				buffer.writeInt(goods.goodsCount);
+				buffer.writeInt(i);
+			}
+		}
+	}
+
+
+	/**
+	 * 保存仓库物品
+	 * @param buffer
+	 */
+	public void saveStorageGoods(ByteBuffer buffer)
+	{
+		int count = 0;
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			if(goodsList[i] != null)
+				count++;
+		}
+		buffer.writeInt(count);
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			Goods goods = goodsList[i];
+			if(goods != null)
+			{
+				buffer.writeInt(goods.id);
+				buffer.writeUTF(goods.objectIndex+"");
+				buffer.writeInt(goods.type);
+				buffer.writeInt(goods.repeatNumber);
+				buffer.writeInt(goods.goodsCount);
+				buffer.writeInt(i);
+			}
+		}
+	}
+	
+	/**
+	 * 加载仓库中物品
+	 * @param buffer
+	 */
+	public void loadStorageGoods(ByteBuffer buffer)
+	{
+		int count = buffer.readInt();
+		for (int i = 0; i < count; i++) 
+		{
+			int id = buffer.readInt();
+			long objectIndex = Long.parseLong(buffer.readUTF());
+			int type = buffer.readInt();
+			int repeatNumber = buffer.readInt();
+			int goodsCount = buffer.readInt();
+			int location = buffer.readInt();
+			
+			Goods goods = (Goods)DataFactory.getInstance().getGameObject(id);
+			Goods newGoods = (Goods) RPGameObject.cloneObject(goods);
+			
+			newGoods.objectIndex = objectIndex;
+			newGoods.type = type;
+			newGoods.repeatNumber = repeatNumber;
+			newGoods.goodsCount = goodsCount;
+			newGoods.id = id;
+			synchronized (goodsList) 
+			{
+				goodsList[location] = newGoods;
+			}
+		}
+	}
+	
+	
+	/**
+	 * 仓库密码操作
+	 * @param target
+	 * @param buffer
+	 */
+	public void storagePassword(PlayerController target,ByteBuffer buffer)
+	{
+		String oldPwd = buffer.readUTF();
+		String newPwd = buffer.readUTF();
+		boolean result = true;
+		if(!oldPwd.equals(password))
+		{
+			result = false;
+			target.sendAlert(ErrorCode.ALERT_STORAGE_OLD_PASSWORD_ERROR);
+			return;
+		}
+		password = newPwd;
+		ByteBuffer buff = new ByteBuffer(1);
+		buff.writeBoolean(result);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_STORAGE_PASSWORD_OPTION_COMMAND,buff));
+	}
+	
+	
+	/**
+	 * 添加物品到仓库中(从背包中)
+	 * @param target
+	 * @param buffer
+	 */
+	public void addGoodsToStorage(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting");
+		Object goodsObject = bag.getGoodsByObjectIndex(objectIndex);
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		if(isStorageFull(target))
+			return;
+		Goods goods = (Goods)goodsObject;
+		bag.getGoodsList()[bag.getGoodsLocation(goods.objectIndex)] = null;
+		Goods newGoods = (Goods) RPGameObject.cloneObject(goods);
+		newGoods.goodsCount = bag.getGoodsCount(newGoods.id);
+		ps.updatePlayerBar(newGoods);
+		ByteBuffer buff = new ByteBuffer(64);
+		addGoodsToStorage(target,goods,buff);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_ADD_GOODS_TO_STORAGE_COMMAND,buff));
+	}
+	
+	
+	/**
+	 * 从仓库中取出物品
+	 * @param target
+	 * @param buffer
+	 */
+	public void takeOutGoodsFromStorage(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		if(bag.isBagFull(target))
+			return;
+		Object goodsObject = getGoodsByObjectIndex(objectIndex);
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods)goodsObject;
+		goodsList[getGoodsLocation(objectIndex)] = null;
+		ByteBuffer buff = new ByteBuffer(128);
+		buff.writeUTF(goods.objectIndex+"");
+		bag.addGoodsToBag(target, goods, buff);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_TAKEOUT_GOODS_FROM_STORAGE_COMMAND,buff));
+	}
+	
+	/**
+	 * 改变物品在仓库中位置
+	 * @param target
+	 * @param buffer
+	 */
+	public void changeStorageGoodsLocation(PlayerController target,ByteBuffer buffer)
+	{
+		long objectIndex = Long.parseLong(buffer.readUTF());
+		int newLocation = buffer.readInt();
+		Object goodsObject = getGoodsByObjectIndex(objectIndex);
+		if(!(goodsObject instanceof Goods) || goodsObject == null)
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		if(newLocation > goodsList.length-1)
+		{
+			target.sendAlert(ErrorCode.ALERT_GOODS_LOCATION_ERROR);
+			return;
+		}
+		ByteBuffer buff = new ByteBuffer(20);
+		if(goodsList[newLocation] != null)
+		{
+			Goods reGoods = goodsList[newLocation];
+			if(reGoods.id != goods.id)
+			{
+				target.sendAlert(ErrorCode.ALERT_GOODS_NOT_SUPERPOSE);
+				return;
+			}
+			else
+			{
+				if(goods.repeatNumber <= 1)
+				{
+					target.sendAlert(ErrorCode.ALERT_GOODS_NOT_SUPERPOSE);
+					return;
+				}
+				int count = goods.goodsCount + reGoods.goodsCount;
+				if(count <= reGoods.repeatNumber)
+				{
+					reGoods.goodsCount = count;
+					goods.goodsCount = 0;
+				}
+				else 
+				{
+					reGoods.goodsCount = reGoods.repeatNumber;
+					goods.goodsCount = count - goods.repeatNumber;	
+				}
+				buff.writeInt(1);
+				buff.writeUTF(goods.objectIndex+"");
+				buff.writeInt(getGoodsLocation(goods.objectIndex));
+				buff.writeInt(goods.goodsCount);
+				buff.writeUTF(reGoods.objectIndex+"");
+				buff.writeInt(getGoodsLocation(reGoods.objectIndex));
+				buff.writeInt(reGoods.goodsCount);
+				updateGoodsList(goods);
+				updateGoodsList(reGoods);
+			}
+		}
+		else
+		{
+			goodsList[getGoodsLocation(objectIndex)] = null;
+			goodsList[newLocation] = goods;
+			buff.writeInt(0);
+			buff.writeUTF(objectIndex+"");
+			buff.writeInt(newLocation);
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_CHANGE_STORAGE_GOODS_LOCATION_COMMAND,buff));
+	}
+	
+
+	/**
+	 * 打开玩家个人仓库
+	 * @param target
+	 * @param buffer
+	 */
+	public void openPrivateStorage(PlayerController target,ByteBuffer buffer)
+	{
+		if(state >= 3)//仓库被锁
+		{
+			long surTime = (lockTime + 24*60*60*1000) - System.currentTimeMillis();//锁24小时
+			if(surTime > 0)//仓库被锁的剩余时间
+			{
+				StringBuffer error = new StringBuffer();
+				SimpleDateFormat loTime = new SimpleDateFormat("yyyy年MM月dd日  HH时mm分ss秒");
+				int hour = (int) (surTime/3600000);
+				int minute = (int) ((surTime - (3600000*hour))/60000);
+				int second = (int) (((surTime - (3600000*hour)) - 60000*minute)/1000);
+				error.append("您的仓库已于");
+				error.append(loTime.format(lockTime));
+				error.append("被锁！还有[");
+				error.append(hour);
+				error.append("]小时[");
+				error.append(minute);
+				error.append("]分[");
+				error.append(second);
+				error.append("]秒才能解锁！");
+				target.sendError(error.toString());
+				return;
+			}
+			else
+				state = 1;
+		}
+		String pwd = buffer.readUTF();
+		ByteBuffer buff = new ByteBuffer();
+		if(password.isEmpty() || pwd.equals(password))
+		{
+			writeTo(buff);
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_OPEN_STORAGE_COMMAND,buff));
+		}
+		else
+		{
+			buff.writeBoolean(true);
+			if(!pwd.isEmpty())
+			{
+				if(!pwd.equals(password))
+				{
+					state++;
+					if(state >= 3)
+					{
+						setLockTime();//仓库被锁
+						target.sendAlert(ErrorCode.ALERT_STORAGE_PASSWORD_ERROR_THRICE);
+						return;
+					}
+					target.sendAlert(ErrorCode.ALERT_STORAGE_PASSWORD_ERROR);
+					return;
+				}
+			}
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_VALIDATE_STORAGE_ISPASSWORD_COMMAND,buff));
+		}
+	}
+	
+	/**
+	 * 仓库中金钱(游戏币)(取出，存入)操作
+	 * @param target
+	 * @param buffer
+	 */
+	public void moneyOption(PlayerController target,ByteBuffer buffer)
+	{
+		int type = buffer.readInt();
+		int pointCount = buffer.readInt();
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		if(type == 0)//存钱
+		{
+			if(pointCount > bag.point)
+			{
+				target.sendAlert(ErrorCode.ALERT_STORAGE_SAVE_POINT_OVERRUN);
+				return;
+			}
+			point += pointCount;
+			bag.point -= pointCount;
+		}
+		else if(type == 1)
+		{
+			if(pointCount > point)
+			{
+				target.sendAlert(ErrorCode.ALERT_STORAGE_TAKE_POINT_OVERRUN);
+				return;
+			}
+			point -= pointCount;
+			bag.point += pointCount;
+		}
+		ByteBuffer buff = new ByteBuffer(4);
+		buff.writeInt(pointCount);
+		buff.writeInt(type);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_MONEY_OPTION_COMMAND,buff));
+	}
+	
+	
+	
+	/**
+	 * 添加物品到玩家仓库中
+	 * @param target
+	 * @param goods
+	 */
+	public void addGoodsToStorage(PlayerController target,Goods goods,ByteBuffer buffer)
+	{
+		buffer.writeUTF(goods.objectIndex+"");
+		if(goods.repeatNumber <= 1)
+		{
+			if(isStorageFull(target))
+				return;
+			int location = getNullLocation();
+			goodsList[location] = goods;
+			buffer.writeInt(2);
+			goods.writeTo(buffer);
+			buffer.writeInt(goods.goodsCount);
+			buffer.writeInt(location);
+		}
+		else
+		{
+			Goods go = getGoods(goods.id);
+			if(go != null)
+			{
+				int total = goods.goodsCount + go.goodsCount;
+				if(total <= goods.repeatNumber)
+				{			
+					go.goodsCount = total;//更新物品数量 
+					buffer.writeInt(0);
+					buffer.writeUTF(go.objectIndex+"");
+					buffer.writeInt(go.goodsCount);
+					buffer.writeInt(getGoodsLocation(go.objectIndex));
+				}
+				else
+				{
+					go.goodsCount = go.repeatNumber;
+					buffer.writeInt(1);
+					buffer.writeUTF(go.objectIndex+"");
+					buffer.writeInt(go.goodsCount);
+					buffer.writeInt(getGoodsLocation(go.objectIndex));
+					int count = total - go.repeatNumber;
+					if(count > 0)
+					{
+						Goods newGoods = (Goods) RPGameObject.cloneObject(go);
+						newGoods.objectIndex = target.getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+						newGoods.goodsCount = total - newGoods.repeatNumber;
+						if(isStorageFull(target))
+							return;
+						goodsList[getNullLocation()] = newGoods;
+						buffer.writeUTF(newGoods.objectIndex+"");
+						buffer.writeInt(newGoods.goodsCount);
+						buffer.writeInt(getGoodsLocation(newGoods.objectIndex));
+					}
+				}	
+				updateGoodsList(go);
+				Goods goo = (Goods) RPGameObject.cloneObject(go);
+				goo.goodsCount = getGoodsCount(goo.id);
+			}
+			else
+			{
+				if(isStorageFull(target))
+					return;
+				int location = getNullLocation();
+				goodsList[location] = goods;
+				buffer.writeInt(2);
+				goods.writeTo(buffer);
+				buffer.writeInt(goods.goodsCount);
+				buffer.writeInt(location);
+			}
+		}
+		
+	}
+	
+	
+	/**
+	 * 判断仓库是否满了
+	 * @param target
+	 * @return
+	 */
+	public boolean isStorageFull(PlayerController target)
+	{
+		if(getNullLocation() == -1)
+		{
+			target.sendAlert(ErrorCode.ALERT_STORAGE_IS_FULL);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取一个空位置
+	 * @return
+	 */
+	private int getNullLocation()
+	{
+		for (int i = 0; i < goodsList.length; i++)
+		{
+			if(goodsList[i] == null)
+				return i;
+		}
+		return -1;
+	}
+	
+	/**
+	 * 根据流水号获取物品
+	 * @param objectIndex
+	 * @return
+	 */
+	public Goods getGoodsByObjectIndex(long objectIndex)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] == null)
+				continue;
+			Goods goods = goodsList[i];
+			if(goods.objectIndex == objectIndex)
+			{
+				return goods;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据流水获取物品在背包的位置
+	 * @param objectIndex
+	 * @return
+	 */
+	public int getGoodsLocation(long objectIndex)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].objectIndex == objectIndex)
+				{
+					return i;
+				}
+			}
+		}
+		return 0;
+	}
+	
+	/**
+	 * 获取仓库中物品数量没有到达最大迭加数量的物品
+	 * @param id
+	 * @return
+	 */
+	public Goods getGoods(int id)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].id == id && goodsList[i].goodsCount < goodsList[i].repeatNumber)
+				{
+					return goodsList[i];
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 更新仓库
+	 * @param goods
+	 */
+	public void updateGoodsList(Goods goods)
+	{
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].objectIndex == goods.objectIndex)
+				{
+					if(goods.goodsCount <= 0)
+						goodsList[i] = null;
+					else
+						goodsList[i] = goods;
+					break;
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * 获取同类物品的总数量
+	 * @param goods
+	 * @return
+	 */
+	public int getGoodsCount(int id)
+	{
+		int count = 0;
+		for (int i = 0; i < goodsList.length; i++) 
+		{
+			if(goodsList[i] != null)
+			{
+				if(goodsList[i].id == id)
+				{
+					count += goodsList[i].goodsCount;
+				}
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * (仓库)客户端消息通道
+	 * @param target
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		ByteBuffer buffer = msg.getBuffer();
+		if(type == SMsg.C_STORAGE_PASSWORD_OPTION_COMMAND)
+		{
+			storagePassword(target,buffer);
+		}
+		else if(type == SMsg.C_ADD_GOODS_TO_STORAGE_COMMAND)
+		{
+			addGoodsToStorage(target,buffer);
+		}
+		else if(type == SMsg.C_TAKEOUT_GOODS_FROM_STORAGE_COMMAND)
+		{
+			takeOutGoodsFromStorage(target,buffer);
+		}
+		else if(type == SMsg.C_CHANGE_STORAGE_GOODS_LOCATION_COMMAND)
+		{
+			changeStorageGoodsLocation(target,buffer);
+		}
+		else if(type == SMsg.C_OPEN_STORAGE_COMMAND)
+		{
+			openPrivateStorage(target, buffer);
+		}
+		else if(type == SMsg.C_MONEY_OPTION_COMMAND)
+		{
+			moneyOption(target,buffer);
+		}
+	}
+
+	public int getStorageSize() {
+		return storageSize;
+	}
+
+	public void setStorageSize(int storageSize) {
+		this.storageSize = storageSize;
+	}
+
+	
+	
+}

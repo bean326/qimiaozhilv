@@ -1,0 +1,243 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+
+import cc.lv1.rpg.gs.entity.ext.PVPInfo;
+import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.ext.PlayerExtInfo;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.Storage;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+//import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.PlayerSetting;
+
+/**
+ * 玩家实体
+ * @author dxw
+ *
+ */
+public class Player extends Role
+{
+
+	/** 玩家基本信息 */
+	private PlayerBaseInfo baseInfo = new PlayerBaseInfo(this);
+	                                                                                                     
+	/** 玩家附加信息 */
+	private PlayerExtInfo [] extInfos = new PlayerExtInfo[0];
+	
+	/** 帐户名 */
+	public String accountName;
+	
+	public Player()
+	{
+		initial();
+		Bag bag = new Bag();
+		bag.point = 1000000;//新建角色时给玩家游戏币10000
+		bag.money = 1000000;//RMB
+		addExtPlayerInfo(bag);
+		
+		SkillTome st = new SkillTome();
+		addExtPlayerInfo(st);
+		
+		BuffBox bb = new BuffBox();
+		bb.setPlayer(this);
+		addExtPlayerInfo(bb);
+		
+		addExtPlayerInfo(new PVPInfo(this));
+		addExtPlayerInfo(new TaskInfo());
+		addExtPlayerInfo(new PlayerSetting());
+		addExtPlayerInfo(new EquipSet(this));
+		addExtPlayerInfo(new Storage(0));//玩家个人仓库
+		//addExtPlayerInfo(new Storage(1));//家族仓库
+		//addExtPlayerInfo(new Storage(2));//工会仓库
+	}
+	
+	/**
+	 * 初始化角色信息
+	 */
+	public void initial()
+	{
+
+		/**
+		 * 运动员...
+		    力量=24
+			敏捷=22
+			体质=20
+			精神=17
+			智慧=17
+		 */
+		if(profession == 1)
+		{
+			baseInfo.power = 24;
+			baseInfo.nimble = 22;
+			baseInfo.physique = 20;
+			baseInfo.spirit= 17;
+			baseInfo.wisdom = 17;
+		}
+		/**
+		 * 士兵...
+			力量=22
+			敏捷=18
+			体质=24
+			精神=20
+			智慧=16
+		 */
+		else if(profession == 2)
+		{
+			baseInfo.power = 22;
+			baseInfo.nimble = 18;
+			baseInfo.physique = 24;
+			baseInfo.spirit= 20;
+			baseInfo.wisdom = 16;
+		}
+		/**
+		 * 医护人员...
+			力量=17
+			敏捷=16
+			体质=18
+			精神=23
+			智慧=26
+		 */
+		else if(profession == 3)
+		{
+			baseInfo.power = 17;
+			baseInfo.nimble = 16;
+			baseInfo.physique = 18;
+			baseInfo.spirit= 23;
+			baseInfo.wisdom = 26;
+		}
+		/**
+		 * 超能力者...
+			力量=16
+			敏捷=19
+			体质=17
+			精神=26
+			智慧=22
+		 */
+		else if(profession == 4)
+		{
+			baseInfo.power = 16;
+			baseInfo.nimble = 19;
+			baseInfo.physique = 17;
+			baseInfo.spirit= 26;
+			baseInfo.wisdom = 22;
+		}
+		
+		baseInfo.updateBaseValue();
+	}
+	
+//	/**
+//	 * 初始化角色信息
+//	 */
+//	public void initial()
+//	{
+//		Bag bag = new Bag();
+//		bag.point = 1000000;//新建角色时给玩家游戏币10000
+//		bag.money = 1000000;//RMB
+//		addExtPlayerInfo(bag);
+//		addExtPlayerInfo(new PlayerSetting());
+//		addExtPlayerInfo(new EquipSet(this));
+//		addExtPlayerInfo(new Storage(0));//玩家个人仓库
+//		//addExtPlayerInfo(new Storage(1));//家族仓库
+//		//addExtPlayerInfo(new Storage(2));//工会仓库
+//
+//		baseInfo.updateBaseValue();
+//
+//	}
+	
+	public void loadFrom(ByteBuffer byteBuffer)
+	{
+		super.loadFrom(byteBuffer);
+		
+		accountName = byteBuffer.readUTF();
+		
+		int extLen = byteBuffer.readInt();
+		for(int i = 0 ; i < extLen ; i ++)
+		{
+			String ext = byteBuffer.readUTF();
+			getExtPlayerInfo(ext).loadFrom(byteBuffer);
+		}
+	}
+	
+
+	public void saveTo(ByteBuffer byteBuffer)
+	{
+		super.saveTo(byteBuffer);
+		
+		byteBuffer.writeUTF(accountName);
+
+		int extLen = extInfos.length;
+		byteBuffer.writeInt(extLen);
+		
+		for(int i = 0 ; i < extLen ; i ++)
+		{
+			String extName = extInfos[i].getName();
+			byteBuffer.writeUTF(extName);
+			extInfos[i].saveTo(byteBuffer);
+		}
+	}
+	
+	public void readFrom(ByteBuffer byteBuffer)
+	{
+		super.readFrom(byteBuffer);
+	}
+	
+	public void writeTo(ByteBuffer byteBuffer)
+	{
+		super.writeTo(byteBuffer);
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		byteBuffer.writeInt(es.maxHitPoint);
+		byteBuffer.writeInt(es.maxMagicPoint);
+
+	}
+	
+	public void writeBaseTo(ByteBuffer buffer)
+	{
+		
+	}
+	
+	public PlayerExtInfo getExtPlayerInfo(String name)
+	{
+		for (int i = 0; i < extInfos.length; i++)
+		{	
+			if (extInfos[i].getName().equals(name))
+				return extInfos[i];
+		}
+		return null;
+	}
+	
+	public void addExtPlayerInfo(PlayerExtInfo extInfo)
+	{
+		PlayerExtInfo[] infos = new PlayerExtInfo[extInfos.length+1];
+		for (int i = 0; i < extInfos.length; i++)
+			infos[i] = extInfos[i];
+		infos[extInfos.length] = extInfo;
+		extInfos = infos;
+	}
+	
+	public List getExtPlayerInfos(String name)
+	{
+		List list = new ArrayList();
+		for (int i = 0; i < extInfos.length; i++)
+		{	
+			if (extInfos[i].getName().equals(name))
+				list.add(extInfos[i]);
+		}
+		return list;
+	}
+
+	public PlayerBaseInfo getBaseInfo()
+	{
+		return baseInfo;
+	}
+
+
+
+}

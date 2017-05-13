@@ -1,0 +1,106 @@
+package cc.lv1.rpg.gs.entity;
+
+
+import cc.lv1.rpg.gs.entity.controller.NpcController;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.xml.XMLNode;
+/**
+ * npc对话信息
+ * @author bean
+ *
+ */
+public class NpcDialog
+{	
+    private String dialogIndex;
+    
+    private DialogStep[] dialogSteps;
+    
+    private NpcController npcController;
+    
+    /**
+     * 构造方法
+     * @param xmlDialog
+     */
+	public NpcDialog(XMLNode root)
+	{
+		this.dialogIndex = root.getName();
+		List steps = root.getSubNodes();
+		dialogSteps = new DialogStep[steps.size()];
+		for (int i = 0; i < steps.size(); i++) 
+		{
+			XMLNode step = (XMLNode) steps.get(i);
+			dialogSteps[i] = new DialogStep(step);
+		}
+	}
+	
+	public void setParent(NpcController npc)
+	{
+		this.npcController = npc;
+	}
+	
+	/**
+	 * 通过指令获取DialogStep对象
+	 * @param command
+	 * @return
+	 */
+	public DialogStep getDialogStep(String command)
+	{
+		int com = Integer.parseInt(command);
+		for (int i = 0; i < dialogSteps.length; i++) {
+			if(dialogSteps[i].index == com)
+			{
+				return dialogSteps[i];
+			}
+		}
+		return null;
+	}
+	
+	public String getDialogIndex()
+	{
+		return this.dialogIndex;
+	}
+
+	public DialogStep[] getDialogStep()
+	{
+		return this.dialogSteps;
+	}
+
+	public NpcController getNpcController()
+	{
+		return this.npcController;
+	}
+	
+	/**
+	 * -----------------
+	 * 内部类(任务对话)
+	 * -----------------
+	 * @author bean
+	 *
+	 */
+    public class DialogStep
+    {
+    	public int index;
+    	
+    	public String dialogColor;
+    	
+    	public int dialogId;
+    	
+    	public List optionList = new ArrayList(5);
+    	
+    	public DialogStep(XMLNode step)
+    	{
+    		XMLNode words = step.getSubNode("words");
+    		XMLNode options = step.getSubNode("options");
+    		XMLNode color = words.getSubNode("color");
+    	    XMLNode text = words.getSubNode("text");
+    	    this.dialogColor = color.getData();
+    	    this.dialogId = Integer.parseInt(text.getAttributeValue("textId"));
+    		this.optionList = options.getSubNodes();
+    		this.index = Integer.parseInt(step.getName().replaceAll("s", ""));
+    		
+    	}
+    	
+    }
+	
+}

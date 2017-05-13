@@ -1,0 +1,78 @@
+package cc.lv1.rpg.gs.data;
+
+import java.util.Random;
+
+import cc.lv1.rpg.gs.entity.impl.Player;
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import vin.rabbit.util.xml.XMLNode;
+/**
+ * 数据工厂.....
+ * @author dxw
+ *
+ */
+public class DataFactory
+{
+
+	private static DataFactory df = null;
+	
+	private static HashMap datasMap = new HashMap(500);
+
+	private DataFactory()
+	{
+	}
+	
+	public static DataFactory getInstance()
+	{
+		if(df == null)
+			df = new DataFactory();
+		return df;
+	}
+	
+	public GameObject getGameObject(int id)
+	{
+		return (GameObject)datasMap.get(id);
+	}
+
+	public void putGameObject(GameObject obj)
+	{
+		datasMap.put(obj.id, obj); 
+	}
+
+	
+	public final static int ATTACH_NATIVITY = 1;
+	
+	private static HashMap attachMap = new HashMap(500);
+	
+	public void putAttachment(int attachType,Object obj)
+	{
+		attachMap.put(attachType, obj);
+	}
+	
+	/**
+	 * 设置出生点
+	 * @param player
+	 * @return
+	 */
+	public boolean setNativity(Player player)
+	{
+		ArrayList nativitys = (ArrayList)attachMap.get(ATTACH_NATIVITY);
+		Random random = new Random();
+		XMLNode points = (XMLNode) nativitys.get(0);
+		ArrayList pointss = points.getSubNodes();
+		int index = random.nextInt(pointss.size());
+		XMLNode point = (XMLNode) pointss.get(index);
+		if(point == null)
+			return false;
+		player.worldId = Integer.parseInt(point.getAttributeValue("worldId"));
+		player.areaId= Integer.parseInt(point.getAttributeValue("areaId"));
+		player.roomId= Integer.parseInt(point.getAttributeValue("roomId"));
+		player.x = Integer.parseInt(point.getAttributeValue("x"));
+		player.y = Integer.parseInt(point.getAttributeValue("y"));
+		
+		return true;
+	}
+
+}

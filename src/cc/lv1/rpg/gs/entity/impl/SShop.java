@@ -1,0 +1,540 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import java.util.Random;
+
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsPetEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsSynt;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsUp;
+
+
+/**
+ * 合成商店
+ * @author dxw
+ *
+ */
+public class SShop extends RPGameObject
+{
+	
+	private static SShop shop = null; 
+	
+	private WorldManager world;
+	
+	private SShop()
+	{	
+	}
+	
+	public static SShop getShop()
+	{
+		if(shop == null)
+			shop = new SShop();
+		return shop;
+	}
+	
+	public void setWorld(WorldManager world)
+	{
+		this.world = world;
+	}
+	
+	private ArrayList equipSynt = new ArrayList();
+	
+	private ArrayList equipDisa = new ArrayList();
+	
+	private ArrayList goodsUp = new ArrayList();
+	
+	private ArrayList goodsEos= new ArrayList();
+	
+	public void addGoodsGold(GoodsUp goods)
+	{
+		goodsEos.add(goods);
+	}
+	
+	public void addGoodsUp(GoodsUp goods)
+	{
+		goodsUp.add(goods);
+	}
+	
+	public void addEquipSynt(GoodsSynt equip)
+	{
+		equipSynt.add(equip);
+	}
+	
+	public void addEquipDisa(GoodsSynt equip)
+	{
+		equipDisa.add(equip);
+	}
+
+	public GoodsUp getGoodsEoBySourceId(int sourceId)
+	{
+		int size = goodsEos.size();
+		
+		for (int j = 0; j < size; j++)
+		{
+			GoodsUp gu = (GoodsUp)(goodsEos.get(j));
+			if(gu.sourceId == sourceId)
+				return gu;
+		}
+		return null;
+	}
+	
+	public GoodsUp getGoodsUpBySourceId(int sourceId)
+	{
+		int size = goodsUp.size();
+		
+		for (int j = 0; j < size; j++)
+		{
+			GoodsUp gu = (GoodsUp)(goodsUp.get(j));
+			if(gu.sourceId == sourceId)
+				return gu;
+		}
+		return null;
+	}
+	
+	public GoodsSynt getEquipSynt(int gsid)
+	{
+		int size = equipSynt.size();
+		
+		for (int j = 0; j < size; j++)
+		{
+			GoodsSynt gs = (GoodsSynt)(equipSynt.get(j));
+			if(gs.gsId == gsid)
+				return gs;
+		}
+		return null;
+	}
+	
+	public GoodsSynt getEquipDisa(int id)
+	{
+		int size = equipDisa.size();
+		
+		for (int j = 0; j < size; j++)
+		{
+			GoodsSynt gs = (GoodsSynt)(equipDisa.get(j));
+			if(gs.id == id)
+				return gs;
+		}
+		return null;
+	}
+	
+	
+	
+	public void check()
+	{
+		
+	}
+	
+	
+//	/**
+//	 * 传入材料,和材料的总数  参1的数量等于参2
+//	 */
+//	public GoodsEquip getEquip(int id,int [] goodsLvs,double totalCount)
+//	{
+//		double [] ms = new double[5];
+//		
+//		for (int i = 0; i < goodsLvs.length; i++)
+//		{
+//			ms[goodsLvs[i]]++;
+//		}
+//		
+//		for (int i = 0; i < ms.length; i++)
+//		{
+////			   System.out.println("材料"+(i+1)+" 数量 :"+ms[i]);
+//		}
+//		
+//		int rates[] = new int[6];
+//
+//		//合成白色装备的机率=M0*0.8*（1/N）+M1*0.2（1/N）
+//		rates[0] = (int)((ms[0]*0.8*(double)(1/totalCount)+ms[1]*0.2*(double)(1/totalCount))*10000);
+//		//合成绿色装备的机率=M0*0.2*(1/N)+M1*0.7*(1/N)+M2*0.2*(1/N)
+//		rates[1] = (int)((ms[0]*0.2*(double)(1/totalCount)+ms[1]*0.7*(double)(1/totalCount)+ms[2]*0.2*(double)(1/totalCount))*10000);
+//		//合成蓝色装备的机率=M2*0.75*（1/N）+M3*0.02*(1/N)+M1*0.1（1/N）
+//		rates[2] = (int)((ms[2]*0.75*(double)(1/totalCount)+ms[3]*0.02*(double)(1/totalCount)+ms[1]*0.1*(double)(1/totalCount))*10000);
+//		//合成紫1装备的机率=M3*0.83(1/N)+M4*0.1*(1/N)+M2*0.05（1/N）
+//		rates[3] = (int)((ms[3]*0.83*(double)(1/totalCount)+ms[4]*0.1*(double)(1/totalCount)+ms[2]*0.05*(double)(1/totalCount))*10000);
+//		//合成紫2装备的机率=M3*0.15*(1/N)+M4*0.5(1/N)
+//		rates[4] = (int)((ms[3]*0.15*(double)(1/totalCount)+ ms[4]*0.5*(double)(1/totalCount))*10000);
+//		//合成紫3装备的机率= M4*0.4（1/N）
+//		rates[5] = (int)((ms[4]*0.4*(double)(1/totalCount))*10000);
+//		
+////		System.out.println("write rate "+rates[0]);
+////		System.out.println("green rate "+rates[1]);
+////		System.out.println("blue rate "+rates[2]);
+////		System.out.println("purple 1 rate"+rates[3]);
+////		System.out.println("purple 2 rate"+rates[4]);
+////		System.out.println("purple 3 rate"+rates[5]);
+//		
+//		int index = 0;
+//		
+//		for (int i = rates.length-1; i >= 0 ; i--)
+//		{
+//			if(rates[i] != 0)
+//			{
+//				index = i;
+//				break;
+//			}
+//		}
+//		
+//		int ran = (int)(Math.random()*10000);
+//		int ranIndex = 0;
+//		int resultIndex = 0;
+//		for (int i = 0; i < index+1; i++)
+//		{
+//			if(ran > ranIndex)
+//			{
+//				resultIndex = i;
+//			}
+//			ranIndex += rates[i];	
+//		}
+//		
+////		System.out.println("resultIndex  "+resultIndex);
+//		return getEquip(id, resultIndex);
+//	}
+	
+//	public GoodsEquip getEquip(int equipId)
+//	{
+//		// TODO Auto-generated method stub
+//		int rates[] = new int[6];
+//		
+//		
+//		//合成白色装备的机率
+//		rates[0] = 6500;
+//		//合成绿色装备的机率
+//		rates[1] = 3000;
+//		//合成蓝色装备的机率
+//		rates[2] = 500;
+//		//合成紫1装备的机率
+//		rates[3] = 0;
+//		//合成紫2装备的机率
+//		rates[4] = 0;
+//		//合成紫3装备的机率
+//		rates[5] = 0;
+//		
+//		
+//		int index = 0;
+//		
+//		for (int i = rates.length-1; i >= 0 ; i--)
+//		{
+//			if(rates[i] != 0)
+//			{
+//				index = i;
+//				break;
+//			}
+//		}
+//
+//		int ran = (int)(Math.random()*10000);
+//		int ranIndex = 0;
+//		int resultIndex = 0;
+//		for (int i = 0; i < index+1; i++)
+//		{
+//
+//			if(ran > ranIndex)
+//			{
+//				resultIndex = i;
+//			}
+//			ranIndex += rates[i];	
+//		}
+//		
+//		return getEquip(equipId,resultIndex);
+//	}
+	
+
+	public Goods getGoods(int goodsId,int rates[])
+	{
+		// TODO Auto-generated method stub
+/*		int rates[] = new int[6];
+		
+		
+		//合成白色装备的机率
+		rates[0] = 6500;
+		//合成绿色装备的机率
+		rates[1] = 3000;
+		//合成蓝色装备的机率
+		rates[2] = 500;
+		//合成紫1装备的机率
+		rates[3] = 0;
+		//合成紫2装备的机率
+		rates[4] = 0;
+		//合成紫3装备的机率
+		rates[5] = 0;*/
+		
+		
+		int index = 0;
+		
+		for (int i = rates.length-1; i >= 0 ; i--)
+		{
+			if(rates[i] != 0)
+			{
+				index = i;
+				break;
+			}
+		}
+
+		int ran = (int)(Math.random()*10000);
+		int ranIndex = 0;
+		int resultIndex = 0;
+		for (int i = 0; i < index+1; i++)
+		{
+
+			if(ran > ranIndex)
+			{
+				resultIndex = i;
+			}
+			ranIndex += rates[i];	
+		}
+		
+		return getGoods(goodsId,resultIndex);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param equipQuality 0白 1绿 2蓝 3紫1  4紫2  5紫3
+	 * @return
+	 */
+	public Goods getGoods(int id , int equipQuality)
+	{
+//		System.out.println("生成品质   "+equipQuality);
+		Goods goods = (Goods)DataFactory.getInstance().getGameObject(id);
+		if(goods == null)
+		{
+			System.out.println("SShop getEquip id error:"+id);
+			return null;
+		}
+		Goods newGoods = null;
+		if(goods instanceof GoodsEquip)
+		{
+			GoodsEquip equip = (GoodsEquip) Goods.cloneObject(goods);
+			newGoods = equip.makeNewBetterEquip(equipQuality);
+			newGoods.objectIndex = world.getDatabaseAccessor().getGoodsObjIndex();
+		}
+		else if(goods instanceof GoodsPetEquip)
+		{
+			newGoods = (Goods) Goods.cloneObject(goods);
+			newGoods.goodsCount = 1;
+			newGoods.objectIndex = world.getDatabaseAccessor().getGoodsObjIndex();
+		}
+		else if(goods instanceof GoodsProp)
+		{
+			newGoods = (Goods) Goods.cloneObject(goods);
+			newGoods.goodsCount = 1;
+			newGoods.objectIndex = world.getDatabaseAccessor().getGoodsObjIndex();
+		}
+		return newGoods;
+	}
+
+//	/**
+//	 * 
+//	 * @param id
+//	 * @param equipQuality 0白 1绿 2蓝 3紫1  4紫2  5紫3
+//	 * @return
+//	 */
+//	private GoodsEquip getEquip(int id , int equipQuality)
+//	{
+////		System.out.println("生成品质   "+equipQuality);
+//		GoodsEquip equip = (GoodsEquip)DataFactory.getInstance().getGameObject(id);
+//		if(equip == null)
+//		{
+//			System.out.println("SShop getEquip id error:"+id);
+//			return null;
+//		}
+//		GoodsEquip goods = (GoodsEquip) Goods.cloneObject(equip);
+//		GoodsEquip newGoods = goods.makeNewBetterEquip(equipQuality);
+//		newGoods.objectIndex = world.getDatabaseAccessor().getGoodsObjIndex();
+//		return newGoods;
+//	}
+
+	
+	public boolean check(int gsId,final HashMap map)
+	{
+		Object obj[] = map.keySet().toArray();
+		
+//		System.out.println("检查和配置文件是否相同");
+//		System.out.println("种类  :"+obj.length);
+		
+		GoodsSynt gs = getEquipSynt(gsId);
+		
+		if(gs == null)
+			return false;
+		
+
+		for (int i = 0; i < gs.materialsIds.length; i++)
+		{
+			if(gs.materialsIds[i] != 0)
+			{
+//				System.out.println("需求的材料id : "+gs.materialsIds[i]+"  需求的材料name : "+gs.materialsName[i]+"  需求的数量 "+gs.materialsCount[i]);
+				
+				for (int j = 0; j < obj.length; j++)
+				{
+					int id = Integer.parseInt(obj[j].toString());
+					int count = (Integer)map.get(id);
+					
+					if(gs.materialsIds[i] == id)
+					{
+//						System.out.println("已经有的合成的 id :"+id +" --- 合成的 数量 : " +count);
+						if(gs.materialsCount[i] != count)
+						{
+							return false;
+						}
+					}	
+				}  
+				
+			}
+			else
+			{
+				break;
+			}
+		}
+		return true;
+	}
+
+	
+/*	*//**
+	 * 取得随机材料
+	 * @param bag
+	 * @param equip
+	 * @return
+	 *//*
+	public boolean addRandomGoods(PlayerController target,Bag bag,GoodsEquip equip)
+	{
+		GoodsSynt gs = getEquipSynt(equip.id);
+		
+		if(gs == null)
+			return false;
+		
+		bag.removeGoods(target, equip.objectIndex, equip.goodsCount);
+		
+		int count = 0;
+		
+		for (int i = 0; i < gs.materialsIds.length; i++)
+		{
+			if(gs.materialsIds[i] != 0)
+			{
+				count++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		int index = 0;
+		if(count != 0)
+		{
+			Random ran = new Random();
+			index = ran.nextInt(count);
+		}
+		
+		bag.addGoods(target, gs.materialsIds[index]+equip.quality, 
+				gs.materialsCount[index]/3);
+		return true;
+	}*/
+	
+	
+	public int addRandomGoods(PlayerController target,Bag bag,GoodsEquip equip)
+	{
+		int quality = equip.quality;
+		GoodsSynt gs = getEquipDisa(equip.id);
+		
+		if(gs == null)
+			return -1;
+		
+		if(!bag.removeGoods(target, equip.objectIndex, equip.goodsCount))
+			return -1;
+		
+		int count = 0;
+		
+		for (int i = 0; i < gs.materialsIds.length; i++)
+		{
+			if(gs.materialsIds[i] != 0)
+			{
+				count++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		int index = 0;
+		Random ran = new Random();
+		if(count != 0)
+		{
+			index = ran.nextInt(count);
+		}
+		else
+		{
+			System.out.println("SShop addRandomGoods check equipDSshop "+gs.id);
+			return -1;
+		}
+ 
+		//0.白色 1.绿色 2.蓝色 3.紫色
+		int rate = ran.nextInt(10000);
+		int qualityAdd = 0;
+		if(quality == 1)
+		{
+			//绿色装备80%几率返回一等材料，20%几率返回二等材料，
+			if(rate > 8000)
+				qualityAdd++;
+		}
+		else if(quality == 2)
+		{
+			//蓝色装备10%几率返回三等材料，70%几率返回二等材料，20%几率返回一等材料。
+			if(rate > 9000)
+				qualityAdd +=2;
+			else if(rate <= 9000 && rate >7000)
+				qualityAdd +=1;
+		}
+		else if(quality == 3)
+		{
+			//紫1装备10%几率返回四等材料，60%几率返回三等材料，30%几率返回二等材料
+			if(rate > 9000)
+				qualityAdd +=3;
+			else if(rate <= 9000 && rate >3000)
+				qualityAdd +=2;
+			else
+				qualityAdd +=1;
+		}
+		else if(quality == 4)
+		{
+			//紫2装备15%几率返回四等材料，65%几率返回三等材料，20%几率返回二等材料
+			if(rate > 8500)
+				qualityAdd +=3;
+			else if(rate <= 8500 && rate >2000)
+				qualityAdd +=2;
+			else
+				qualityAdd +=1;
+		}
+		else if(quality == 5)
+		{
+			//紫3装备30%几率返回四等材料，70%几率返回三等材料
+			if(rate > 7000)
+				qualityAdd +=3;
+			else
+				qualityAdd +=2;
+		}
+		
+		bag.addGoods(target, gs.materialsIds[index]+qualityAdd, 
+				gs.materialsCount[index]/3);
+
+		int p = 0;
+		
+		if(quality == 1)
+			p = (int) (gs.point*(double)gs.modValue[0]/10000);
+		else if(quality == 2)          
+			p = (int) (gs.point*(double)gs.modValue[1]/10000);
+		else        
+			p = (int) (gs.point*(double)gs.modValue[2]/10000);
+		
+		return p;
+	}
+
+
+}

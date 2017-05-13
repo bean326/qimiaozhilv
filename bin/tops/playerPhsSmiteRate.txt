@@ -1,0 +1,10 @@
+id	accountName	playerName	value
+
+1	zjj2003	°¥Ó´Î¹	7100
+2	twh11	TWh11	500
+3	twh22	dfd	500
+4	bean02	bean02	500
+5	bean03	bean03	500
+6	zhongyukaishi	123456	500
+7	bean01	bean01	500
+8	loky	loky	500

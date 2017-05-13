@@ -1,0 +1,300 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PassiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+/**
+ * 技能组
+ * @author dxw
+ *
+ */
+public class SkillTome extends PlayerExtInfo
+{
+
+	/**
+	 * 主动技能
+	 */
+	private ActiveSkill [] activeSkills = new ActiveSkill[0];
+	
+	/**
+	 * 被动技能
+	 */
+	private PassiveSkill [] passiveSkills = new PassiveSkill[0];
+	
+	/**
+	 * 当前职业可以学习的技能
+	 */
+	private Skill [] skills = null;
+	
+
+	
+	public SkillTome()
+	{
+
+	}
+	
+
+	public Skill getSkill(int id)
+	{
+		for (int i = 0; i < skills.length; i++)
+		{
+			if(skills[i].id == id)
+				return skills[i];
+		}
+		return null;
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		String name = "";
+		for (int i = 0; i < skills.length; i++)
+		{
+			if(name.equals(skills[i].name))
+				continue;
+
+			if(skills[i].isStudied)
+			{
+				if(isNextLv(i,skills[i].level))
+					continue;
+			}
+			
+			buffer.writeInt(skills[i].id);
+			buffer.writeInt(skills[i].iconId);
+			buffer.writeUTF(skills[i].name);
+			buffer.writeInt(skills[i].level);
+			buffer.writeBoolean(skills[i].isStudied);
+			buffer.writeBoolean(skills[i].isPubSkill);
+			
+			if(!skills[i].isStudied)
+				name = skills[i].name;
+			
+			System.out.println(skills[i].name + " "+skills[i].level +" "+skills[i].isStudied);
+		}
+	}
+
+	private boolean isNextLv(int index,int currlv)
+	{
+		try
+		{
+			if(skills[index+1].level > currlv
+					&&
+				skills[index+1].isStudied)
+				return true;
+		}
+		catch(NullPointerException e)
+		{
+			return false;
+		}
+		catch(ArrayIndexOutOfBoundsException e)
+		{
+			return false;
+		}
+		return false;
+	}
+	
+	public void writeActiveSkill(ByteBuffer buffer)
+	{
+		int skillLength = activeSkills.length;
+		
+		buffer.writeInt(skillLength);
+		for(int i = 0 ; i < skillLength ; i ++)
+		{
+			buffer.writeInt(activeSkills[i].id);
+		}
+	}
+	
+	public void writePassiveSkill(ByteBuffer buffer)
+	{
+		int skillLength = passiveSkills.length;
+		for(int i = 0 ; i < skillLength ; i ++)
+		{
+			passiveSkills[i].writeTo(buffer);
+		}
+	}
+	
+	public void initBaseSkill(int []skillIds,Player player)
+	{
+		DataFactory dataFactory = DataFactory.getInstance();
+
+		List skillsList = dataFactory.getSkillList();
+		
+		List skillList = new ArrayList();
+
+		
+		int size = skillsList.size();
+		for (int i = 0; i < size; i++)
+		{
+			Skill skill = (Skill)skillsList.get(i);
+			if(skill instanceof ActiveSkill)
+			{
+				ActiveSkill as = ((ActiveSkill)skill);
+				
+				boolean isPubSkill = true;
+
+				for (int j = 0; j < as.profession.length; j++)
+				{
+					if(j == 0)
+					{
+						if(as.profession[j] != 0)
+							isPubSkill = false;
+					}
+					else
+					{
+						if(as.profession[j] == 0)
+							break;
+					}
+					
+					if(isPubSkill)
+					{
+						as.isPubSkill = isPubSkill;
+						skillList.add(as);
+						break;
+					}
+					else
+					{
+						int count = player.profession+3;
+
+						if(as.profession[j] == player.profession 
+							|| as.profession[j] == player.profession+count
+							|| as.profession[j] == player.profession+count+1)
+						{
+							skillList.add(as);
+						as.isPubSkill = isPubSkill;
+						}
+					}
+				}
+			}
+		}
+		
+		Object[] objs = skillList.toArray();
+		skills = new Skill[objs.length];
+		for (int i = 0; i < objs.length; i++)
+		{
+			skills[i] = (Skill)Skill.cloneObject((Skill)objs[i]);
+		}
+		
+		for(int i = 0 ; i < skillIds.length ; i ++)
+		{
+			addSkill(skillIds[i]);
+		}
+
+	}
+	
+	public String getName()
+	{
+		return "skillTome";
+	}
+
+
+	public void loadFrom(ByteBuffer buffer)
+	{
+
+		DataFactory dataFactory = DataFactory.getInstance();
+		
+		int length = buffer.readInt();
+		
+		skills = new Skill[length];
+		
+		for (int i = 0; i < length; i++)
+		{
+			int id = buffer.readInt();
+			boolean isStudied = buffer.readBoolean();
+			boolean isPubSkill = buffer.readBoolean();
+			
+			Skill skill = (Skill)dataFactory.getGameObject(id);
+			skill = (Skill)Skill.cloneObject(skill);
+			skill.isStudied = isStudied;
+			skill.isPubSkill = isPubSkill;
+			
+			if(skill.isStudied)
+			{
+				addSkill(skill);
+			}
+			skills[i] = skill;
+		}
+		
+	}
+
+
+	public void saveTo(ByteBuffer buffer)
+	{
+
+		buffer.writeInt(skills.length);
+		for (int i = 0; i < skills.length; i++)
+		{
+			buffer.writeInt(skills[i].id);
+			buffer.writeBoolean(skills[i].isStudied);
+			buffer.writeBoolean(skills[i].isPubSkill);
+		}
+		
+	}
+
+	public void addSkill(int skillId)
+	{
+		Skill skill = getSkill(skillId);
+		if(skill == null)
+			return;
+		addSkill(skill);
+	}
+	
+	private void addSkill(Skill extInfo)
+	{
+		extInfo.isStudied = true;
+		
+		if(extInfo instanceof ActiveSkill)
+		{
+			ActiveSkill [] infos = new ActiveSkill[activeSkills.length+1];
+			for (int i = 0; i < activeSkills.length; i++)
+				infos[i] = activeSkills[i];
+			infos[activeSkills.length] = (ActiveSkill)extInfo;
+			activeSkills = infos;
+		}
+		else if(extInfo instanceof PassiveSkill)
+		{
+			PassiveSkill [] infos = new PassiveSkill[passiveSkills.length+1];
+			for (int i = 0; i < passiveSkills.length; i++)
+				infos[i] = passiveSkills[i];
+			infos[passiveSkills.length] = (PassiveSkill)extInfo;
+			passiveSkills = infos;
+		}
+	}
+	
+	/**
+	 * 获取主动技能
+	 * @param id
+	 * @return
+	 */
+	public ActiveSkill getActiveSkill(int id)
+	{
+		int length = activeSkills.length;
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(id == activeSkills[i].id)
+				return activeSkills[i];
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取被动技能
+	 * @param id
+	 * @return
+	 */
+	public PassiveSkill getPassiveSkill(int id)
+	{
+		int length = passiveSkills.length;
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(id == passiveSkills[i].id)
+				return passiveSkills[i];
+		}
+		return null;
+	}
+
+		
+}

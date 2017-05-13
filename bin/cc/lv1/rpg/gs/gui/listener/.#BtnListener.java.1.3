@@ -1,0 +1,215 @@
+package cc.lv1.rpg.gs.gui.listener;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+
+import vin.rabbit.net.abs.NetServer;
+import vin.rabbit.util.ThreadPool;
+import vin.rabbit.util.Utils;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.gui.component.impl.BtnComponent;
+import cc.lv1.rpg.gs.gui.component.impl.LabelComponent;
+import cc.lv1.rpg.gs.gui.component.impl.TxtComponent;
+
+public class BtnListener implements ActionListener
+{
+
+	private BtnComponent btnComponent;
+
+	public BtnListener(BtnComponent btnComponent)
+	{
+		this.btnComponent = btnComponent;
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		Object obj = e.getSource();
+		
+		if(obj instanceof JButton)
+		{
+			JButton jb = (JButton)obj;
+			String jbStr = jb.getText().trim();
+
+			if(jbStr.equals("Start"))
+			{
+				startClick();
+			}
+			else if(jbStr.equals("Close"))
+			{
+				closeClick();
+			}
+			else if(jbStr.equals("Clean"))
+			{
+				cleanClick();
+			}
+			else if(jbStr.equals("Reset"))
+			{
+				resetClick();
+			}
+			else if(jbStr.equals("Show"))
+			{
+				showClick();
+			}
+			else if(jbStr.equals("Visible"))
+			{
+				setVisible();
+			}
+		}
+	}
+	
+
+	
+//	private void testNewGoodsEquip()
+//	{
+//		GoodsEquip equip = (GoodsEquip) DataFactory.getInstance().getGameObject(1050100001);
+//		System.out.println("白色装备属性：");
+//		System.out.println("----------第一批属性----------");
+//		System.out.println("敏捷："+equip.agility);
+//		System.out.println("精神："+equip.spirit);
+//		System.out.println("智慧："+equip.wisdom);
+//		System.out.println("力量："+equip.power);
+//		System.out.println("体质："+equip.physique);
+//		System.out.println("----------第二批属性----------");
+//		System.out.println("生命值  ："+equip.lifePoint);
+//		System.out.println("精力值  ："+equip.magicPoint);
+//		System.out.println("命中值  ："+equip.hit);
+//		System.out.println("闪避值  ："+equip.avoidance);
+//		System.out.println("精神抵抗："+equip.spiritStand);
+//		System.out.println("治疗值  ："+equip.curePoint);
+//		System.out.println("----------第三批属性----------");
+//		System.out.println("----------第四批属性----------");
+//		System.out.println("////////////////////////////////////////////////////////////////////");
+//		GoodsEquip greenEquip = equip.makeNewBetterEquip(1);
+//		System.out.println("绿色装备属性：");
+//		System.out.println("----------第一批属性----------");
+//		System.out.println("敏捷："+greenEquip.agility);
+//		System.out.println("精神："+greenEquip.spirit);
+//		System.out.println("智慧："+greenEquip.wisdom);
+//		System.out.println("力量："+greenEquip.power);
+//		System.out.println("体质："+greenEquip.physique);
+//		System.out.println("----------第二批属性----------");
+//		System.out.println("生命值  ："+greenEquip.lifePoint);
+//		System.out.println("精力值  ："+greenEquip.magicPoint);
+//		System.out.println("命中值  ："+greenEquip.hit);
+//		System.out.println("闪避值  ："+greenEquip.avoidance);
+//		System.out.println("精神抵抗："+greenEquip.spiritStand);
+//		System.out.println("治疗值  ："+greenEquip.curePoint);
+//		System.out.println("////////////////////////////////////////////////////////////////////");
+//		GoodsEquip blueEquip = equip.makeNewBetterEquip(2);
+//		System.out.println("蓝色装备属性：");
+//		System.out.println("----------第一批属性----------");
+//		System.out.println("敏捷："+blueEquip.agility);
+//		System.out.println("精神："+blueEquip.spirit);
+//		System.out.println("智慧："+blueEquip.wisdom);
+//		System.out.println("力量："+blueEquip.power);
+//		System.out.println("体质："+blueEquip.physique);
+//		System.out.println("----------第二批属性----------");
+//		System.out.println("生命值  ："+blueEquip.lifePoint);
+//		System.out.println("精力值  ："+blueEquip.magicPoint);
+//		System.out.println("命中值  ："+blueEquip.hit);
+//		System.out.println("闪避值  ："+blueEquip.avoidance);
+//		System.out.println("精神抵抗："+blueEquip.spiritStand);
+//		System.out.println("治疗值  ："+blueEquip.curePoint);
+//		System.out.println("////////////////////////////////////////////////////////////////////");
+//		GoodsEquip purpleEquip1 = equip.makeNewBetterEquip(3);
+//		System.out.println("紫色1装备属性：");
+//		System.out.println("----------第一批属性----------");
+//		System.out.println("敏捷："+purpleEquip1.agility);
+//		System.out.println("精神："+purpleEquip1.spirit);
+//		System.out.println("智慧："+purpleEquip1.wisdom);
+//		System.out.println("力量："+purpleEquip1.power);
+//		System.out.println("体质："+purpleEquip1.physique);
+//		System.out.println("----------第二批属性----------");
+//		System.out.println("生命值  ："+purpleEquip1.lifePoint);
+//		System.out.println("精力值  ："+purpleEquip1.magicPoint);
+//		System.out.println("命中值  ："+purpleEquip1.hit);
+//		System.out.println("闪避值  ："+purpleEquip1.avoidance);
+//		System.out.println("精神抵抗："+purpleEquip1.spiritStand);
+//		System.out.println("治疗值  ："+purpleEquip1.curePoint);
+//		
+//	}
+
+
+
+	private void startClick()
+	{
+		btnComponent.getBStart().setVisible(false);
+		btnComponent.getBClose().setVisible(true);
+		btnComponent.getBReset().setVisible(true);
+		
+	    MainFrame mf = ((MainFrame)btnComponent.getFrame());
+		ThreadPool threadPool = mf.getThreadPool();
+		
+		LabelComponent labelComponent =  ((LabelComponent)MainFrame.components[1]);
+		labelComponent.lServerStartTime.setText("Server startd on "+Utils.getCurrentTime());
+		
+		
+		threadPool.addTask(new Runnable()
+		{
+			public void run()
+			{
+				startServer();
+			}
+		});
+	}
+	
+	private void closeClick()
+	{
+		
+	    MainFrame mf = ((MainFrame)btnComponent.getFrame());
+		ThreadPool threadPool = mf.getThreadPool();
+		
+		threadPool.addTask(new Runnable() 
+		{
+			public void run()
+			{
+				NetServer.closeAllConnections();
+			}
+		});
+	}
+	
+	
+	private void cleanClick()
+	{
+		TxtComponent labelComponent =  ((TxtComponent)MainFrame.components[2]);
+		labelComponent.infoText.setText("");
+	}
+
+	
+	private void resetClick()
+	{
+		
+	}
+	
+	private void showClick()
+	{
+		
+	}
+	
+	private void setVisible()
+	{
+/*		MainFrame mf = ((MainFrame)btnComponent.getFrame());
+		
+		String name = btnComponent.getBVisible().getName();
+		if(name.equals("false"))
+		{
+			btnComponent.getBVisible().setName("true");
+		}
+		else
+		{
+			btnComponent.getBVisible().setName("false");
+		}*/
+	}
+	
+	private void startServer()
+	{
+		GameServer server = GameServer.getInstance();
+		server.initial();
+		server.start();
+	}
+}

@@ -1,0 +1,254 @@
+package cc.lv1.rpg.gs.net.impl;
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.job.i.NetJob;
+import vin.rabbit.util.ByteBuffer;
+/**
+ * 客户端消息事物
+ * @author balan
+ *
+ */
+public class CMsgJob extends NetJob
+{
+	private AppMessage msg;
+	
+	private WorldManager worldmanager;
+
+	private NetConnection netConnection;
+	
+	public CMsgJob(WorldManager worldManager, AppMessage msg)
+	{
+		this.msg = msg;
+		this.worldmanager = worldManager;
+		netConnection = (NetConnection)msg.getSource();
+		
+	}
+
+	public NetConnection getConnection()
+	{
+		return netConnection;
+	}
+
+
+	public void run()
+	{
+		clientMessageChain();
+	}
+	
+	/**
+	 * 与客户端通信
+	 * @param conn
+	 */
+	public void clientMessageChain()
+	{
+		if(msg == null)
+			return;
+		
+		int type = msg.getType();
+		int markType = msg.getMarkType();
+		
+		if(markType == SMsg.T_LOGIN_COMMAND)
+		{
+			if(type == SMsg.C_LOGIN_COMMAND)
+			{
+				processPlayerLogin();
+			}
+			else if(type == SMsg.C_CREATE_ROLE_COMMAND)
+			{
+				processPlayerCreate();
+			}
+			else if(type == SMsg.C_DELETE_ROLE_COMMAND)
+			{
+				processPlayerRoleDelete();
+			}
+			else if(type == SMsg.C_ROLENAME_REPEAT_COMMAND)
+			{
+				processCheckRoleName();
+			}
+			else if(type == SMsg.C_PLAYER_ENTER_GAME_COMMAND)
+			{
+				processPlayerEnterGame();
+			}
+		}
+		else
+		{
+			worldmanager.clientMessageChain(msg);
+		}
+	}
+	
+
+	/**
+	 * 玩家进入游戏
+	 * @param conn
+	 */
+	public void processPlayerEnterGame()
+	{
+		Object playerObj = netConnection.getInfo();
+		
+		if(!(playerObj instanceof Player))
+		{//说明是外挂
+			netConnection.close();
+			return;
+		}
+		
+		Player player = (Player)playerObj;
+		worldmanager.processEnterGame(player, netConnection);
+		ByteBuffer buffer = new ByteBuffer(1);
+		buffer.writeBoolean(true);
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_ENTER_GAME_COMMAND,buffer));
+	}
+	
+	/**
+	 * 检测角色名是否已存在
+	 * @param conn
+	 * @param roleName
+	 */
+	public void processCheckRoleName()
+	{
+		String roleName = msg.getBuffer().readUTF();
+		
+		ByteBuffer buffer = new ByteBuffer(2);
+		boolean flag = false;
+		if(worldmanager.getDatabaseAccessor().checkHeroName(roleName))
+		{
+			flag = true;//alert 已有相同名字
+		}
+		buffer.writeBoolean(flag);
+		netConnection.sendMessage(new SMsg(SMsg.S_ROLENAME_REPEAT_COMMAND, buffer));
+	}
+	
+	/**
+	 * 处理玩家角色删除
+	 * @param conn
+	 * @param id
+	 * @param accountName
+	 */
+	public void processPlayerRoleDelete()
+	{
+		Object playerObj = netConnection.getInfo();
+		if(!(playerObj instanceof Player))
+		{//说明是外挂
+			netConnection.close();
+			return;
+		}
+		ByteBuffer buffer = new ByteBuffer(8);
+		boolean flag = false;
+		if(worldmanager.getDatabaseAccessor().delPlayer((Player)playerObj))
+		{
+			flag = true;
+		}
+		buffer.writeBoolean(flag);
+		netConnection.sendMessage(new SMsg(SMsg.S_DELETE_ROLE_COMMAND,buffer));
+	}
+	
+	/**
+	 * 处理玩家登陆
+	 * @param conn
+	 * @param acountname
+	 */
+	private void processPlayerLogin()
+	{
+		String accountname = msg.getBuffer().readUTF();//帐户名
+		//String password = msg.getBuffer().readUTF();//密码(暂时不用)
+		
+		if(netConnection.getInfo()!=null)
+		{ 
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			netConnection.close();
+			return;
+		}
+		
+		//验证玩家是否在，在则T下玩家
+		NetConnection targetNc = worldmanager.checkPlayerIsOnline(accountname);
+		if(targetNc != null)
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.ALERT_LOGIN_OTHERPLAYERLOGIN);
+			targetNc.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+			targetNc.close();
+			//return;
+		}
+		
+		netConnection.setInfo("validate");
+
+		worldmanager.getJobObserver().addJob(GameServer.JOB_DATABASEJOB, new ValidateJob(worldmanager,netConnection,accountname));
+	}
+	
+	/**
+	 * 处理玩家角色创建
+	 */
+	private void processPlayerCreate()
+	{
+		ByteBuffer readBuffer = msg.getBuffer();
+		
+		String accountName = readBuffer.readUTF();//帐户名
+		String roleName = readBuffer.readUTF();//角色名
+		int roleSex = readBuffer.readInt(); //1 nan 0 nv性别
+		int profession = readBuffer.readInt();//职业（有5种）
+		if(profession == 0)
+		{
+			System.out.println("没有这个职业！");
+			return;
+		}
+		if(roleSex != 1 && roleSex != 0)
+		{
+			System.out.println("没有这个性别！");
+			return;
+		}
+		
+		if(worldmanager.getDatabaseAccessor().checkHeroName(roleName))//验证数据库是否有相同角色名
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.EXCEPTION_LOGIN_SAMENAME);//alert 已有相同名字
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			return;
+		}
+		if(!(roleName.trim().length()>0))
+		{
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(ErrorCode.ALERT_ROLENAME_NULL_ERROR);//alert 角色名不能为空
+			netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE, buffer));
+			return;
+		}
+		
+		int roldId = worldmanager.getDatabaseAccessor().getNewPlayerId();//获取一个新的角色ID
+		
+		Player player = new Player();
+		player.id = roldId;
+		player.accountName = accountName;
+		player.name = roleName;
+		player.sex = roleSex;
+		player.profession = profession;
+		player.hitPoint = player.maxHitPoint;
+		player.magicPoint = player.maxMagicPoint;
+		if(profession == 4 && roleSex == 0)
+			player.modelId = 1160000401;
+		
+		DataFactory.getInstance().setNativity(player);
+		
+		netConnection.setId(roldId);
+		netConnection.setInfo(player);
+		
+		worldmanager.getJobObserver().addJob(GameServer.JOB_DATABASEJOB, new SaveJob(worldmanager,player));
+		
+		//把创建好的角色信息发送给客户端
+		ByteBuffer buffer = new ByteBuffer(32);
+		buffer.writeInt(roldId);
+		buffer.writeUTF(player.name);
+		buffer.writeByte(player.sex);
+		buffer.writeInt(player.profession);
+		buffer.writeInt(player.level);
+		netConnection.sendMessage(new SMsg(SMsg.S_CREATE_ROLE_COMMAND, buffer));
+	}
+
+}

@@ -1,0 +1,22 @@
+<nativity>
+	<!-- 出生点配置 -->
+	<points>
+		<!-- 创建角色随机出生点N，策划可以随意调配N个出生点 -->
+		<!-- 后面可以用这个配置文件来扩展。比如玩家初始头像id，初始money，初始等级..... -->
+		<point worldId="1011010001" areaId="1012010100" roomId="1013010101" x="0" y="0" />	
+	</points>
+	<skills>
+		<!-- 初始化技能组id 只能填主动技能 -->
+		<skill id="1031000001" />
+	</skills>
+	<pet><pet id="1047000001" /></pet>
+	<giftGoods>
+		<goods id="1045000068" count="1" />
+		<goods id="1045000066" count="1" />
+		<goods id="1045000067" count="1" />
+		<goods id="1045000065" count="1" />
+	</giftGoods>
+        <goods>
+        <goods id="1050000010" count="1" bind="2"/>
+        </goods>
+</nativity>

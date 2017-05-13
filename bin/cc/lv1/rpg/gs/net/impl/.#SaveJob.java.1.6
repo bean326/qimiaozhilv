@@ -1,0 +1,79 @@
+package cc.lv1.rpg.gs.net.impl;
+
+import java.text.SimpleDateFormat;
+
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.Task;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.job.i.NetJob;
+
+/**
+ * 保存
+ * @author balan
+ *
+ */
+public class SaveJob extends NetJob {
+
+	private WorldManager world;
+	
+	private PlayerController target;
+	
+	private Player player;
+	
+	public SaveJob(WorldManager world,PlayerController target)
+	{
+		this.world = world;
+		this.target = target;
+		this.player = target.getPlayer();
+	}
+	
+	public SaveJob(WorldManager world,Player player)
+	{
+		this.world = world;
+		this.player = player;
+	}
+	
+	public NetConnection getConnection() 
+	{
+		if(target==null)
+			return null;
+		return target.getNetConnection();
+	}
+
+
+	public void run() 
+	{
+		try
+		{
+			world.getDatabaseAccessor().savePlayer(player);
+		}
+		catch(Exception e)
+		{
+			System.out.println("-----------------------------------------------start");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			System.out.println(sdf.format(System.currentTimeMillis())+" SaveJob run savePlayer error:"+(player==null?"player is null!":player.name+" account:"+player.accountName));
+			TaskInfo ti = (TaskInfo) player.getExtPlayerInfo("taskInfo");
+			e.printStackTrace();
+			System.out.println("task count:"+ti.getTasks().size()+"  hashCode:"+ti.hashCode()+" tasksHashCode:"+ti.getTasks().hashCode());
+			for (int i = 0; i < ti.getTasks().size(); i++)
+			{
+				Task t = (Task) ti.getTasks().get(i);
+				if(t == null)
+					System.out.println("the["+i+"]task is null!");
+				else
+					System.out.println("task name:"+t.name+" ID:"+t.id);
+			}
+			System.out.println("-----------------------------------------------end");
+			MainFrame.println("SaveJob run savePlayer error:"+player==null?"player is null!":player.name+" account:"+player.accountName);
+			
+			
+			world.getDatabaseAccessor().savePlayer(player);
+			System.out.println("-----------------------------------------------save success");
+		}
+	}
+
+}

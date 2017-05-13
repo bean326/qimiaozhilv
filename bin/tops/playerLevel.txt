@@ -1,0 +1,10 @@
+id	accountName	playerName	playerJob	value
+
+1	bean01	bean01	3	6000
+2	zjj2003	°¥Ó´Î¹	3	6000
+3	twh11	TWh11	7	5501
+4	loky	loky	6	3761
+5	zhongyukaishi	123456	7	3638
+6	bean02	bean02	3	613
+7	twh22	dfd	7	78
+8	bean03	bean03	1	1

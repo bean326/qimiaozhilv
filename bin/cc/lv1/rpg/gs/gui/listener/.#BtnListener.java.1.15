@@ -1,0 +1,221 @@
+package cc.lv1.rpg.gs.gui.listener;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.abs.NetServer;
+import vin.rabbit.util.ThreadPool;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.PressureTest;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.gui.component.impl.BtnComponent;
+import cc.lv1.rpg.gs.gui.component.impl.LabelComponent;
+import cc.lv1.rpg.gs.gui.component.impl.TxtComponent;
+import cc.lv1.rpg.gs.util.SaverChanger;
+
+public class BtnListener implements ActionListener
+{
+
+	private BtnComponent btnComponent;
+
+	public BtnListener(BtnComponent btnComponent)
+	{
+		this.btnComponent = btnComponent;
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		Object obj = e.getSource();
+		
+		if(obj instanceof JButton)
+		{
+			JButton jb = (JButton)obj;
+			String jbStr = jb.getText().trim();
+
+			if(jbStr.equals("Start"))
+			{
+				startClick();
+			}
+			else if(jbStr.equals("Close"))
+			{
+				closeClick();
+			}
+			else if(jbStr.equals("Clean"))
+			{
+				cleanClick();
+			}
+			else if(jbStr.equals("Check"))
+			{
+				checkClick();
+			}
+			else if(jbStr.equals("Show"))
+			{
+				showClick();
+			}
+			else if(jbStr.equals("Visible"))
+			{
+				setVisible();
+			}
+		}
+	}
+
+	private void startClick()
+	{
+		btnComponent.getBStart().setVisible(false);
+		btnComponent.getBClose().setVisible(true);
+		btnComponent.getBCheck().setVisible(true);
+		
+	    MainFrame mf = ((MainFrame)btnComponent.getFrame());
+		ThreadPool threadPool = mf.getThreadPool();
+		
+		LabelComponent labelComponent =  ((LabelComponent)MainFrame.components[1]);
+		labelComponent.lServerStartTime.setText("Server startd on "+Utils.getCurrentTime());
+		
+		
+		threadPool.addTask(new Runnable()
+		{
+			public void run()
+			{
+				startServer();
+			}
+		});
+	}
+	
+	private void closeClick()
+	{
+		
+	    MainFrame mf = ((MainFrame)btnComponent.getFrame());
+		ThreadPool threadPool = mf.getThreadPool();
+		
+		threadPool.addTask(new Runnable() 
+		{
+			public void run()
+			{
+				NetServer.closeAllConnections();
+				stopServer();
+			}
+		});
+	}
+	
+	
+	private void cleanClick()
+	{
+		TxtComponent labelComponent =  ((TxtComponent)MainFrame.components[2]);
+		labelComponent.infoText.setText("");
+	}
+
+	public static boolean CheckPrint = false;
+	
+	private void checkClick()
+	{
+	
+		
+		if(CheckPrint)
+			CheckPrint = false;
+		else
+			CheckPrint = true;
+		
+		//NetServer.closeAllConnections();
+		//new SaverChanger().procress(GameServer.getInstance().getDatabaseAccessor());
+	}
+	
+	private void showClick()
+	{
+		WorldManager world= GameServer.getInstance().getWorldManager();
+		
+		
+		StringBuffer buffer = new StringBuffer();
+		
+/*		List list = world.getPlayerList();
+		buffer.append("player size : "+list.size()+"\n");
+		buffer.append("\n");
+		for (int i = 0; i != list.size(); i++)
+		{
+			PlayerController everyone = (PlayerController)list.get(i);
+			
+			if(everyone == null)
+				continue;
+			
+			buffer.append("id : "+everyone.getID()+" name : "+everyone.getName()+"\n");
+			buffer.append("ip : "+everyone.getNetConnection().getIP()+"\n");
+			buffer.append("room : "+everyone.getRoom() == null?"null":everyone.getRoom().name+"\n");
+			buffer.append("--------------"+"\n");
+		}*/
+
+
+		List list = world.getConnections();
+		for (int i = 0; i != list.size(); i++)
+		{
+			NetConnection net = (NetConnection)list.get(i);
+			
+			if(net == null)
+			{
+				buffer.append("net null by "+i+"\n");
+				buffer.append("--------------"+"\n");
+				continue;
+			}
+			
+			if(net.getInfo() ==null)
+			{
+				buffer.append("net.getInfo() null lasttime : "+net.getPingTime()+" currtime : "+System.currentTimeMillis()+"\n");
+				buffer.append(net.getIP()+"\n");
+				buffer.append("--------------"+"\n");
+				continue;
+			}
+			
+			if(net.getInfo() instanceof PlayerController)
+			{
+				PlayerController target = (PlayerController)net.getInfo();
+				buffer.append("id : "+target.getID()+" name : "+target.getName()+"\n");
+				buffer.append("room : "+target.getRoom() == null?"null":target.getRoom().name+"\n");
+				buffer.append(net.getIP()+"\n");
+				buffer.append("--------------"+"\n");
+			}
+			else
+			{
+				buffer.append(net.getInfo()+"\n");
+				buffer.append(net.getIP()+"\n");
+				buffer.append("--------------"+"\n");
+			}
+		}
+		
+		MainFrame.println(buffer.toString());
+
+	}
+	
+	private void setVisible()
+	{
+		PressureTest.getInstance().saveTestText();
+		
+/*		MainFrame mf = ((MainFrame)btnComponent.getFrame());
+		
+		String name = btnComponent.getBVisible().getName();
+		if(name.equals("false"))
+		{
+			btnComponent.getBVisible().setName("true");
+		}
+		else
+		{
+			btnComponent.getBVisible().setName("false");
+		}*/
+	}
+	
+	private void startServer()
+	{
+		GameServer server = GameServer.getInstance();
+		server.initial();
+		server.start();
+	}
+	
+	private void stopServer()
+	{
+		GameServer server = GameServer.getInstance();
+		server.stop();
+	}
+}

@@ -1,0 +1,399 @@
+package cc.lv1.rpg.gs.load.impl;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.controller.AreaController;
+import cc.lv1.rpg.gs.entity.controller.MonsterGroupController;
+import cc.lv1.rpg.gs.entity.controller.NpcController;
+import cc.lv1.rpg.gs.entity.controller.RoomController;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Monster;
+import cc.lv1.rpg.gs.entity.impl.NPC;
+import cc.lv1.rpg.gs.entity.impl.Shop;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.load.i.ILoader;
+/**
+ * 本地资源加载器
+ * @author dxw
+ *
+ */
+public class LocalDataLoader implements ILoader
+{
+
+	private GameServer gameserver = null;
+	
+	private String monsterStr = GameServer.getAbsolutePath()+"data\\entity\\monster.txt";
+	
+	private String monsterGroupStr = GameServer.getAbsolutePath()+"data\\entity\\monsterGroup.txt";
+	
+	private String npcStr = GameServer.getAbsolutePath()+"data\\entity\\npc.txt";
+	
+	private String worldStr = GameServer.getAbsolutePath()+"data\\world.txt";
+
+	private String npcDialogStr = GameServer.getAbsolutePath()+"data\\npc_dialog\\npc";
+
+	private String nativityStr = GameServer.getAbsolutePath()+"data\\nativity.txt";
+	
+	private String equipmentStr = GameServer.getAbsolutePath()+"data\\entity\\equipment.txt";
+	
+	private String propStr = GameServer.getAbsolutePath()+"data\\entity\\prop.txt";
+	
+	private String shopStr = GameServer.getAbsolutePath()+"data\\entity\\shop";
+
+
+	public void setAttachment(Object obj)
+	{
+		if(obj instanceof GameServer)
+			gameserver = (GameServer)obj;
+		else
+			MainFrame.println("unknown attachment!");
+	}
+
+	/**
+	 * 加载.........
+	 * 
+	 */
+	public void loading()
+	{
+		loadWorldMap();
+		MainFrame.println("load WorldMap success!!");
+		
+		loadGoodsProp();
+		MainFrame.println("load prop success!!");
+		
+		loadGoodsEquip();
+		MainFrame.println("load equipment success!!");
+		
+		loadShop();
+		MainFrame.println("load shop success!!");
+
+		loadNpc();
+		MainFrame.println("load Npc success!!");
+		
+		loadMonster();
+		MainFrame.println("load monster success!!");
+		
+		loadMonsterGroup();
+		MainFrame.println("load monsterGroup success!!");
+		
+		loadNativity();
+		MainFrame.println("load nativity success!!");
+		
+	}
+
+	/**
+	 * 加载世界（区域，房间）
+	 */
+	private void loadWorldMap()
+	{
+		XMLNode worldNode = Utils.getXMLNode(worldStr);
+        
+		XMLNode roomsNode = worldNode.getSubNode("rooms");
+		ArrayList roomsList = roomsNode.getSubNodes();
+		int roomsSize = roomsList.size();
+		
+		RoomController [] roomControllers = new RoomController[roomsSize];
+
+		for(int i = 0 ; i < roomsSize ; i ++) 
+		{
+			XMLNode node = (XMLNode)roomsList.get(i);
+			
+			roomControllers[i] = new RoomController();
+			roomControllers[i].init(node);
+			roomControllers[i].setWorld(gameserver.getWorldManager());
+			DataFactory.getInstance().putGameObject(roomControllers[i]);
+		}
+		
+		
+		XMLNode areaNode = worldNode.getSubNode("areas");
+		
+		ArrayList areaList = areaNode.getSubNodes();
+		int areaSize = areaList.size();
+		
+		AreaController [] areaControllers = new AreaController[areaSize];
+		
+		for(int i = 0 ; i < areaSize ;i ++) 
+		{
+			XMLNode node = (XMLNode)areaList.get(i);
+			areaControllers[i] = new AreaController();
+			areaControllers[i].setParent(gameserver.getWorldManager());
+			areaControllers[i].init(node);
+		}
+		gameserver.getWorldManager().setAreaController(areaControllers);
+	
+		for (int i = 0; i < areaControllers.length; i++)
+		{
+			areaControllers[i].ExitLinking();
+		}
+
+		//test(areaControllers);
+	}
+	
+	/**
+	 * 加载NPC到服务器
+	 */
+	private void loadNpc()
+	{
+		try
+		{
+			WorldManager world = gameserver.getWorldManager();
+			ArrayList npcs = Utils.loadFileVariables(npcStr, NPC.class);
+			int npcSize = npcs.size();
+ 
+			NpcController[] npcControllers = new NpcController[npcSize];
+			
+			for(int i = 0 ; i < npcSize ; i ++)
+			{
+				NPC npc = (NPC)npcs.get(i);
+				npcControllers[i] = new NpcController();
+				npcControllers[i].setWorld(world);
+				npcControllers[i].setNpc(npc);
+				if(npc.shopId != 0)
+				{	
+					Shop shop = (Shop) DataFactory.getInstance().getGameObject(npc.shopId);
+					npcControllers[i].setShop(shop);
+				}
+				
+		        AreaController area = (AreaController)world.getAreaById(npc.areaId);
+				if(area != null)
+				{
+					RoomController room = area.getRoomById(npc.roomId);
+					if(room != null)
+					{
+						room.addNpcList(npcControllers[i]);
+						npcControllers[i].setParent(room);
+					}
+				}	
+				File file = new File(npcDialogStr+npc.id+".txt");
+				XMLNode dialog;
+				if(file.exists())
+				{
+					dialog = Utils.getXMLNode(file);	
+				}
+				else
+				{
+				    dialog = Utils.getXMLNode(npcDialogStr+"default.txt");	
+				}		
+				npcControllers[i].parseDialog(dialog);
+			}	
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("load npc error:"+e.getMessage());
+		}
+
+	}
+
+	
+	
+	/**
+	 * 加载怪物
+	 */
+	public void loadMonster()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(monsterStr, Monster.class);
+			
+			DataFactory datafactory = DataFactory.getInstance(); 
+			int monsterSize = list.size();
+			
+			for(int i = 0 ; i < monsterSize ; i ++)
+			{
+				Monster monster = (Monster)list.get(i);
+				datafactory.putGameObject(monster);
+			}
+		}
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monster error:"+e.getMessage());
+		} 
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monster error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载怪物组
+	 */
+	private void loadMonsterGroup()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(monsterGroupStr, MonsterGroupController.class);			
+			int size = list.size();
+			DataFactory datafactory = DataFactory.getInstance();
+			for(int i = 0 ; i < size ; i++)
+			{
+				MonsterGroupController monsterGroupController	= (MonsterGroupController)list.get(i);
+				datafactory.putGameObject(monsterGroupController);
+			}
+			
+			WorldManager world = gameserver.getWorldManager();
+			
+			AreaController [] areas = world.getAreaControllers();
+			int areaLength = areas.length;
+			
+			for(int i = 0 ; i < areaLength ; i++)
+			{
+				RoomController [] rooms = areas[i].getRooms();
+				int roomLength = rooms.length;
+				
+				for(int j = 0 ; j < roomLength ; j ++)
+				{
+					ArrayList nodeList= rooms[j].getMonstersNode();
+					
+					if(nodeList == null)
+						continue;
+					
+					int groupSize = nodeList.size();
+					for(int k = 0 ; k < groupSize ; k++)
+					{
+						XMLNode xmlnode = (XMLNode)nodeList.get(k);
+						int groupId = Integer.parseInt(xmlnode.getAttributeValue("id"));
+						int groupX = Integer.parseInt(xmlnode.getAttributeValue("x"));
+						int groupY = Integer.parseInt(xmlnode.getAttributeValue("y"));
+						
+						MonsterGroupController mc = (MonsterGroupController)datafactory.getGameObject(groupId);
+						if(mc == null)
+						{
+							System.out.println("MonsterGroupController "+groupId+" can not find");
+							continue;
+						}
+						MonsterGroupController nMc = new MonsterGroupController();
+						nMc.areaId = areas[i].id;
+						nMc.roomId = rooms[j].id;
+						nMc.x = groupX;
+						nMc.y = groupY;
+						nMc.setParent(rooms[j]);
+						mc.copyTo(nMc);
+						rooms[j].addMonsterGroupList(nMc);
+					}
+					
+				}
+			}
+		} 
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monsterGroup error:"+e.getMessage());
+		} 
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monsterGroup error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载装备 
+	 */
+	public void loadGoodsEquip()
+	{
+		try 
+		{
+			ArrayList equips = Utils.loadFileVariables(equipmentStr, GoodsEquip.class);
+			int size = equips.size();
+			for (int i = 0; i < size; i++) 
+			{
+				GoodsEquip goods = (GoodsEquip)equips.get(i);
+				DataFactory.getInstance().putGameObject(goods);
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("load equip error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载道具
+	 */
+	public void loadGoodsProp()
+	{
+		try {
+			ArrayList props = Utils.loadFileVariables(propStr, GoodsProp.class);
+			int size = props.size();
+			for (int i = 0; i < size; i++) 
+			{
+				GoodsProp goods = (GoodsProp)props.get(i);
+				DataFactory.getInstance().putGameObject(goods);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("load prop error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载商店
+	 */
+	public void loadShop()
+	{
+		try
+		{
+			String MATCH = "shop\\d++\\.txt";
+			File file = new File(shopStr);
+			File[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) 
+			{
+				if(!files[i].getName().matches(MATCH))
+					continue;
+				List goodsList = new ArrayList(200);
+				BufferedReader br = new BufferedReader(new FileReader(new File(files[i].getPath())));
+				br.readLine();
+				br.readLine();
+				String line;
+				while((line = br.readLine()) != null)
+				{
+					String[] gos = Utils.split(line, "\t");
+					int goodsId = Integer.parseInt(gos[0]);
+					Goods goods = (Goods) DataFactory.getInstance().getGameObject(goodsId);
+					goods.saleRate = Integer.parseInt(gos[2]);
+					goods.buyRate = Integer.parseInt(gos[3]);
+					goodsList.add(goods);
+				}
+				String str = files[i].getName().substring(4);
+				int shopId = Integer.parseInt(str.substring(0, str.indexOf(".")));
+				Shop shop = new Shop(shopId,goodsList);
+				DataFactory.getInstance().putGameObject(shop);
+				GameServer.getInstance().getWorldManager().setShopList(shop);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("load shop error:"+e.getMessage());
+		}
+	}
+
+	
+	
+	/**
+	 * 读取出生初始化配置文件信息
+	 */
+	private void loadNativity()
+	{
+		XMLNode nativityNode = Utils.getXMLNode(nativityStr);
+		ArrayList nativitys = nativityNode.getSubNodes();
+		DataFactory dataFactory = DataFactory.getInstance();
+		dataFactory.putAttachment(DataFactory.ATTACH_NATIVITY, nativitys);
+	}
+	
+
+}

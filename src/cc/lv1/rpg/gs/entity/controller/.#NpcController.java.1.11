@@ -1,0 +1,161 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+
+import vin.rabbit.net.AppMessage;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.NpcDialog;
+import cc.lv1.rpg.gs.entity.NpcDialog.DialogStep;
+import cc.lv1.rpg.gs.entity.impl.NPC;
+import cc.lv1.rpg.gs.net.SMsg;
+
+/**
+ * npc 控制器
+ * @author dxw
+ *
+ */
+public class NpcController extends SpriteController
+{
+	private WorldManager worldManager;
+	
+	private NPC npc;
+	
+	private NpcDialog[] npcDialogs;
+	
+	public void init(XMLNode node)
+	{
+		npc = new NPC();
+		npc.id = Integer.parseInt(node.getAttributeValue("id"));
+		npc.name = node.getAttributeValue("name");
+		npc.areaId = Integer.parseInt(node.getAttributeValue("areaId"));
+		npc.roomId = Integer.parseInt(node.getAttributeValue("roomId"));
+		npc.iconId = Integer.parseInt(node.getAttributeValue("iconId"));
+		npc.modelId = Integer.parseInt(node.getAttributeValue("modeId"));
+		npc.x = Integer.parseInt(node.getAttributeValue("x"));
+		npc.y = Integer.parseInt(node.getAttributeValue("y"));
+		npc.shopId = Integer.parseInt(node.getAttributeValue("shopId"));
+		npc.script = node.getAttributeValue("script");
+	}
+	
+	@Override
+	public int getID() {
+		return npc.id;
+	}
+
+	@Override
+	public String getName() {
+		return npc.name;
+	}
+
+	@Override
+	public long getObjectIndex() {
+		return npc.objectIndex;
+	}
+	
+	public NPC getNpc()
+	{
+		return npc;
+	}
+	
+	public void setWorld(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+	
+	public NpcDialog[] getNpcDialogs()
+	{
+		return this.npcDialogs;
+	}
+	
+	public void parseDialog(XMLNode xmlDialog)
+	{
+		List dialog = xmlDialog.getSubNodes();
+		npcDialogs = new NpcDialog[dialog.size()];
+		for (int i = 0; i < dialog.size(); i++) {
+			XMLNode root = (XMLNode) dialog.get(i);
+			npcDialogs[i] = new NpcDialog(root);
+			npcDialogs[i].setParent(this);
+		}
+	}
+	
+	public NpcDialog getNpcDialog(String dialog)
+	{
+		for (int i = 0; i < npcDialogs.length; i++) {
+			NpcDialog nd = npcDialogs[i];
+			if(nd.getDialogIndex().equals(dialog))
+			{
+				return nd;
+			}
+		}
+		return null;
+	}
+
+	/** 接收玩家和npc的互动 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_CLICK_NPC_COMMAND)
+		{
+			requestNpcDialog(target,msg);
+		}
+	}
+	
+	/**
+	 * 请求NPC对话
+	 * @param target
+	 * @param msg
+	 */
+	public void requestNpcDialog(PlayerController target,AppMessage msg)
+	{
+		String com = msg.getBuffer().readUTF();	
+		
+		if(com.isEmpty())
+		{
+			ByteBuffer buffer = new ByteBuffer(20);
+			npcDialogs[0].getDialogStep()[0].writeTo(buffer);
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_CLICK_NPC_COMMAND,buffer));
+		}
+		else
+		{
+			String[] strs= Utils.split(com, ":");
+			
+			if(strs[0].equals("accept"))
+			{
+				acceptTask(target,com);
+			}
+			else if(strs[0].equals("link"))
+			{
+
+
+				ByteBuffer buffer = new ByteBuffer(20);
+				NpcDialog nDialog = getNpcDialog(strs[1]);
+				if(nDialog != null)
+				{
+					DialogStep[] dStep = nDialog.getDialogStep();
+					dStep[0].writeTo(buffer);
+				}
+				else
+				{
+					String st[] = Utils.split(strs[1], "_");
+					DialogStep dStep = getNpcDialog(st[0]).getDialogStep(st[1]);
+					dStep.writeTo(buffer);
+				}
+				target.getNetConnection().sendMessage(new SMsg(SMsg.S_CLICK_NPC_COMMAND,buffer));
+			}
+		}
+		
+	}
+	
+	
+	public boolean acceptTask(PlayerController target,String com)
+	{
+		System.out.println("接受任务========"+com.replaceAll("accept:", ""));
+		return true;
+	}
+}

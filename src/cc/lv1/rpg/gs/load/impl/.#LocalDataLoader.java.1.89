@@ -1,0 +1,1361 @@
+package cc.lv1.rpg.gs.load.impl;
+
+import java.io.*;
+
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.Exp;
+import cc.lv1.rpg.gs.data.MailRemind;
+import cc.lv1.rpg.gs.data.MarkChar;
+import cc.lv1.rpg.gs.data.PetExp;
+import cc.lv1.rpg.gs.data.TaskManager;
+import cc.lv1.rpg.gs.entity.controller.AreaController;
+import cc.lv1.rpg.gs.entity.controller.CopyController;
+import cc.lv1.rpg.gs.entity.controller.MonsterGroupController;
+import cc.lv1.rpg.gs.entity.controller.NpcController;
+import cc.lv1.rpg.gs.entity.controller.RoomController;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.impl.BaseFlayer;
+import cc.lv1.rpg.gs.entity.impl.BossDropProp;
+import cc.lv1.rpg.gs.entity.impl.BoxDropProp;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Monster;
+import cc.lv1.rpg.gs.entity.impl.MonsterAI;
+import cc.lv1.rpg.gs.entity.impl.MonsterDropProp;
+import cc.lv1.rpg.gs.entity.impl.NPC;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.RankReward;
+import cc.lv1.rpg.gs.entity.impl.RewardSender;
+import cc.lv1.rpg.gs.entity.impl.SShop;
+import cc.lv1.rpg.gs.entity.impl.Shop;
+import cc.lv1.rpg.gs.entity.impl.Task;
+import cc.lv1.rpg.gs.entity.impl.UpRole;
+import cc.lv1.rpg.gs.entity.impl.answer.AnswerReward;
+import cc.lv1.rpg.gs.entity.impl.answer.Question;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.FlashEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PassiveSkill;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsMarry;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsSynt;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsUp;
+import cc.lv1.rpg.gs.entity.impl.pet.Pet;
+import cc.lv1.rpg.gs.entity.impl.pet.PetTrain;
+import cc.lv1.rpg.gs.entity.impl.pet.PetUpRule;
+import cc.lv1.rpg.gs.entity.impl.pet.PetWords;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.load.i.ILoader;
+import cc.lv1.rpg.gs.util.DropPropXML;
+/**
+ * 本地资源加载器
+ * @author dxw
+ *
+ */
+public class LocalDataLoader implements ILoader
+{ 
+
+	private GameServer gameserver = null;
+	
+	private String maskCharStr = GameServer.getAbsolutePath()+"config/maskChar.txt";
+	
+	private String monsterStr = GameServer.getAbsolutePath()+"data/entity/monster.txt";
+	
+	private String monsterGroupStr = GameServer.getAbsolutePath()+"data/entity/monsterGroup.txt";
+	
+	private String npcStr = GameServer.getAbsolutePath()+"data/entity/npc.txt";
+	
+	private String worldStr = GameServer.getAbsolutePath()+"data/world.txt";
+
+	private String npcDialogStr = GameServer.getAbsolutePath()+"data/npc_dialog/npc";
+
+	private String nativityStr = GameServer.getAbsolutePath()+"data/nativity.txt";
+	
+	private String equipmentStr = GameServer.getAbsolutePath()+"data/entity/equipment.txt";
+	
+	private String propStr = GameServer.getAbsolutePath()+"data/entity/prop.txt";
+	
+	private String shopStr = GameServer.getAbsolutePath()+"data/entity/shop";
+
+	private String timeEffStr = GameServer.getAbsolutePath()+"data/entity/effect1.txt";
+	
+	private String flashEffStr = GameServer.getAbsolutePath()+"data/entity/effect2.txt";
+	
+	private String aSkillStr = GameServer.getAbsolutePath()+"data/entity/skills1.txt";
+	
+	private String pSkillStr = GameServer.getAbsolutePath()+"data/entity/skills2.txt";
+	
+	private String petSkillStr = GameServer.getAbsolutePath()+"data/entity/pet/petSkill.txt";
+	
+	private String monsterAiStr = GameServer.getAbsolutePath()+"data/entity/monsterAI.txt";
+	
+	private String taskStr = GameServer.getAbsolutePath()+"data/task";
+	
+	private String expStr = GameServer.getAbsolutePath()+"data/exp.txt";
+	
+	private String mailRemindStr = GameServer.getAbsolutePath()+"data/mailRemind.txt";
+	
+	private String petExpStr = GameServer.getAbsolutePath()+"data/entity/pet/petExp.txt";
+	
+	private String equipSShopStr = GameServer.getAbsolutePath()+"data/equipSShop.txt";
+	
+	private String equipDShopStr = GameServer.getAbsolutePath()+"data/equipDShop.txt";
+	
+	private String goodsUpStr = GameServer.getAbsolutePath()+"data/goodsUp.txt";
+	
+	private String goodsGiftStr = GameServer.getAbsolutePath()+"data/goodsGift.txt";
+	
+	private String monsterDropPropStr = GameServer.getAbsolutePath()+"data/entity/monsterDropProp.txt";
+	
+	private String taskDropPropStr = GameServer.getAbsolutePath()+"data/entity/taskDropProp.txt";
+	
+	private String boxDropPropStr = GameServer.getAbsolutePath()+"data/entity/boxDropProp.txt";
+	
+	private String bossDropPropStr = GameServer.getAbsolutePath()+"data/entity/bossDropProp.txt";
+	
+	private String boxStr = GameServer.getAbsolutePath()+"data/entity/box";
+	
+	private String baseFlyerStr = GameServer.getAbsolutePath()+"data/baseflyer.txt";
+	
+	private String petStr = GameServer.getAbsolutePath()+"data/entity/pet/pet.txt";
+	
+	private String petUpStr = GameServer.getAbsolutePath()+"data/entity/pet/petUp/pet";
+	
+	private String gmProcessStr = GameServer.getAbsolutePath()+"data/gm_process.txt";
+
+	private String petTrainStr = GameServer.getAbsolutePath()+"data/entity/pet/petTrain.txt";
+	
+	private String petWordsStr = GameServer.getAbsolutePath()+"data/entity/pet/petWords.txt";
+	
+	private String noNoticeStr = GameServer.getAbsolutePath()+"data/noNotice.txt";
+	
+	private String rankRewardStr = GameServer.getAbsolutePath()+"data/entity/answer/rankReward.txt";
+	
+	private String answerRewardStr = GameServer.getAbsolutePath()+"data/entity/answer/answerReward.txt";
+	
+	private String questionStr = GameServer.getAbsolutePath()+"data/entity/answer/question.txt";
+	
+	private String copyStr = GameServer.getAbsolutePath()+"data/copy.txt";
+	
+	private String marryStr = GameServer.getAbsolutePath()+"data/goodsMarry.txt";
+	
+	private String upRoleStr = GameServer.getAbsolutePath()+"data/upRole.txt";
+	
+	public static String rewardSenderStr = GameServer.getAbsolutePath()+"data/rewardSender.txt";
+	
+	public void setAttachment(Object obj)
+	{
+		if(obj instanceof GameServer)
+			gameserver = (GameServer)obj;
+		else
+			MainFrame.println("unknown attachment!");
+	}
+
+	/**
+	 * 加载.........
+	 * 
+	 */
+	public void loading()
+	{
+		loadMaskCharStr();
+		MainFrame.println("load MaskCharStr success!!");
+		
+		loadCopy();
+		MainFrame.println("load copy success!!");
+		
+		loadEffect();
+		MainFrame.println("load Effect success!!");
+		
+		loadSkill();
+		MainFrame.println("load Skill success!!");
+		
+		loadWorldMap();
+		MainFrame.println("load WorldMap success!!");
+		
+		loadGoodsProp();
+		MainFrame.println("load prop success!!");
+		
+		loadGoodsEquip();
+		MainFrame.println("load equipment success!!");
+		
+		loadShop();
+		MainFrame.println("load shop success!!");
+
+		loadExtShop();
+		MainFrame.println("load ext shop success!!");
+		
+		loadNpc();
+		MainFrame.println("load Npc success!!");
+		
+		loadDropProp();
+		MainFrame.println("load dropProp success!!");
+		
+		loadMonster();
+		MainFrame.println("load monster success!!");
+		
+		loadMonsterGroup();
+		MainFrame.println("load monsterGroup success!!");
+		
+		loadNativity();
+		MainFrame.println("load nativity success!!");
+		
+		loadTask();
+		MainFrame.println("load task success!!");
+		
+		loadExp();
+		MainFrame.println("load exp success!!");
+		
+		loadBaseFlyer();
+		MainFrame.println("load BaseFlyer success!!");
+		
+		loadPet();
+		MainFrame.println("load Pet succes!!");
+		
+		loadMailRemind();
+		MainFrame.println("load MailRemind success!!");
+		
+		loadGMProcess();
+		MainFrame.println("load GMProcess success");
+		
+		loadPetTrain();
+		MainFrame.println("load PetTrain success!!");
+		
+		loadNoNotice();
+		MainFrame.println("load noNotice success!!");
+		
+		loadQuestion();
+		MainFrame.println("load question success!!");
+		
+		if(loadRewardSender())
+		{
+			MainFrame.println("load RewardSender success!!");
+		}
+		
+		loadMarry();
+		MainFrame.println("load marry success!!");
+		
+		loadUpRole();
+		MainFrame.println("load upRole success!!");
+	}
+	
+	private void loadUpRole()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(upRoleStr, UpRole.class);
+			DataFactory.getInstance().putAttachment(DataFactory.UP_ROLE, list);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			System.out.println("load marry error!");
+		}
+	}
+	
+	private void loadMarry()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(marryStr, GoodsMarry.class);
+			DataFactory.getInstance().putAttachment(DataFactory.MARRY_ROLE, list);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			System.out.println("load marry error!");
+		}
+	}
+	
+	public void loadMaskCharStr()
+	{
+		try
+		{
+			
+			File file = new File(maskCharStr);
+			FileInputStream fis = new FileInputStream(file);
+			InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+			while ( (line = br.readLine()) != null)
+			{
+			   if(line== null || line.equals(""))
+				   continue;
+				
+			   MarkChar.putMarkChar(line);
+			}
+			
+		}
+		catch(Exception e)
+		{
+			System.out.println("loadMask CharStr error!");
+		}
+	}
+	
+	
+	private boolean loadRewardSender()
+	{
+		if(!new File(rewardSenderStr).exists())
+			return false;
+		
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(rewardSenderStr, RewardSender.class);
+			DataFactory.getInstance().putAttachment(DataFactory.REWARDSENDER_LIST, list);
+			return true;
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			System.out.println("load RewardSender error!");
+		}
+		return false;
+	}
+
+	private void loadCopy()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(copyStr, CopyController.class);
+			DataFactory.getInstance().putAttachment(DataFactory.COPY_LIST, list);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			System.out.println("load copy error!");
+		}
+	}
+	
+	private void loadQuestion()
+	{
+		try 
+		{
+			DataFactory df = DataFactory.getInstance();
+			
+			ArrayList questions = Utils.loadFileVariables(questionStr, Question.class);
+			
+			List list1 = new ArrayList();
+			List list2 = new ArrayList();
+			List list3 = new ArrayList();
+			
+			for (int i = 0; i < questions.size(); i++)
+			{
+				Question question = (Question) questions.get(i);
+				if(df.getQuestion(question.id) != null)
+				{
+					System.out.println("loadQuestion question is exist:"+question.id);
+					continue;
+				}
+				
+				if(question.type == 1)
+					list1.add(question);
+				else if(question.type == 2)
+					list2.add(question);
+				else if(question.type == 3)
+					list3.add(question);
+				
+				df.addQuestion(question);
+			}
+			
+			df.addAnswerObject(DataFactory.TYPE_ONE_QUESTION, list1);
+			df.addAnswerObject(DataFactory.TYPE_TWO_QUESTION, list2);
+			df.addAnswerObject(DataFactory.TYPE_THREE_QUESTION, list3);
+			
+			ArrayList rrs = Utils.loadFileVariables(rankRewardStr, RankReward.class);
+			for (int i = 0; i < rrs.size(); i++)
+			{
+				RankReward rr = (RankReward) rrs.get(i);
+				df.addRankRewards(rr);
+			}
+			
+			ArrayList ars = Utils.loadFileVariables(answerRewardStr, AnswerReward.class);
+			for (int i = 0; i < ars.size(); i++)
+			{
+				AnswerReward ar = (AnswerReward) ars.get(i);
+				if(df.getAnswerReward(ar.minLevel,ar.maxLevel) != null)
+				{
+					System.out.println("loadQuestion answerReward is exist:"+ar.id);
+					continue;
+				}
+				df.addARList(ar);
+			}
+		}
+		catch (Exception e) 
+		{
+			//e.printStackTrace();
+			System.out.println("load question error!");
+		}
+	}
+	
+	private void loadNoNotice()
+	{
+		noNoticeStr = Utils.readFile2(noNoticeStr);
+		String gmUsers[]= Utils.split(noNoticeStr, Utils.LINE_SEPARATOR);
+		
+		ArrayList list = new ArrayList();
+		
+		for (int i = 0; i < gmUsers.length; i++)
+		{
+			list.add(gmUsers[i]);
+		}
+		
+		DataFactory.getInstance().putAttachment(DataFactory.NO_NOTICE_LIST, list);
+	}
+	
+	private void loadPetTrain()
+	{
+		try 
+		{
+			ArrayList petTrain = Utils.loadFileVariables(petTrainStr, PetTrain.class);
+
+			DataFactory.getInstance().putAttachment(DataFactory.PET_TRAIN_LIST, petTrain);
+			
+			
+			ArrayList petWords = Utils.loadFileVariables(petWordsStr, PetWords.class);
+			
+			DataFactory.getInstance().putAttachment(DataFactory.PET_WORDS_LIST, petWords);
+			
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			System.out.println("load petTrain error!");
+		} 
+		
+	}
+
+	private void loadGMProcess()
+	{
+		gmProcessStr = Utils.readFile2(gmProcessStr);
+		String gmUsers[]= Utils.split(gmProcessStr, Utils.LINE_SEPARATOR);
+		
+		ArrayList list = new ArrayList();
+		
+		for (int i = 0; i < gmUsers.length; i++)
+		{
+			if(gmUsers.length -1 == i)
+				continue;
+			MainFrame.println("GM User :"+gmUsers[i]);
+			list.add(gmUsers[i]);
+		}
+		
+		DataFactory.getInstance().putAttachment(DataFactory.GMPROCESS_LIST, list);
+		
+		
+		GoodsEquip ges= (GoodsEquip)DataFactory.getInstance().getGameObject(1050605139);
+		
+		GoodsEquip ge = new GoodsEquip();
+		ges.copyTo(ge);
+
+		ge.id = 19820520;
+		ge.name = "\u5154\u603B\u70B8\u5F39";
+		ge.level = 1;
+		ge.type = 1;
+		ge.iconId = 1141010001;
+		ge.minQuality = 3;
+		ge.maxQuality = 3;
+		ge.repeatNumber = 1;
+		ge.job = "0";
+		ge.equipType = 9;
+		ge.equipLevel = 1;
+		ge.maxEquipLevel = 1;
+		ge.phyAtt = 100000;
+		ge.sptAtt = 100000;
+		ge.modValueWhite = 1000000;
+		ge.modValueGreen = 1200000;
+		ge.curePoint = 60000;
+		ge.isVIP = true;
+		ge.startLevel = 10;
+
+		ge.phyHurtAvoid = 10000;
+		ge.sptHurtAvoid = 10000;
+		
+		ge.lifePoint = 3000000;
+		ge.magicPoint = 300000000;
+		ge.phyDefWhite = 300000;
+		ge.phyDefGreen = 300000;
+		ge.phyDefBlue = 300000;
+		ge.phyDefPurple = 300000;
+		ge.sptDefWhite = 300000;
+		ge.sptDefGreen = 300000;
+		ge.sptDefBlue = 300000;
+		ge.sptDefPurple = 300000;
+	
+		DataFactory.getInstance().putGameObject(ge);
+
+		GoodsEquip n = (GoodsEquip)DataFactory.getInstance().getGameObject(1051040027);
+		
+		GoodsEquip ng = new GoodsEquip();
+		n.copyTo(ng);
+		ng.id = 19860326;
+		ng.name = "豆圣";
+		ng.level = 1;
+		ng.type = 1;
+		ng.iconId = 1141010001;
+		ng.minQuality = 3;
+		ng.maxQuality = 3;
+		ng.repeatNumber = 1;
+		ng.job = "0";
+		ng.equipType = 9;
+		ng.equipLevel = 1;
+		ng.maxEquipLevel = 1;
+		ng.phyAtt = 100000;
+		ng.sptAtt = 100000;
+		ng.modValueWhite = 1000000;
+		ng.modValueGreen = 1200000;
+		ng.curePoint = 60000;
+		ng.isVIP = true;
+		ng.startLevel = 0;
+		ng.eType = 1;
+		DataFactory.getInstance().putGameObject(ng);
+	}
+
+	private void loadPet()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(petStr, Pet.class);
+		
+			for(int i = 0 ; i < list.size() ; i ++)
+			{
+				Pet pet = (Pet)list.get(i);
+				Map upMap = new HashMap();
+				File file = new File(petUpStr+pet.id+".txt");
+				ArrayList upList = null;
+				if(!file.exists())
+				{
+					upList = Utils.loadFileVariables(petUpStr+"default.txt", PetUpRule.class);
+				}
+				else
+				{
+					upList = Utils.loadFileVariables(file, PetUpRule.class);
+				}
+				if(upList == null)
+				{
+					System.out.println("LoadPet error:"+pet.id);
+					continue;
+				}
+				for (int j = 0; j < upList.size(); j++) 
+				{
+					PetUpRule pur = (PetUpRule) upList.get(j);
+					upMap.put(pur.level, pur);
+				}
+				pet.setUpMap(upMap);
+				if(DataFactory.getInstance().getGameObject(pet.id) != null)
+				{
+					System.out.println("load Pet error pet is exits:"+pet.id);
+					continue;
+				}
+				DataFactory.getInstance().putGameObject(pet);
+			}
+
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+
+
+	private void loadBaseFlyer()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(baseFlyerStr, BaseFlayer.class);
+		
+			Map bfMap = new HashMap(10);
+			for(int i = 0 ; i < list.size() ; i ++)
+			{
+				BaseFlayer bf = (BaseFlayer)list.get(i);
+				bfMap.put(bf.id, bf);
+			}
+			DataFactory.getInstance().putAttachment(DataFactory.ATTACH_NPC_FLYER, bfMap);
+
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void loadMailRemind()
+	{
+		
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(mailRemindStr, MailRemind.class);
+			DataFactory.getInstance().putAttachment(DataFactory.ATTACH_MAILREMIND, list);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		} 
+	}
+
+	private void loadExp()
+	{
+		
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(expStr, Exp.class);
+			
+			Map expMap = new HashMap();
+			
+			for(int i = 0 ; i < list.size() ; i ++)
+			{
+				Exp exp = (Exp)list.get(i);
+				expMap.put(exp.level, exp);
+				
+				if(exp.level > Exp.max_level)
+				{
+					Exp.max_level = exp.level;
+				}
+			}
+			
+			DataFactory.getInstance().putAttachment(DataFactory.ATTACH_EXP, expMap);
+			
+			ArrayList petExp = Utils.loadFileVariables(petExpStr, PetExp.class);
+			Map petExpMap = new HashMap();
+			
+			for(int i = 0 ; i < petExp.size() ; i ++)
+			{
+				PetExp exp = (PetExp)petExp.get(i);
+				petExpMap.put(exp.level, exp);
+				if(i + 1 == petExp.size())
+				{
+					PetExp.DEFAULTMAXEXP = exp.total;
+					PetExp.DEFAULTMAXINTI = exp.totalInt;
+				}	
+			}
+			DataFactory.getInstance().putAttachment(DataFactory.ATTACH_PET_EXP, petExpMap);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		} 
+	}
+
+	/**
+	 * 加载效果
+	 */
+
+	private void loadEffect()
+	{
+		DataFactory dataFactory = DataFactory.getInstance();
+		try
+		{
+			ArrayList timeEffects = Utils.loadFileVariables(timeEffStr, TimeEffect.class);
+			
+			for(int i = 0 ; i < timeEffects.size() ; i ++)
+			{
+				TimeEffect timeEffect = (TimeEffect)timeEffects.get(i);
+				if(DataFactory.getInstance().getGameObject(timeEffect.id) != null)
+				{
+					System.out.println("load timeEffect error timeEffect is exits:"+timeEffect.id);
+					continue;
+				}
+				dataFactory.putGameObject(timeEffect);
+			}
+			
+			
+			ArrayList flashEffects = Utils.loadFileVariables(flashEffStr, FlashEffect.class);
+			
+			for(int i = 0 ; i < flashEffects.size() ; i ++)
+			{
+				FlashEffect flashEffect = (FlashEffect)flashEffects.get(i);
+				if(DataFactory.getInstance().getGameObject(flashEffect.id) != null)
+				{
+					System.out.println("load flashEffect error flashEffect is exits:"+flashEffect.id);
+					continue;
+				}
+				dataFactory.putGameObject(flashEffect);
+			}
+			
+		} 
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+		} 
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private void loadSkill()
+	{
+		DataFactory dataFactory = DataFactory.getInstance();
+		try
+		{
+			ArrayList askills =  Utils.loadFileVariables(aSkillStr,ActiveSkill.class);
+			for(int i = 0 ; i < askills.size() ; i ++)
+			{
+				ActiveSkill aSkill = (ActiveSkill)askills.get(i);
+				if(DataFactory.getInstance().getGameObject(aSkill.id) != null)
+				{
+					System.out.println("load aSkill error aSkill is exits:"+aSkill.id);
+					continue;
+				}
+				dataFactory.putGameObject(aSkill);
+				dataFactory.addSkill(aSkill);
+			}
+			
+			ArrayList pkills =  Utils.loadFileVariables(pSkillStr,PassiveSkill.class);
+			for(int i = 0 ; i < pkills.size() ; i ++)
+			{
+				PassiveSkill pSkill = (PassiveSkill)pkills.get(i);
+				if(DataFactory.getInstance().getGameObject(pSkill.id) != null)
+				{
+					System.out.println("load pSkill error pSkill is exits:"+pSkill.id);
+					continue;
+				}
+				dataFactory.putGameObject(pSkill);
+				dataFactory.addSkill(pSkill);
+			}
+			
+			Player player = new Player();//初始化技能数量
+			for (int i = 0; i < SkillTome.professionCount.length; i++)
+			{
+				player.profession = i+1;
+				
+				SkillTome st = (SkillTome)player.getExtPlayerInfo("skillTome");
+				List list = st.getProfessionSkills(player);
+				
+				SkillTome.professionCount[i] = list.size();
+			}
+			
+			
+//			ArrayList petkills =  Utils.loadFileVariables(petSkillStr,PetSkill.class);
+//			for(int i = 0 ; i < petkills.size() ; i ++)
+//			{
+//				PetSkill petSkill = (PetSkill)petkills.get(i);
+//				dataFactory.putGameObject(petSkill);
+//				dataFactory.addPetSkill(petSkill);
+//			}
+		} 
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+		} 
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	/**
+	 * 加载世界（区域，房间）
+	 */
+	private void loadWorldMap()
+	{
+		XMLNode worldNode = Utils.getXMLNode(worldStr);
+        
+		XMLNode roomsNode = worldNode.getSubNode("rooms");
+		ArrayList roomsList = roomsNode.getSubNodes();
+		int roomsSize = roomsList.size();
+		
+		RoomController [] roomControllers = new RoomController[roomsSize];
+
+		for(int i = 0 ; i < roomsSize ; i ++) 
+		{
+			XMLNode node = (XMLNode)roomsList.get(i);
+			
+			roomControllers[i] = new RoomController();
+			roomControllers[i].init(node);
+			roomControllers[i].setWorld(gameserver.getWorldManager());
+			if(DataFactory.getInstance().getGameObject(roomControllers[i].id) != null)
+			{
+				System.out.println("load roomControllers[i] error roomControllers[i] is exits:"+roomControllers[i].id);
+				continue;
+			}
+			DataFactory.getInstance().putGameObject(roomControllers[i]);
+		}
+		
+		
+		XMLNode areaNode = worldNode.getSubNode("areas");
+		
+		ArrayList areaList = areaNode.getSubNodes();
+		int areaSize = areaList.size();
+		
+		AreaController [] areaControllers = new AreaController[areaSize];
+		
+		for(int i = 0 ; i < areaSize ;i ++) 
+		{
+			XMLNode node = (XMLNode)areaList.get(i);
+			areaControllers[i] = new AreaController();
+			areaControllers[i].setParent(gameserver.getWorldManager());
+			areaControllers[i].init(node);
+			areaControllers[i].setSmailWorld(areaControllers);
+		}
+		gameserver.getWorldManager().setAreaController(areaControllers);
+	
+		for (int i = 0; i < areaControllers.length; i++)
+		{
+			areaControllers[i].ExitLinking();
+		}
+		
+		
+		
+	}
+	
+	/**
+	 * 加载NPC到服务器
+	 */
+	private void loadNpc()
+	{
+		try
+		{
+			WorldManager world = gameserver.getWorldManager();
+			ArrayList npcs = Utils.loadFileVariables(npcStr, NPC.class);
+			int npcSize = npcs.size();
+ 
+			NpcController[] npcControllers = new NpcController[npcSize];
+			
+			for(int i = 0 ; i < npcSize ; i ++)
+			{
+				NPC npc = (NPC)npcs.get(i);
+				npcControllers[i] = new NpcController();
+				npcControllers[i].setWorld(world);
+				npcControllers[i].setNpc(npc);
+				if(npc.script.equals("answer"))
+				{
+					npcControllers[i].isAnswerNpc = true;
+					DataFactory.answerNpc = npc.id;
+				}
+				if(!npc.shopId.equals("0") && !npc.shopId.trim().equals("0"))
+				{
+					String[] strs = Utils.split(npc.shopId, ":");
+					for (int j = 0; j < strs.length; j++) 
+					{
+						int id = Integer.parseInt(strs[j]);
+						Shop shop = (Shop) DataFactory.getInstance().getGameObject(id);
+						npcControllers[i].setShop(shop);
+					}
+				}
+				
+		        AreaController area = (AreaController)world.getAreaById(npc.areaId);
+				if(area != null)
+				{
+					RoomController room = area.getRoomById(npc.roomId);
+					if(room != null)
+					{
+						room.addNpcList(npcControllers[i]);
+						npcControllers[i].setParent(room);
+					}
+				}	
+				File file = new File(npcDialogStr+npc.id+".txt");
+				XMLNode dialog;
+				if(file.exists())
+				{
+					dialog = Utils.getXMLNode(file);	
+				}
+				else
+				{
+				    dialog = Utils.getXMLNode(npcDialogStr+"default.txt");	
+				}		
+				npcControllers[i].parseDialog(dialog);
+				
+				
+				npcControllers[i].runAttach();
+			}	
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("load npc error:"+e.getMessage());
+		}
+
+	}
+
+	public void loadDropProp()
+	{
+		try
+		{
+			DataFactory datafactory = DataFactory.getInstance(); 
+			
+			
+			File file = new File(monsterDropPropStr);
+			if(file.isFile() && file.exists())
+			{
+				String out = monsterDropPropStr.substring(1, monsterDropPropStr.length()-19);
+				DropPropXML.writeXML(monsterDropPropStr,out, "monsterDropProp");
+				ArrayList list1 = Utils.loadFileVariables(out+"monsterDropProp", MonsterDropProp.class);
+				for (int i = 0; i < list1.size(); i++) 
+				{
+					MonsterDropProp mdp = (MonsterDropProp) list1.get(i);
+					if(DataFactory.getInstance().getGameObject(mdp.id) != null)
+					{
+						System.out.println("load mdp error mdp is exits:"+mdp.id);
+						continue;
+					}
+					datafactory.putGameObject(mdp);
+				}
+			}
+
+			
+			file = new File(taskDropPropStr);
+			if(file.isFile() && file.exists())
+			{
+				String out = taskDropPropStr.substring(1, taskDropPropStr.length()-16);
+				DropPropXML.writeXML(taskDropPropStr, out, "taskDropProp");
+
+				ArrayList list2 = Utils.loadFileVariables(out+"taskDropProp", MonsterDropProp.class);
+				for (int i = 0; i < list2.size(); i++) 
+				{
+					MonsterDropProp mdp = (MonsterDropProp) list2.get(i);
+					if(DataFactory.getInstance().getGameObject(mdp.id) != null)
+					{
+						System.out.println("load mdp error mdp is exits:"+mdp.id);
+						continue;
+					}
+					datafactory.putGameObject(mdp);
+				}
+			}
+
+			
+			ArrayList list3 = Utils.loadFileVariables(boxDropPropStr,BoxDropProp.class);
+			for (int i = 0; i < list3.size(); i++) 
+			{
+				BoxDropProp bdp = (BoxDropProp) list3.get(i);
+				file = new File(boxStr);
+				File[] files = file.listFiles();
+				List ids = new ArrayList();
+				List counts = new ArrayList();
+				for (int j = 0; j < files.length; j++) 
+				{
+					if(!files[j].getName().startsWith("box"))
+						continue;
+					BufferedReader br = new BufferedReader(new FileReader(new File(files[j].getPath())));
+					br.readLine();
+					br.readLine();
+					String line;
+					while((line = br.readLine()) != null)
+					{
+						String[] strs = Utils.split(line, "\t");
+						int dropId = Integer.parseInt(strs[0]);
+						if(bdp.id != dropId)
+							continue;
+						if(strs[1].equals("0"))
+							continue;
+						ids.add(strs[1]);
+						try
+						{
+							counts.add(strs[3]);
+						}
+						catch(Exception e)
+						{
+							counts.add(1);
+						}
+					}
+				}
+				bdp.setDefault(ids,counts);
+				datafactory.addBoxDropProp(bdp);
+			}
+			
+			
+			file = new File(bossDropPropStr);
+			if(file.isFile() && file.exists())
+			{
+				String out = bossDropPropStr.substring(1, bossDropPropStr.length()-16);
+				DropPropXML.writeXML(bossDropPropStr,out , "bossDropProp");
+				ArrayList list4 = Utils.loadFileVariables(out+"bossDropProp", BossDropProp.class);
+				for (int i = 0; i < list4.size(); i++) 
+				{
+					BossDropProp mdp = (BossDropProp) list4.get(i);
+					for (int j = 0; j < mdp.propId.length; j++)
+					{
+						if(mdp.propId[j] == 0)
+							continue;
+						Goods goods = (Goods) DataFactory.getInstance().getGameObject(mdp.propId[j]);
+						if(goods == null)
+						{
+							System.out.println("Load BossDropProp goods is null:"+mdp.propId[j]+" mdpId:"+mdp.id);
+							continue;
+						}
+					}
+					datafactory.putGameObject(mdp);
+				}
+			}
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("load dropProp error:"+e.getMessage());
+		} 
+	}
+	
+	
+	/**
+	 * 加载怪物
+	 */
+	public void loadMonster()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(monsterStr, Monster.class);
+			ArrayList listAI = Utils.loadFileVariables(monsterAiStr, MonsterAI.class);
+			
+			DataFactory datafactory = DataFactory.getInstance(); 
+			int monsterSize = list.size();
+			
+			for(int i = 0 ; i < monsterSize ; i ++)
+			{
+				Monster monster = (Monster)list.get(i);
+				monster.updateMoreValue();
+				for (int j = 0; j < listAI.size(); j++) 
+				{
+					MonsterAI monsterAI = (MonsterAI)listAI.get(j);
+					if(monsterAI.monsterId == monster.id)
+					{
+						monster.setMonsterAI(monsterAI);
+						break;
+					}
+				}
+				MonsterDropProp mdp = null;
+				if(monster.normalDropRate != 0)
+				{
+					mdp = (MonsterDropProp) datafactory.getGameObject(monster.normalDropRate);
+					monster.setMonsterDropProp(mdp);
+				}
+				if(monster.questDropRate != 0)
+				{
+					mdp = (MonsterDropProp) datafactory.getGameObject(monster.questDropRate);
+					monster.setTaskDropProp(mdp);
+				}
+				if(DataFactory.getInstance().getGameObject(monster.id) != null)
+				{
+					System.out.println("load monster error monster is exits:"+monster.id);
+					continue;
+				}
+				datafactory.putGameObject(monster);
+			}
+			
+		}
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monster error:"+e.getMessage());
+		} 
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monster error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载怪物组
+	 */
+	private void loadMonsterGroup()
+	{
+		try
+		{
+			ArrayList list = Utils.loadFileVariables(monsterGroupStr, MonsterGroupController.class);			
+			int size = list.size();
+			DataFactory datafactory = DataFactory.getInstance();
+			for(int i = 0 ; i < size ; i++)
+			{
+				MonsterGroupController monsterGroupController	= (MonsterGroupController)list.get(i);
+				datafactory.putGameObject(monsterGroupController);
+			}
+			
+			WorldManager world = gameserver.getWorldManager();
+			
+			AreaController [] areas = world.getAreaControllers();
+			int areaLength = areas.length;
+			for(int i = 0 ; i < areaLength ; i++)
+			{
+				RoomController [] rooms = areas[i].getRooms();
+				int roomLength = rooms.length;
+				
+				for(int j = 0 ; j < roomLength ; j ++)
+				{
+					ArrayList nodeList= rooms[j].getMonstersNode();
+					
+					if(nodeList == null)
+						continue;
+					
+					int groupSize = nodeList.size();
+					for(int k = 0 ; k < groupSize ; k++)
+					{
+						XMLNode xmlnode = (XMLNode)nodeList.get(k);
+						int groupId = Integer.parseInt(xmlnode.getAttributeValue("id"));
+						int groupX = Integer.parseInt(xmlnode.getAttributeValue("x"));
+						int groupY = Integer.parseInt(xmlnode.getAttributeValue("y"));
+						
+						MonsterGroupController mc = (MonsterGroupController)datafactory.getGameObject(groupId);
+						if(mc == null)
+						{
+							System.out.println("MonsterGroupController "+groupId+" can not find");
+							continue;
+						}
+						MonsterGroupController nMc = new MonsterGroupController();
+						nMc.areaId = areas[i].id;
+						nMc.roomId = rooms[j].id;
+						nMc.x = groupX;
+						nMc.y = groupY;
+						nMc.setParent(rooms[j]);
+						mc.copyTo(nMc);
+						nMc.objectIndex = MonsterGroupController.publicObjectIndex++;
+						rooms[j].addMonsterGroupList(nMc);
+						
+						//服务器启动就隐藏掉时间怪
+						nMc.setVisibled();
+					}
+					
+				}
+			}
+		} 
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monsterGroup error:"+e.getMessage());
+		} 
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+			System.out.println("load monsterGroup error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载装备 
+	 */
+	public void loadGoodsEquip()
+	{
+		try 
+		{
+			ArrayList equips = Utils.loadFileVariables(equipmentStr, GoodsEquip.class);
+			int size = equips.size();
+
+			for (int i = 0; i < size; i++) 
+			{
+				GoodsEquip goods = (GoodsEquip)equips.get(i);
+				if(DataFactory.getInstance().getGameObject(goods.id) != null)
+				{
+					System.out.println("load GoodsEquip equip exits:"+goods.id);
+					continue;
+				}
+				DataFactory.getInstance().putGameObject(goods);
+			}
+		
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("load equip error:"+e.getMessage());
+		}
+	}
+	
+	/**
+	 * 加载道具
+	 */
+	public void loadGoodsProp()
+	{
+		try {
+			ArrayList props = Utils.loadFileVariables(propStr, GoodsProp.class);
+			int size = props.size();
+			for (int i = 0; i < size; i++) 
+			{
+				GoodsProp goods = (GoodsProp)props.get(i);
+				goods.quality = (goods.minQuality == goods.maxQuality?goods.minQuality:0);
+				if(DataFactory.getInstance().getGameObject(goods.id) != null)
+				{
+					System.out.println("load GoodsProp prop exits:"+goods.id);
+					continue;
+				}
+				DataFactory.getInstance().putGameObject(goods);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("load props error:"+e.getMessage());
+		}
+	}
+	
+	private void loadTask()
+	{
+		File file = new File(taskStr);
+		File [] taskfiles = file.listFiles();
+		
+		for(int i = 0 ; i < taskfiles.length ; i ++)
+		{
+			if(taskfiles[i] == null)
+				continue;
+			
+			if(!taskfiles[i].toString().endsWith("txt"))
+				continue;
+			
+			XMLNode taskNode = Utils.getXMLNode(taskfiles[i]);
+			Task task = new Task();
+			task.setWorld(gameserver.getWorldManager());
+			task.parseTask(taskNode);
+			task.initial();
+
+			TaskManager.getInstance().putTask(task);
+		}
+	}
+	
+	/**
+	 * 加载商店
+	 */
+	public void loadShop()
+	{
+		try
+		{
+			String MATCH = "shop\\d++\\.txt";
+			File file = new File(shopStr);
+			File[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) 
+			{
+				if(!files[i].getName().matches(MATCH))
+					continue;
+				List goodsList = new ArrayList(200);
+				BufferedReader br = new BufferedReader(new FileReader(new File(files[i].getPath())));
+				br.readLine();
+				br.readLine();
+				String line;
+				HashMap buyRate = new HashMap();
+				HashMap saleRate = new HashMap();
+				HashMap honourPoint = new HashMap();
+				HashMap sourceIds = new HashMap();
+				
+				while((line = br.readLine()) != null)
+				{
+					String[] gos = Utils.split(line, "\t");
+					int goodsId = Integer.parseInt(gos[0]);
+					int honour = 0;
+					if(gos.length == 5)
+					{
+						honour = Integer.parseInt(gos[4]);
+					}
+					Goods goods = (Goods) DataFactory.getInstance().getGameObject(goodsId);
+					Goods newGoods = null;
+					if(goods instanceof GoodsEquip)
+					{
+						GoodsEquip equip = (GoodsEquip) Goods.cloneObject(goods);
+						if(files[i].getName().equals("shop1000000000.txt") || files[i].getName().equals("shop2000000000.txt")
+						|| files[i].getName().equals("shop1000000001.txt") || files[i].getName().equals("shop2000000002.txt"))
+						{
+							newGoods = equip.makeNewBetterEquip(equip.taskColor==-1?0:equip.taskColor);
+						}
+						else
+						{
+							newGoods = equip.makeNewBetterEquip(0);
+						}
+					}
+					else if(goods instanceof GoodsProp)
+						newGoods = (Goods) Goods.cloneObject(goods);
+					if(newGoods == null)
+					{
+						System.out.println("LocalDataLoader shop goods is null:"+goodsId+"  "+files[i].getName());
+						continue;
+					}
+					goodsList.add(newGoods);
+					if(files[i].getName().equals("shop1000000002.txt"))//礼券商店
+					{
+						sourceIds.put(goodsId, gos[1]);
+						saleRate.put(goodsId, 100);
+						buyRate.put(goodsId, 100);
+					}
+					else
+					{
+						saleRate.put(goodsId, gos[2]);
+						buyRate.put(goodsId, gos[3]);
+					}
+					honourPoint.put(goodsId, honour);
+				}
+				
+				String str = files[i].getName().substring(4);
+				int shopId = Integer.parseInt(str.substring(0, str.indexOf(".")));
+				Shop shop = new Shop(shopId,goodsList,saleRate,buyRate,honourPoint,sourceIds);
+				if(DataFactory.getInstance().getGameObject(shop.id) != null)
+				{
+					System.out.println("load shop error shop is exits:"+shop.id);
+					continue;
+				}
+				DataFactory.getInstance().putGameObject(shop);
+				GameServer.getInstance().getWorldManager().setShopList(shop);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("load shop error:"+e.getMessage());
+		}
+	}
+
+	private void loadExtShop()
+	{
+		try
+		{
+			ArrayList list1 = Utils.loadFileVariables(equipSShopStr, GoodsSynt.class);
+			ArrayList list2 = Utils.loadFileVariables(equipDShopStr, GoodsSynt.class);
+			ArrayList list3 = Utils.loadFileVariables(goodsUpStr, GoodsUp.class);
+			
+			SShop ss = SShop.getShop();
+			
+			for(int i = 0 ; i < list1.size() ; i ++)
+			{
+				GoodsSynt gs = (GoodsSynt)list1.get(i);
+				if(ss.getEquipSynt(gs.gsId) != null)
+				{
+					System.out.println("load extShop error goodsSynt is exits:"+gs.gsId);
+					continue;
+				}
+				ss.addEquipSynt(gs);
+			}
+			
+			for (int i = 0; i < list2.size(); i++)
+			{
+				GoodsSynt gs = (GoodsSynt)list2.get(i);
+				if(ss.getEquipDisa(gs.id) != null)
+				{
+					System.out.println("load extShop error goodsSynt is exits:"+gs.id);
+					continue;
+				}
+				ss.addEquipDisa(gs);
+			}
+			
+			for (int i = 0; i < list3.size(); i++)
+			{
+				GoodsUp gu = (GoodsUp)list3.get(i);
+				if(ss.getGoodsUpBySourceId(gu.sourceId) != null)
+				{
+					System.out.println("load extShop error goodsUp sourceId is exits:"+gu.sourceId);
+					continue;
+				}
+				ss.addGoodsUp(gu);
+			}
+
+			SShop.getShop().setWorld(gameserver.getWorldManager());
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+	
+	/**
+	 * 读取出生初始化配置文件信息
+	 */
+	private void loadNativity()
+	{
+		XMLNode nativityNode = Utils.getXMLNode(nativityStr);
+		ArrayList nativitys = nativityNode.getSubNodes();
+		DataFactory dataFactory = DataFactory.getInstance();
+		dataFactory.putAttachment(DataFactory.ATTACH_NATIVITY, nativitys);
+	}
+	
+
+}

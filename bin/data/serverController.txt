@@ -1,0 +1,4 @@
+<!--字體版本fontVer(簡體:simple繁體:complex)=防沉迷isIdcard(true:開false:不開) = 商店shopVer(old表示是旧版本 new表示 是新的)-->
+fontVer=simple
+isIdcard=false
+shopVer=new

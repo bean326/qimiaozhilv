@@ -1,0 +1,310 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.RoomExit;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.net.SMsg;
+/**
+ * 玩家控制器
+ * @author dxw
+ *
+ */
+public class PlayerController extends SpriteController
+{
+	
+	private WorldManager worldManager;
+	
+	private NetConnection netConnection;
+	
+	private Player player;
+	
+	private boolean online;
+	
+	private TeamController team;
+	
+	private RoomExit roomExit = null;
+
+	public PlayerController(Player player)
+	{
+		this.player = player;
+	}
+
+	/** 获得玩家所在区域 */
+	public AreaController getArea()
+	{
+		PlayerContainer container = getParent();
+		if(container instanceof RoomController) 
+			return ((RoomController)container).getParent();
+ 		return worldManager.getAreaById(player.areaId);
+	}
+	
+	/** 获得玩家所在房间 */
+	public RoomController getRoom()
+	{
+		PlayerContainer container = getParent();
+			if(container instanceof RoomController)
+				return ((RoomController)container);
+			
+		RoomController room = null;
+ 		AreaController area = getArea();
+		if(area != null)
+		{
+			room = area.getRoomById(player.roomId);	
+		}
+		return room;
+	}
+	
+	public void close()
+	{
+		netConnection.close();
+	}
+	
+	public void sendAlert(int alert)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(alert);
+		netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+	}
+	
+	public void sendError(String error)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeUTF(error);
+		netConnection.sendMessage(new SMsg(SMsg.S_ERROR_MESSAGE,buffer));
+	}
+
+	public void sendException(int exception)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(exception);
+		netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE,buffer));
+	}
+	
+
+
+	/**
+     * 与客户端通信
+     * @param msg
+     */
+	public void clientMessageChain(AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_PLAYER_INFO_COMMAND)
+		{
+			sendInfo();
+		}
+		else if(type == SMsg.C_PLAYER_ONKEYMOVE_COMMAND)
+		{
+			keyMoveTo(msg);
+		}
+		else if(type == SMsg.C_PLAYER_ONMOUSEMOVE_COMMAND)
+		{
+			mouseMoveTo(msg);
+		}
+		else if(type == SMsg.C_GET_PLAYER_EQUIPSET_COMMAND)
+		{
+			int playerId = msg.getBuffer().readInt();
+			PlayerController target = null;
+			if(playerId == getPlayer().id)
+				target = this;
+			else
+				target = worldManager.getPlayerControllerById(playerId);
+			Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+			bag.getPlayerEquipSet(target);
+		}	
+	}
+	
+	/**
+	 * 发送自己的完整信息
+	 */
+	public void sendInfo()
+	{	
+		ByteBuffer buffer = new ByteBuffer(64);
+		player.writeTo(buffer);
+		sendSkill(buffer);
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_INFO_COMMAND,buffer));
+	}
+	
+	public void sendSkill(ByteBuffer buffer)
+	{
+		SkillTome skill = (SkillTome)player.getExtPlayerInfo("skillTome");
+		skill.writeActiveSkill(buffer);
+	}
+	
+	/**
+	 * 键盘移动
+	 * @param msg
+	 */
+	public void keyMoveTo(AppMessage msg)
+	{
+		RoomController room  = getRoom();
+		
+		if(room == null)
+			return;
+		
+		ByteBuffer readBuff = msg.getBuffer();
+		int state = readBuff.readByte(); //0停 1走
+		int pos = readBuff.readByte(); //1上   2下   4左  8右   5上左 6下左 9上右 10下右
+		int x = readBuff.readInt(); //发送按下坐标 x
+		int y = readBuff.readInt(); //发送按下坐标 x
+		
+		
+		ByteBuffer writeBuff = new ByteBuffer(14);
+		writeBuff.writeInt(player.id);
+		writeBuff.writeByte(state);
+		writeBuff.writeByte(pos);
+		writeBuff.writeInt(x);
+		writeBuff.writeInt(y);
+		
+		if(state == 0) //停下的时候记录玩家的坐标
+		{
+			getPlayer().x = x;
+			getPlayer().y = y;
+		}
+		room.dispatchMsg(SMsg.S_PLAYER_ONKEYMOVE_COMMAND, writeBuff);
+	}
+	
+	/**
+	 * 鼠标移动
+	 * @param msg
+	 */
+	private void mouseMoveTo(AppMessage msg)
+	{
+		RoomController room  = getRoom();
+		
+		if(room == null)
+			return;
+		
+		ByteBuffer readBuff = msg.getBuffer();
+		int x = readBuff.readInt();  //发送目标坐标 x
+		int y = readBuff.readInt();  //发送目标坐标 y
+		
+		ByteBuffer writeBuff = new ByteBuffer(12);
+		writeBuff.writeInt(player.id);
+		writeBuff.writeInt(x);
+		writeBuff.writeInt(y);
+		room.dispatchMsg(SMsg.S_PLAYER_ONMOUSEMOVE_COMMAND, writeBuff);
+	}
+	
+	
+	public String getName()
+	{
+		return player.name;
+	}
+
+	public int getID()
+	{
+		return player.id;
+	}
+
+	public long getObjectIndex()
+	{
+		return 0;
+	}
+	
+	public Player getPlayer()
+	{
+		return player;
+	}
+
+	public void setPlayer(Player player)
+	{
+		this.player = player;
+	}
+
+	public WorldManager getWorldManager()
+	{
+		return worldManager;
+	}
+
+	public void setWorldManager(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+
+	public boolean isOnline()
+	{
+		return online;
+	}
+
+	public void setOnline(boolean online)
+	{
+		this.online = online;
+	}
+
+	public NetConnection getNetConnection()
+	{
+		return netConnection;
+	}
+
+	public void setNetConnection(NetConnection netConnection)
+	{
+		this.netConnection = netConnection;
+	}
+
+
+	public TeamController getTeam()
+	{
+		return team;
+	}
+
+	public void setTeam(TeamController team)
+	{
+		this.team = team;
+	}
+
+	public RoomExit getRoomExit()
+	{
+		return roomExit;
+	}
+
+	public void setRoomExit(RoomExit roomExit)
+	{
+		this.roomExit = roomExit;
+	}
+
+	public void update(long currentMillis)
+	{
+/*		if(player.isHaveBuff)
+		{
+			BufferBox buffBox = (BufferBox)player.getExtPlayerInfo("buffBox");
+			buffBox.update(currentMillis);
+		}*/
+	}
+
+	public boolean isDead()
+	{
+		return player.hitPoint <= 1;
+	}
+	
+	/**
+	 * 设置玩家凶恶值
+	 */
+	public void setAtrocity()
+	{
+		int at = player.atrocity;
+		if(at >= 0 && at < 40)
+			at += 100;
+		else if(at >= 40 && at <  90)
+			at += 150;
+		else if(at >= 90 && at <  200)
+			at += 200;
+		else if(at >= 200 && at <  400)
+			at += 300;
+		else if(at >= 400 && at <  600)
+			at += 450;
+		else if(at >= 600 && at <  1200)
+			at += 650;
+		else if(at > 1200)
+			at = 1200;
+	}
+
+}

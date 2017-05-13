@@ -1,0 +1,839 @@
+package cc.lv1.rpg.gs.data;
+
+import java.util.Random;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.controller.CopyController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.PetTome;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+//import cc.lv1.rpg.gs.entity.impl.GoldBox;
+import cc.lv1.rpg.gs.entity.impl.BoxDropProp;
+import cc.lv1.rpg.gs.entity.impl.GoldBox;
+import cc.lv1.rpg.gs.entity.impl.GoldParty;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.RankReward;
+import cc.lv1.rpg.gs.entity.impl.UpRole;
+import cc.lv1.rpg.gs.entity.impl.answer.AnswerReward;
+import cc.lv1.rpg.gs.entity.impl.answer.Guide;
+import cc.lv1.rpg.gs.entity.impl.answer.Question;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsMarry;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.entity.impl.pet.Pet;
+import cc.lv1.rpg.gs.entity.impl.pet.PetUpRule;
+import cc.lv1.rpg.gs.entity.impl.pet.PetWords;
+import cc.lv1.rpg.gs.other.ErrorCode;
+/**
+ * 数据工厂.....
+ * @author dxw
+ *
+ */
+ 
+public class DataFactory
+{
+	/** 默认回城点 */
+	public static final int INITROOM = 1013010111;
+	/** 新手区域 */
+	public static final int NOVICEAREA = 1012010100;
+	/** 开拓阵营活动休息房间 */
+	public static final int KAITUOROOM = 1013060101;
+	/** 邪神阵营活动休息房间 */
+	public static final int XIESHENROOM = 1013060102;
+	/** 活动PK房间 */
+	public static final int PARTYPKROOM = 1013060103;
+	/** 奇妙广场 */
+	public static final int MARRYROOM = 1013210101;
+	/** 荣誉圣殿 */
+	public static final int HONORROOM = 1013430101;
+	/** 是否要开沉迷系统 */
+
+	public static boolean isIdcard = true;
+
+	/** 战斗加密 */ 
+	public static boolean isBattleCode = true;
+	/** 行动值新版(true:新版 false:旧版 新版有三种行动值,旧版就只有一种) */
+	public static boolean isActivePoint = true;
+	/** 字体版本 */
+	public static final String SIMPLE = "simple";
+	public static final String COMPLEX = "complex";
+	/** 服务器的字体版本 */
+	public static String fontVer = SIMPLE;
+	
+	private static DataFactory df = null;
+	
+	private static HashMap datasMap = new HashMap(1000);
+	
+	public static int answerNpc;
+
+	private DataFactory()
+	{
+	}
+	
+	public static DataFactory getInstance()
+	{
+		if(df == null)
+			df = new DataFactory();
+		return df;
+	}
+	
+	public GameObject getGameObject(int id)
+	{
+		return (GameObject)datasMap.get(id);
+	}
+
+	public void putGameObject(GameObject obj)
+	{
+		datasMap.put(obj.id, obj); 
+	}
+	
+	public void setRoomObject(GameObject obj)
+	{
+		datasMap.remove(obj);
+		datasMap.put(obj.id, obj);
+	}
+	
+
+	/** 玩家出生 */
+	public final static int ATTACH_NATIVITY = 1;
+	
+	/** 玩家升级经验计算 */
+	public final static int ATTACH_EXP = 2;
+	
+	/** 宠物升级经验计算 */
+	public final static int ATTACH_PET_EXP = 3;
+	
+	/** NPC传送配置 */
+	public final static int ATTACH_NPC_FLYER = 4;
+	
+	/** 邮件提醒 */
+	public final static int ATTACH_MAILREMIND = 5;
+	
+	/** GM命令使用人员列表 */
+	public final static int GMPROCESS_LIST = 6;
+	
+	/** 宠物出行规则 */
+	public final static int PET_TRAIN_LIST = 7;
+	
+	/** 宠物语言 */
+	public final static int PET_WORDS_LIST = 8;
+	
+	/** 不公告显示的物品列表 */
+	public final static int NO_NOTICE_LIST = 9;
+	
+	/** 副本列表 */
+	public final static int COPY_LIST = 10;
+	
+	/** 奖励列表 */
+	public final static int REWARDSENDER_LIST = 11;
+	
+	/** 结婚规则 */
+	public final static int MARRY_ROLE = 12;
+	
+	/** 转生规则 */
+	public final static int UP_ROLE = 13;
+	
+	/** 房间进入的时间限制 */
+	public final static int TIME_CONDITION = 14;
+	
+	/** 新手泡跑答题 */
+	public final static int GUIDE_ANSWER = 15;
+	
+	/** 普通抽奖(炼金术)规则 */
+	public final static int GOLD_BOX = 16;
+	
+	/** 简体字库 */
+	public final static int SIMPLE_FONT = 17;
+	
+	/** 繁体字库 */
+	public final static int COMPLEX_FONT = 18;
+	
+	/** 黄金斗士规则 */
+	public final static int GOLD_PARTY = 19;
+	
+	private static HashMap attachMap = new HashMap(500);
+	
+	public void putAttachment(int attachType,Object obj)
+	{
+		attachMap.put(attachType, obj);
+	}
+	
+	public Object getAttachment(int attachType)
+	{
+		return attachMap.get(attachType);
+	}
+	
+	public GoldParty getGoldPartyByLevel(int level)
+	{
+		List list = (List) DataFactory.getInstance().getAttachment(GOLD_PARTY);
+		if(list == null)
+			return null;
+		for (int i = 0; i < list.size(); i++)
+		{
+			GoldParty gp = (GoldParty) list.get(i);
+			if(gp.level == level)
+				return gp;
+		}
+		return null;
+	}
+	
+	public GoldParty getGoldPartyByRoom(int roomId)
+	{
+		List list = (List) DataFactory.getInstance().getAttachment(GOLD_PARTY);
+		if(list == null)
+			return null;
+		for (int i = 0; i < list.size(); i++)
+		{
+			GoldParty gp = (GoldParty) list.get(i);
+			if(gp.roomIds == null)
+				continue;
+			for (int j = 0; j < gp.roomIds.length; j++)
+			{
+				if(gp.roomIds[j] == roomId)
+					return gp;
+			}
+		}
+		return null;
+	}
+	
+	public GoldBox getAwardType()
+	{
+		List list = (List)DataFactory.getInstance().getAttachment(GOLD_BOX);
+		if(list == null)
+			return null;
+		int rate = 0;
+		int cr = (int) (Math.random() * 10000) + 1;
+		for (int i = 0; i < list.size(); i++) 
+		{
+			GoldBox at = (GoldBox) list.get(i);
+			rate += at.rate;
+			if(cr <= rate)
+			{
+				return at;
+			}
+		}
+		return null;
+	}
+	
+	public Guide getGuideByLevel(int step)
+	{
+		List list = (List)DataFactory.getInstance().getAttachment(GUIDE_ANSWER);
+		if(list == null)
+			return null;
+		for (int i = 0; i < list.size(); i++)
+		{
+			Guide guide = (Guide) list.get(i);
+			if(guide.step == step)
+				continue;
+		}
+		return null;
+	}
+	
+	public Guide getGuideById(int id)
+	{
+		List list = (List)DataFactory.getInstance().getAttachment(GUIDE_ANSWER);
+		if(list == null)
+			return null;
+		for (int i = 0; i < list.size(); i++)
+		{
+			Guide guide = (Guide) list.get(i);
+			if(guide.id == id)
+				return guide;
+		}
+		return null;
+	}
+	
+	public UpRole getUpRoleByPlayer(int type,int job)
+	{
+		if(type == 0)
+			return null;
+		List list = (List) getAttachment(UP_ROLE);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			UpRole ur = (UpRole)list.get(i);
+			if(ur.type == type && ur.job == job)
+				return ur;
+		}
+		return null;
+	}
+	
+	public GoodsMarry getGoodsMarryByGoodsId(int goodsId)
+	{
+		List list = (List) getAttachment(MARRY_ROLE);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			GoodsMarry gm = (GoodsMarry)list.get(i);
+			if(gm.goodsId == goodsId)
+				return gm;
+		}
+		return null;
+	}
+	
+	
+	public CopyController getCopyByArea(int areaId)
+	{
+		List list = (List) getAttachment(COPY_LIST);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			CopyController cpc = (CopyController) list.get(i);
+			if(cpc.areaId == areaId)
+				return cpc;
+		}
+		return null;
+	}
+	
+	public CopyController getCopyByNum(int num)
+	{
+		List list = (List) getAttachment(COPY_LIST);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			CopyController cpc = (CopyController) list.get(i);
+			if(i == num)
+				return cpc;
+		}
+		return null;
+	}
+	
+	public CopyController getCopyById(int id)
+	{
+		List list = (List) getAttachment(COPY_LIST);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			CopyController cpc = (CopyController) list.get(i);
+			if(cpc.id == id)
+				return cpc;
+		}
+		return null;
+	}
+	
+	public int getCopyNum(int areaId)
+	{
+		List list = (List) getAttachment(COPY_LIST);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			CopyController cpc = (CopyController) list.get(i);
+			if(cpc.areaId == areaId)
+				return i;
+		}
+		return -1;
+	}
+	
+	private List skillList = new ArrayList(500);
+	
+	public void addSkill(Skill skill)
+	{
+		skillList.add(skill);
+	}
+	
+	public List getSkillList()
+	{
+		return skillList;
+	}
+	
+	private List petSkillList = new ArrayList(100);
+	
+	public void addPetSkill(Skill skill)
+	{
+		petSkillList.add(skill);
+	}
+	
+	public List getPetSkillList()
+	{
+		return petSkillList;
+	}
+	
+	private List boxDropPropList = new ArrayList();
+	
+	public void addBoxDropProp(BoxDropProp bdp)
+	{
+		boxDropPropList.add(bdp);
+	}
+	
+	public List getBoxDropPropList()
+	{
+		return boxDropPropList;
+	}
+	
+	public BoxDropProp getBDP(int id)
+	{
+		for (int i = 0; i < boxDropPropList.size(); i++) 
+		{
+			BoxDropProp bdp = (BoxDropProp) boxDropPropList.get(i);
+			if(bdp == null)
+				continue;
+			if(bdp.id == id)
+				return bdp;
+		}
+		return null;
+	}
+	
+	/** 类型为1的题 */
+	public final static int TYPE_ONE_QUESTION = 1;
+	/** 类型为2的题 */
+	public final static int TYPE_TWO_QUESTION = 2;
+	/** 类型为3的题 */
+	public final static int TYPE_THREE_QUESTION = 3;
+	/** 类型为4的题 */
+	public final static int TYPE_FOUR_QUESTION = 4;
+	
+	public HashMap questionMap = new HashMap();
+	public void addAnswerObject(int type,Object obj)
+	{
+		questionMap.put(type, obj);
+	}
+	
+	public Object getAnswerObject(int type)
+	{
+		return questionMap.get(type);
+	}
+	
+	public Question getQuestionFromGuide(int id)
+	{
+		List questionList = (List) DataFactory.getInstance().getAnswerObject(DataFactory.TYPE_FOUR_QUESTION);
+	    for (int i = 0; i < questionList.size(); i++)
+	    {
+	    	Question q = (Question) questionList.get(i);
+			if(q.id == id)
+				return q;
+		}
+	    return null;
+	}
+	
+	public List questions = new ArrayList();
+	public void addQuestion(Question question)
+	{
+		questions.add(question);
+	}
+	public List getQuestionList()
+	{
+		return questions;
+	}
+	public Question getQuestion(int id)
+	{
+		for (int i = 0; i < questions.size(); i++) 
+		{
+			Question q = (Question) questions.get(i);
+			if(q.id == id)
+				return q;
+		}
+		return null;
+	}
+	
+	public List answerRewardList = new ArrayList();
+	public void addARList(AnswerReward ar)
+	{
+		answerRewardList.add(ar);
+	}
+	public List getAnswerRewardList()
+	{
+		return answerRewardList;
+	}
+	public AnswerReward getAnswerReward(int level)
+	{
+		for (int i = 0; i < answerRewardList.size(); i++) 
+		{
+			AnswerReward ar = (AnswerReward) answerRewardList.get(i);
+			if(level >= ar.minLevel && level <= ar.maxLevel)
+			{
+				return ar;
+			}
+		}
+		return null;
+	}
+	public AnswerReward getAnswerReward(int min,int max)
+	{
+		for (int i = 0; i < answerRewardList.size(); i++) 
+		{
+			AnswerReward ar = (AnswerReward) answerRewardList.get(i);
+			if(min == ar.minLevel && max == ar.maxLevel)
+			{
+				return ar;
+			}
+		}
+		return null;
+	}
+	
+	public List rankRewards = new ArrayList(13);
+	public void addRankRewards(RankReward rr)
+	{
+		rankRewards.add(rr);
+	}
+	public List getRankRewards()
+	{
+		return rankRewards;
+	}
+	public RankReward getRankReward(int type,int rank)
+	{
+		for (int i = 0; i < rankRewards.size(); i++)
+		{
+			RankReward rp = (RankReward) rankRewards.get(i);
+			if(rp.type == type && rp.rank == rank)
+				return rp;
+		}
+		return null;
+	}
+	
+	
+	public Goods[] makeGoods(int goodsId,int count)
+	{
+		return makeGoods(goodsId,count,0);
+	}
+	
+	public Goods[] makeGoods(int goodsId)
+	{
+		Object obj = DataFactory.getInstance().getGameObject(goodsId);
+		if(!(obj instanceof Goods) || obj == null)
+		{
+			System.out.println("DataFactory error no count id:"+goodsId);
+			return null;
+		}
+		Goods goods = (Goods) obj;
+		if(goods instanceof GoodsEquip)
+		{
+			return makeGoods(goodsId,1,((GoodsEquip) goods).taskColor);
+		}
+		else
+		{
+			return makeGoods(goodsId,1,0);
+		}
+	}
+	
+	public Goods[] makeGoods(int goodsId,int count,int quality)
+	{
+		Object obj = DataFactory.getInstance().getGameObject(goodsId);
+		if(!(obj instanceof Goods) || obj == null)
+		{
+			System.out.println("DataFactory error id:"+goodsId);
+			return null;
+		}
+		Goods[] goodsList = null;
+		Goods goods = (Goods) obj;
+		Goods newGoods = null;
+		if(goods instanceof GoodsEquip)
+		{
+			goodsList = new Goods[count];
+			for (int i = 0; i < count; i++)
+			{
+				newGoods = ((GoodsEquip)goods).makeNewBetterEquip(quality);
+				newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+				goodsList[i] = newGoods;
+			}
+		}
+		else if(goods instanceof GoodsProp)
+		{
+			newGoods = (Goods) Goods.cloneObject(goods);
+			newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+			int number = 0;
+			if(count > newGoods.repeatNumber)
+			{
+				number = count / newGoods.repeatNumber;
+				int moreCount = count - (number * newGoods.repeatNumber);
+				if(moreCount > 0)
+				{
+					goodsList = new Goods[number+1];
+					for (int i = 0; i < goodsList.length; i++)
+					{
+						newGoods = (Goods) Goods.cloneObject(goods);
+						newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+						if(i == number)
+							newGoods.goodsCount = moreCount;
+						else
+							newGoods.goodsCount = newGoods.repeatNumber;
+						goodsList[i] = newGoods;
+					}
+				}
+				else if(moreCount == 0)
+				{
+					goodsList = new Goods[number];
+					for (int i = 0; i < number; i++)
+					{
+						newGoods = (Goods) Goods.cloneObject(goods);
+						newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+						newGoods.goodsCount = newGoods.repeatNumber;
+						goodsList[i] = newGoods;
+					}
+				}
+			}
+			else
+			{
+				goodsList = new Goods[1];
+				newGoods = (Goods) Goods.cloneObject(goods);
+				newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+				newGoods.goodsCount = count;
+				goodsList[0] = newGoods;
+			}
+		}
+		return goodsList;
+	}
+	
+	public String getPetWords(int type)
+	{
+		int t = type + 6;
+		List words = new ArrayList();
+		List list = (List) getAttachment(PET_WORDS_LIST);
+		for (int i = 0; i < list.size(); i++) 
+		{
+			PetWords pw = (PetWords) list.get(i);
+			if(pw == null)
+				continue;
+			if(pw.type == t)
+				words.add(pw.words);
+		}
+		int random = (int) (Math.random() * words.size());
+		return words.get(random).toString();
+	}
+
+	
+
+	
+	/**
+	 * 设置出生点
+	 * @param player
+	 * @return
+	 */
+	public boolean setNativity(Player player)
+	{
+		ArrayList nativitys = (ArrayList)attachMap.get(ATTACH_NATIVITY);
+		Random random = new Random();
+		XMLNode points = (XMLNode) nativitys.get(0);
+		ArrayList pointss = points.getSubNodes();
+		int index = random.nextInt(pointss.size());
+		XMLNode point = (XMLNode) pointss.get(index);
+		if(point == null)
+			return false;
+		player.worldId = Integer.parseInt(point.getAttributeValue("worldId"));
+		player.areaId= Integer.parseInt(point.getAttributeValue("areaId"));
+		player.roomId= Integer.parseInt(point.getAttributeValue("roomId"));
+		player.x = Integer.parseInt(point.getAttributeValue("x"));
+		player.y = Integer.parseInt(point.getAttributeValue("y"));
+
+		int nativitySize = nativitys.size();
+		
+		for(int i = 0 ; i < nativitySize ; i ++)
+		{
+			XMLNode anyNode = (XMLNode)nativitys.get(i);
+			
+			if(anyNode.getName().equals("points"))
+			{
+				ArrayList pointList = anyNode.getSubNodes();
+				Random ran = new Random();
+				int indexx = ran.nextInt(pointList.size());
+				XMLNode pointO = (XMLNode)pointList.get(indexx);
+				
+				if(pointO != null)
+				{
+					player.worldId = Integer.parseInt(pointO.getAttributeValue("worldId"));
+					player.areaId= Integer.parseInt(pointO.getAttributeValue("areaId"));
+					player.roomId= Integer.parseInt(pointO.getAttributeValue("roomId"));
+					player.x = Integer.parseInt(pointO.getAttributeValue("x"));
+					player.y = Integer.parseInt(pointO.getAttributeValue("y"));
+				}
+				
+//				System.out.println("创建角色世界Id:"+player.worldId);
+//				System.out.println("创建区域世界Id:"+player.areaId);
+//				System.out.println("创建房间世界Id:"+player.roomId);
+//				System.out.println("创建玩家出生点-- x:"+player.x+" y:"+player.y);
+			}
+			else if(anyNode.getName().equals("skills"))
+			{
+				ArrayList skills = anyNode.getSubNodes();
+				int size = skills.size();
+				int [] ids = new int[size];
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode skill = (XMLNode)skills.get(j);
+					ids[j] = Integer.parseInt(skill.getAttributeValue("id"));
+				}
+				//初始化技能组
+				SkillTome skillTome = (SkillTome)player.getExtPlayerInfo("skillTome");
+				skillTome.initBaseSkill(ids,player);
+			}
+			else if(anyNode.getName().equals("goods"))
+			{
+				ArrayList list = anyNode.getSubNodes();
+				int size = list.size();
+
+				Bag bag = (Bag)player.getExtPlayerInfo("bag");
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode goodsNode = (XMLNode)list.get(j);
+					int goodsId = Integer.parseInt(goodsNode.getAttributeValue("id"));
+					int goodsCount = Integer.parseInt(goodsNode.getAttributeValue("count"));
+					int bindMode = Integer.parseInt(goodsNode.getAttributeValue("bind"));
+		
+					Goods goods = (Goods)DataFactory.getInstance().getGameObject(goodsId);
+
+					if(goods == null)
+						continue;
+
+					Goods newGoods = null;
+					if(goods instanceof GoodsEquip)
+					{
+						GoodsEquip equip = (GoodsEquip) goods;
+						newGoods = equip.makeNewBetterEquip(equip.quality);
+					}
+					else if(goods instanceof GoodsProp)
+					{
+						newGoods = (Goods) Goods.cloneObject(goods);
+						newGoods.goodsCount = goodsCount;
+					}
+					
+					newGoods.bindMode = bindMode;
+					newGoods.pickUpBind();
+					newGoods.objectIndex = GameServer.getInstance().getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					
+					//System.out.println(j+"  加入背包  "+newGoods.name +"  流水号 "+newGoods.objectIndex);
+					bag.getGoodsList()[j] = newGoods;
+
+				}
+			}
+			else if(anyNode.getName().equals("petSkills"))
+			{
+//				ArrayList skills = anyNode.getSubNodes();
+//				if(skills != null)
+//				{
+//					int size = skills.size();
+//					int [] ids = new int[size];
+//					for(int j = 0 ; j < size ; j ++)
+//					{
+//						XMLNode skill = (XMLNode)skills.get(j);
+//						ids[j] = Integer.parseInt(skill.getAttributeValue("id"));
+//					}
+//					//初始化宠物技能组
+//					Pet pet = (Pet)player.getExtPlayerInfo("pet");
+//					pet.initPetSkill(ids);
+//				}
+			}
+			else if(anyNode.getName().equals("pet"))
+			{
+				ArrayList skills = anyNode.getSubNodes();
+				int size = skills.size();
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode skill = (XMLNode)skills.get(j);
+					int id = Integer.parseInt(skill.getAttributeValue("id"));
+					GoodsProp goods = (GoodsProp) DataFactory.getInstance().getGameObject(id);
+					GoodsProp prop = (GoodsProp) Goods.cloneObject(goods);
+					Pet pet = (Pet) DataFactory.getInstance().getGameObject(prop.petId);
+					Pet newPet = (Pet) Pet.cloneObject(pet);
+					prop.petIndex = GameServer.getInstance().getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					prop.objectIndex = GameServer.getInstance().getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+					newPet.objectIndex = prop.petIndex;
+					PetTome pets = (PetTome) player.getExtPlayerInfo("petTome");
+					newPet.setPlayer(player);
+					newPet.isActive = true;
+					newPet.requireExp = Pet.PETEXP;
+
+					pets.addPet(newPet);
+					Bag bag = (Bag) player.getExtPlayerInfo("bag");
+					bag.addPetEggs(prop);
+					break;
+				}
+				
+			}
+			else if(anyNode.getName().equals("giftGoods"))
+			{
+				ArrayList list = anyNode.getSubNodes();
+				int size = list.size();
+
+				Bag bag = (Bag)player.getExtPlayerInfo("bag");
+				for(int j = 0 ; j < size ; j ++)
+				{
+					XMLNode goodsNode = (XMLNode)list.get(j);
+					int goodsId = Integer.parseInt(goodsNode.getAttributeValue("id"));
+					int goodsCount = Integer.parseInt(goodsNode.getAttributeValue("count"));
+		
+					Goods[] goodsList = makeGoods(goodsId, goodsCount);
+					
+					//System.out.println(j+"  加入背包  "+newGoods.name +"  流水号 "+newGoods.objectIndex);
+					for (int k = 0; k < goodsList.length; k++)
+					{
+						if(goodsList[k] == null)
+							continue;
+						bag.addGiftGoods(goodsList[k]);
+					}
+					
+					goodsList = null;
+				}
+			}
+		}
+
+		return true;
+	}
+	
+	/**
+	 * 检测能否进入房间 房间是否有时间限制  true为可以进  false为不能进
+	 * @param id
+	 * @return
+	 */
+	public boolean checkInRoom(PlayerController target,int id)
+	{
+		Map map = (Map)getAttachment(DataFactory.TIME_CONDITION);
+		
+		if(map == null)
+			return true;
+		
+		Object obj = map.get(id+"");
+		
+		if(obj == null)
+			return true;
+		
+		String ts []= Utils.split((String)obj, ":");
+		String currTime = WorldManager.getTypeTime("yyyy-MM-dd", WorldManager.currentTime);
+		
+		for (int i = 0; i < ts.length; i++)
+		{
+			if(ts[i].trim().equals(currTime))
+			{	
+				return true;
+			}
+		}
+	
+		target.sendAlert(ErrorCode.ALERT_NOT_PARTY_TIME);
+		
+		return false;
+	}
+	
+	/**
+	 * 是否需要把玩家设置回城(在特殊时间特殊房间)
+	 * @param roomId
+	 * @return
+	 */
+	public boolean isInConPartyRoom(int roomId)
+	{
+		Map map = (Map)getAttachment(DataFactory.TIME_CONDITION);
+		
+		if(map == null)
+			return false;
+		
+		Object obj = map.get(roomId+"");
+		
+		if(obj == null)
+			return false;
+		
+		String ts []= Utils.split((String)obj, ":");
+		String currTime = WorldManager.getTypeTime("yyyy-MM-dd", WorldManager.currentTime);
+		
+		for (int i = 0; i < ts.length; i++)
+		{
+			if(ts[i].trim().equals(currTime))
+			{	
+				return false;
+			}
+		}
+	
+		return true;
+	
+	}
+}

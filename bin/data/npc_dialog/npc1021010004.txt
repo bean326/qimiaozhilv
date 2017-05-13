@@ -1,0 +1,94 @@
+<dialog>
+
+<!--该NPC名为苹果姐姐 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="100000">欢迎来到奇妙世界！</text>
+		</words>
+   		 <options>
+                 </options>
+	</s01>
+   </default>
+	<t1071010103>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1071010103">任务：我们都要幸福</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="110231">“西瓜”这个看似和自己不相称的名字，反而让我明白了，豁达的心胸，开朗的笑容，不在意浮华的表象，不受他人眼光的羁绊，就能拥有幸福。|去比基尼海滩04找苹果姐姐</text>
+			</words>
+			<options>
+				<item textId="110232" text="接受任务" command="accept:1071010103" />
+				<item textId="110233" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1100234">“西瓜”这个看似和自己不相称的名字，反而让我明白了，豁达的心胸，开朗的笑容，不在意浮华的表象，不受他人眼光的羁绊，就能拥有幸福。|去比基尼海滩04找苹果姐姐</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1071010103" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1100235">“西瓜”这个看似和自己不相称的名字，反而让我明白了，豁达的心胸，开朗的笑容，不在意浮华的表象，不受他人眼光的羁绊，就能拥有幸福。|去比基尼海滩04找苹果姐姐</text>
+			</words>
+			<options>
+				<item textId="1100236" text="完成任务" command="finish:1071010103" />
+			</options>
+		 </s03>
+   </t1071010103> 
+	<t1071010104>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1071010104">任务：宠物伙伴 </text>
+			</words>
+			<options>
+			</options>
+		</s00>
+
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="110237">你有一个蹦蹦跳跳的宠物蛋呢？好可爱啊！我曾经养过好多宠物的，可惜现在男朋友不让我养了。因为他无法理解为什么人要和宠物一起洗澡、吃饭、睡觉。|去比基尼海滩05找荔枝姐姐</text>
+			</words>
+			<options>
+				<item textId="110238" text="接受任务" command="accept:1071010104" />
+				<item textId="110239" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1100240">你有一个蹦蹦跳跳的宠物蛋呢？好可爱啊！我曾经养过好多宠物的，可惜现在男朋友不让我养了。因为他无法理解为什么人要和宠物一起洗澡、吃饭、睡觉。|去比基尼海滩05找荔枝姐姐</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1071010104" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1100241">你有一个蹦蹦跳跳的宠物蛋呢？好可爱啊！我曾经养过好多宠物的，可惜现在男朋友不让我养了。因为他无法理解为什么人要和宠物一起洗澡、吃饭、睡觉。|去比基尼海滩05找荔枝姐姐</text>
+			</words>
+			<options>
+				<item textId="1100242" text="完成任务" command="finish:1071010104" />
+			</options>
+		 </s03>
+   </t1071010104>           
+</dialog>

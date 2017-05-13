@@ -1,0 +1,2 @@
+time	account	name	level	data
+2010-12-29-10:29:35	twh11	54654	6000	¶ªÆú×·¼¦Áîx8

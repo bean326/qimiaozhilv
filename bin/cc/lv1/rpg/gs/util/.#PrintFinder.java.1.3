@@ -1,0 +1,105 @@
+package cc.lv1.rpg.gs.util;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import vin.rabbit.util.Utils;
+import cc.lv1.rpg.gs.GameServer;
+
+public class PrintFinder
+{
+	
+	private static int linecount;
+
+	private void find(File file,String key) throws Exception
+	{
+		if (file.isFile())
+		{
+			if (file.getName().endsWith("java"))
+			{
+
+				FileInputStream fis = new FileInputStream(file);
+				InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+
+				char[] b = new char[fis.available()];
+				isr.read(b);
+				String str = new String(b);
+
+				String lines[] = Utils.split(str, "\n");
+
+				for (int i = 0; i < lines.length; i++)
+				{
+						PrintFinder.linecount++;
+					  if(lines[i].indexOf("mail.setTitle(\"*") != -1)
+					  {
+						  System.err.println(file.getName() +"  "+(i+1)+" 行      "
+						  + lines[i].trim()); 
+					  }
+					
+
+/*					if (isChinese(lines[i]))
+=======
+					if(lines[i].indexOf(key) != -1)
+>>>>>>> 1.3
+					{
+						System.err.println(file.getName() + "  " + (i + 1)
+								+ " \u884C      " + lines[i].trim());
+					}*/
+				}
+			}
+		} else
+		{
+			File fs[] = file.listFiles();
+			for (int i = 0; i < fs.length; i++)
+			{
+				find(fs[i],key);
+			}
+		}
+	}
+
+	public static boolean isChinese(String strName)
+	{
+		char[] ch = strName.toCharArray();
+		for (int i = 0; i < ch.length; i++)
+		{
+			char c = ch[i];
+			if (isChinese(c) == true)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isChinese(char c)
+	{
+		Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+		if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+		|| ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+		|| ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+		|| ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+		|| ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+		|| ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public static void main(String[] args) throws Exception
+	{
+		PrintFinder pf = new PrintFinder();
+
+		String path = GameServer.getAbsolutePath();
+
+		path = path.subSequence(0, path.length() - 4) + "src";
+
+
+		String key = "copyTo";
+		pf.find(new File(path),key);
+		
+		System.out.println(PrintFinder.linecount);
+
+	}
+
+}

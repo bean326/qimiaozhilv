@@ -1,0 +1,81 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.xml.XMLNode;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.NpcDialog;
+import cc.lv1.rpg.gs.entity.impl.NPC;
+
+/**
+ * npc 控制器
+ * @author dxw
+ *
+ */
+public class NpcController extends SpriteController
+{
+	private WorldManager worldManager;
+	
+	private RoomController roomController;
+
+	private NPC npc;
+	
+	/** 每个npc 拥有个dialog对话 */
+	private NpcDialog dialog;
+	
+	public void init(XMLNode node)
+	{
+		npc = new NPC();
+		npc.id = Integer.parseInt(node.getAttributeValue("id"));
+		npc.name = node.getAttributeValue("name");
+		npc.areaId = Integer.parseInt(node.getAttributeValue("areaId"));
+		npc.roomId = Integer.parseInt(node.getAttributeValue("roomId"));
+		npc.iconId = Integer.parseInt(node.getAttributeValue("iconId"));
+		npc.modelId = Integer.parseInt(node.getAttributeValue("modeId"));
+		npc.x = Integer.parseInt(node.getAttributeValue("x"));
+		npc.y = Integer.parseInt(node.getAttributeValue("y"));
+		npc.shopId = Integer.parseInt(node.getAttributeValue("shopId"));
+		npc.script = node.getAttributeValue("script");
+	}
+	
+	@Override
+	public int getID() {
+		return npc.id;
+	}
+
+	@Override
+	public String getName() {
+		return npc.name;
+	}
+
+	@Override
+	public long getObjectIndex() {
+		return npc.objectIndex;
+	}
+	
+	public NPC getNpc()
+	{
+		return npc;
+	}
+	
+	public void setParent(RoomController roomController)
+	{
+		this.roomController = roomController;
+	}
+	
+	public void setWorld(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+	
+	public void parseDialog(XMLNode xmlDialog)
+	{
+		dialog = new NpcDialog(xmlDialog);
+		dialog.setParent(this);
+	}
+
+	/** 接收玩家和npc的互动 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		
+	}
+}

@@ -1,0 +1,2 @@
+time	account	name	level	data
+2011-02-20-17:57:35	twh33	TWH33	6000	¶ªÆú72±ä±¦Ê¯x2

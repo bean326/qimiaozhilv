@@ -1,0 +1,433 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.ByteBuffer;
+
+/**
+ * 怪物实体
+ * @author dxw
+ *
+ */
+public class Monster extends NPC
+{
+
+	/** 怪物种类 0：人 1：兽 2：鬼 3：妖 4：仙 5：魔 6：神 */
+	public int type;
+	
+	/** 逻辑分类 1：普通怪 2：回城BOSS */
+	public int logicType;
+	
+	/** 体型 0小体型 1中体型(打死后要上电视) */
+	public int bodyType;
+	
+	/** 经验值 */
+	public int experience;
+	
+	/** 最小物理攻击 */
+	public int minForceAttack;
+	
+	/** 最大物理攻击 */
+	public int maxForceAttack;
+	
+	/** 最小精神攻击 */
+	public int minIFAttack;
+	
+	/** 最大精神攻击 */
+	public int maxIFAttack;
+	
+	/** 物理防御 */
+	public int forceDefense;
+	
+	/** 精神防御 */
+	public int IFDefense;
+	
+	/** 命中 */
+	public int chanceToHit;
+	
+	/** 回避 */
+	public int chanceToDodge;
+	
+	/** 精神抵抗 */
+	public double IFResistance;
+	
+	/** 经验获取等级 */
+	public int expLevel;
+	
+	/** 效果ID */
+	public int effectDisplayID;
+	
+	/** 掉落组编号 */
+	public int normalDropRate;
+	
+	/** 任务掉宝组 */
+	public int questDropRate;
+	
+	
+	/**
+	 * 物理减伤比
+	 */
+	public double phsHitRate;
+	
+	/**
+	 * 精神减伤比
+	 */
+	public double sptHitRate;
+	
+	/** cd 时间*/
+	public int speed = 5000;
+	
+	/** 事件值 每个怪物打死了过后都把值给主角的事件值加上 */
+	public int eventPoint;
+	
+	/** 宝箱ID(对应怪物死了后要送给玩家哪个宝箱) */
+	public int boxId;
+	
+	private MonsterAI monsterAI;
+	
+	private MonsterDropProp monsterDropProp;
+	
+	private MonsterDropProp taskDropProp;
+	
+	/** 攻击忽视防御() */
+	private boolean noDefAtt = false;
+	
+	
+	public void copyTo(GameObject dest)
+	{
+		super.copyTo(dest);
+		
+		Monster monster = (Monster) dest;
+		monster.type = type;
+		monster.logicType = logicType;
+		monster.bodyType = bodyType;
+		monster.experience = experience;
+		monster.minForceAttack = minForceAttack;
+		monster.maxForceAttack = maxForceAttack;
+		monster.minIFAttack = minIFAttack;
+		monster.maxIFAttack = maxIFAttack;
+		monster.forceDefense = forceDefense;
+		monster.IFDefense = IFDefense;
+		monster.chanceToHit = chanceToHit;
+		monster.chanceToDodge = chanceToDodge;
+		monster.expLevel = expLevel;
+		monster.effectDisplayID = effectDisplayID;
+		monster.normalDropRate = normalDropRate;
+		monster.questDropRate = questDropRate;
+		monster.phsHitRate = phsHitRate;
+		monster.sptHitRate = sptHitRate;
+		monster.speed = speed;
+		monster.eventPoint = eventPoint;
+		monster.boxId = boxId;
+		
+		monster.monsterAI = monsterAI;
+		monster.monsterDropProp = monsterDropProp;
+		monster.taskDropProp = taskDropProp;
+	}
+	
+	public boolean setVariable(String key, String value)
+	{
+		if(key.equals("IFResistance"))
+		{
+			IFResistance = Double.parseDouble(value);
+			return true;
+		}
+		else if(key.equals("battleMaxHP"))
+		{
+			maxHitPoint = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("battleMaxMP"))
+		{
+			maxMagicPoint = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("sptAtt"))
+		{
+			minIFAttack = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("phsAtt"))
+		{
+			minForceAttack = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("sptDef"))
+		{
+			IFDefense = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("phsDef"))
+		{
+			forceDefense = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("hit"))
+		{
+			chanceToHit = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("avoidance"))
+		{
+			chanceToDodge = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("speed"))
+		{
+			speed = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("currentHP"))
+		{
+			return true;
+		}
+		else if(key.equals("currentMP"))
+		{
+			return true;
+		}
+		else if(key.equals("boxId"))
+		{
+			boxId = Integer.parseInt(value);
+			return true;
+		}
+		else if(key.equals("phsSmiteRate"))
+		{
+			return true;
+		}
+		else if(key.equals("phySmiteRate"))
+		{
+			return true;
+		}
+		else if(key.equals("sptSmiteRate"))
+		{
+			return true;
+		}
+		else if(key.equals("phySmiteHurtParm"))
+		{
+			return true;
+		}
+		else if(key.equals("sptSmiteHurtParm"))
+		{
+			return true;
+		}
+		else if(key.equals("wisdom"))
+		{
+			return true;
+		}
+		else if(key.equals("spirit"))
+		{
+			return true;
+		}
+		else if(key.equals("nimble"))
+		{
+			return true;
+		}
+		else if(key.equals("power"))
+		{
+			return true;
+		}
+		else if(key.equals("physique"))
+		{
+			return true;
+		}
+		else
+		{
+			return super.setVariable(key, value);
+		}
+		
+		
+	}
+	
+	
+	public String getVariable(String key)
+	{
+		if(key.equals("battleMaxHP"))
+		{
+			return maxHitPoint+"";
+		}
+		else if(key.equals("battleMaxMP"))
+		{
+			return maxMagicPoint+"";
+		}
+		else if(key.equals("sptAtt"))
+		{
+			return minIFAttack+"";
+		}
+		else if(key.equals("phsAtt"))
+		{
+			return minForceAttack+"";
+		}
+		else if(key.equals("sptDef"))
+		{
+			return IFDefense+"";
+		}
+		else if(key.equals("phsDef"))
+		{
+			return forceDefense+"";
+		}
+		else if(key.equals("hit"))
+		{
+			return chanceToHit+"";
+		}
+		else if(key.equals("avoidance"))
+		{
+			return chanceToDodge+"";
+		}
+		else if(key.equals("speed"))
+		{
+			return speed+"";
+		}
+		else if(key.equals("phsSmiteRate"))
+		{
+			return "0";
+		}
+		else if(key.equals("phySmiteRate"))
+		{
+			return "0";
+		}
+		else if(key.equals("sptSmiteRate"))
+		{
+			return "0";
+		}
+		else if(key.equals("phySmiteHurtParm"))
+		{
+			return "0";
+		}
+		else if(key.equals("sptSmiteHurtParm"))
+		{
+			return "0";
+		}
+		else if(key.equals("wisdom"))
+		{
+			return "0";
+		}
+		else if(key.equals("spirit"))
+		{
+			return "0";
+		}
+		else if(key.equals("nimble"))
+		{
+			return "0";
+		}
+		else if(key.equals("power"))
+		{
+			return "0";
+		}
+		else if(key.equals("physique"))
+		{
+			return "0";
+		}
+		else if(key.equals("currentHP"))
+		{
+			return hitPoint+"";
+		}
+		else if(key.equals("currentMP"))
+		{
+			return magicPoint+"";
+		}
+		return "";
+	}
+	
+	public void readFrom(ByteBuffer buffer)
+	{
+		super.readFrom(buffer);
+		
+		type = buffer.readByte();
+		logicType = buffer.readByte();
+		bodyType = buffer.readByte();
+		experience = buffer.readInt();
+		minForceAttack = buffer.readInt();
+		maxForceAttack = buffer.readInt();
+		minIFAttack = buffer.readInt();
+		maxIFAttack = buffer.readInt();
+		forceDefense = buffer.readInt();
+		IFDefense = buffer.readInt();
+		chanceToHit = buffer.readInt();
+		chanceToDodge = buffer.readInt();
+		expLevel = buffer.readInt();
+		effectDisplayID = buffer.readInt();
+		normalDropRate = buffer.readInt();
+		questDropRate = buffer.readInt();
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		super.writeTo(buffer);
+		buffer.writeByte(type);
+		buffer.writeByte(logicType);
+		buffer.writeByte(bodyType);
+		buffer.writeInt(experience);
+		buffer.writeInt(minForceAttack);
+		buffer.writeInt(maxForceAttack);
+		buffer.writeInt(minIFAttack);
+		buffer.writeInt(maxIFAttack);
+		buffer.writeInt(forceDefense);
+		buffer.writeInt(IFDefense);
+		buffer.writeInt(chanceToHit);
+		buffer.writeInt(chanceToDodge);
+		buffer.writeInt(expLevel);
+		buffer.writeInt(effectDisplayID);
+		buffer.writeInt(normalDropRate);
+		buffer.writeInt(questDropRate);
+	}
+	
+	public void writeBattleTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(id);
+		buffer.writeUTF(name);
+		buffer.writeInt(iconId);
+		buffer.writeInt(modelId);
+		buffer.writeInt(modelMotionId);
+		buffer.writeInt(level);
+		buffer.writeInt(hitPoint);
+		buffer.writeInt(maxHitPoint);
+		buffer.writeInt(magicPoint);
+		buffer.writeInt(maxMagicPoint);
+		buffer.writeByte(0);
+	}
+
+	public void updateMoreValue()
+	{
+//		phsHitRate = (double)forceDefense/(double)(forceDefense+8020);
+//		sptHitRate = (double)IFDefense/(double)(IFDefense+8020);
+		phsHitRate = (double)forceDefense / 10000;
+		sptHitRate = (double)IFDefense / 10000;
+	}
+	
+	
+	
+	public MonsterAI getMonsterAI() 
+	{
+		return monsterAI;
+	}
+
+	public void setMonsterAI(MonsterAI monsterAI)
+	{
+		this.monsterAI = monsterAI;
+	}
+
+	public MonsterDropProp getMonsterDropProp() {
+		return monsterDropProp;
+	}
+
+	public void setMonsterDropProp(MonsterDropProp monsterDropProp) {
+		this.monsterDropProp = monsterDropProp;
+	}
+
+	public MonsterDropProp getTaskDropProp() {
+		return taskDropProp;
+	}
+
+	public void setTaskDropProp(MonsterDropProp taskDropProp) {
+		this.taskDropProp = taskDropProp;
+	}
+
+	public void setNoDefAtt(boolean flag)
+	{
+		noDefAtt = flag;
+	}
+	
+	public boolean isNoDefAtt()
+	{
+		return noDefAtt;
+	}
+}

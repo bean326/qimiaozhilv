@@ -1,0 +1,856 @@
+package cc.lv1.rpg.gs.entity;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Mail;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+/**
+ * 交易中心
+ * @author dxw
+ *
+ */
+public class ShopCenter implements vin.rabbit.comm.i.IDatabaseHandle
+{
+	
+	private static int MAX = 2000;
+	
+	private static final int PAGECOUNT = 0x0A;
+	
+	private static final int BASEQUERY = 0x01;
+	
+	private static final int ADD = 0x02;
+
+	private static final int GET = 0x03;
+	
+	private static final int CANCEL = 0x04;
+	
+	private static final int MYLIST = 0x05;
+	
+	private static final int GETINFO = 0x06;
+	
+	private static final int GOODS_NOHAS = 0x07;
+	
+	private static ShopCenter sc;
+	
+	/** 0：通用1：士兵 2：运动员 3：医护人员 4：超能力者5：军官 6：特种兵 7：足球运动员 8： 篮球运动员9：医生10：护士11：超人12：赌圣
+	 *  武器0，头盔1，上衣2，裤子3，鞋4，护腕5，手套6，饰品7（项链，戒指，装饰）equipCount
+	 */
+	private int [][] jobsCount = new int[13][8];
+	
+	/**
+	 * 饰品数量
+	 */
+	private int adornmentCount;
+	
+	/**
+	 * 道具数量
+	 */
+	private int otherCount;
+	
+	/**
+	 * 中心正在销售的道具
+	 */
+	private ArrayList centerGoods = new ArrayList(500);
+	
+/*	*//**
+	 * 中心已卖出的道具
+	 *//*
+	private ArrayList saledGoods = new ArrayList(500);
+	
+	*//**
+	 * 中心已过期的道具
+	 *//*
+	private ArrayList overdueGoods = new ArrayList(1000);*/
+	
+	private ShopCenter()
+	{
+	}
+	
+	public static ShopCenter getInstance()
+	{
+		if(sc == null)
+			sc = new ShopCenter();
+		return sc;
+	}
+	
+	
+	public boolean isShopFull()
+	{
+		return centerGoods.size() > MAX;
+	}
+
+	
+	public void loadFrom(ByteBuffer buffer)
+	{
+		for (int i = 0; i < 13; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				buffer.readInt();
+				//jobsCount[i][j] = buffer.readInt();
+			}
+		}
+		//otherCount = buffer.readInt();
+		
+		long timeMillis = System.currentTimeMillis();
+		
+		int count = buffer.readInt();
+	
+		for (int i = 0; i < count; i++)
+		{
+			CenterGoods cg = new CenterGoods();
+			cg.setTimer(timeMillis);
+			cg.loadFrom(buffer);
+			
+			centerGoods.add(cg);
+			
+			onAddOrRemove(cg, true);
+		}
+		
+/*		count = buffer.readInt();
+		
+		for (int i = 0; i < count; i++)
+		{
+			CenterGoods cg = new CenterGoods();
+			cg.setTimer(timeMillis);
+			cg.loadFrom(buffer);
+			saledGoods.add(cg);
+		}
+		
+		count = buffer.readInt();
+		
+		for (int i = 0; i < count; i++)
+		{
+			CenterGoods cg = new CenterGoods();
+			cg.setTimer(timeMillis);
+			cg.loadFrom(buffer);
+			overdueGoods.add(cg);
+		}*/
+		
+	}
+
+	
+	public void saveTo(ByteBuffer buffer)
+	{
+		for (int i = 0; i < 13; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				buffer.writeInt(jobsCount[i][j]);
+			}
+		}
+		buffer.writeInt(otherCount);
+
+		
+		int count = centerGoods.size();
+		buffer.writeInt(count);
+		
+		for (int i = 0; i < count; i++)
+		{
+			CenterGoods cg = (CenterGoods)centerGoods.get(i);
+			cg.saveTo(buffer);
+		}
+		
+/*		count = saledGoods.size();
+		buffer.writeInt(count);
+		
+		for (int i = 0; i < count; i++)
+		{
+			CenterGoods cg = (CenterGoods)saledGoods.get(i);
+			cg.saveTo(buffer);
+		}
+		
+		count = overdueGoods.size();
+		buffer.writeInt(count);
+		
+		for (int i = 0; i < count; i++)
+		{
+			CenterGoods cg = (CenterGoods)overdueGoods.get(i);
+			cg.saveTo(buffer);
+		}*/
+		
+	}
+
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		ByteBuffer buffer = msg.getBuffer();
+		int type = buffer.readByte();	//1 查询 , 2 增加  //3 取得
+		
+		if(type == BASEQUERY)
+		{
+			centerQuery(target,buffer);
+		}
+		else if(type == ADD)
+		{
+			addGoodsToCenter(target,buffer);
+		}
+		else if(type == GET)
+		{
+			getGoodsFromCenter(target,buffer);
+		}
+		else if(type == CANCEL)
+		{
+			cancelGoodsFromCenter(target,buffer);
+		}
+		else if(type == MYLIST)
+		{
+			queryMyList(target,buffer);
+		}
+		else if(type == GETINFO)
+		{
+			getGoodsInfo(target,buffer);
+		}
+	}
+
+	private void getGoodsInfo(PlayerController target, ByteBuffer buffer)
+	{
+
+		long objectIndex = 0;
+		
+		try
+		{
+			objectIndex = Long.parseLong(buffer.readUTF());//流水号
+		}
+		catch(NumberFormatException e)
+		{
+			System.out.println("NumberFormatException ShopCenter getGoodsInfo");
+			return;
+		}
+		
+		CenterGoods cg = getCenterGoodsByObjectIndex(objectIndex);
+		
+		if(cg == null)
+		{
+			buffer = new ByteBuffer(16);
+			buffer.writeByte(GOODS_NOHAS);
+			buffer.writeUTF(objectIndex+"");
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+			return;
+		}
+		
+
+		buffer = new ByteBuffer(64);
+		buffer.writeByte(GETINFO);
+		cg.getGoods().writeTo(buffer);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+		buffer = null;
+	}
+
+	private void queryMyList(PlayerController target, ByteBuffer buffer)
+	{
+		
+		buffer = new ByteBuffer(256);
+		
+		int size = centerGoods.size();
+		int count = 0;
+		
+		for (int i = 0; i < size; i++)
+		{
+			CenterGoods cg = (CenterGoods)centerGoods.get(i);
+			
+			if(cg.getAccountName().equals(target.getPlayer().accountName))
+			{
+				Goods g = cg.getGoods();
+				buffer.writeInt(g.id);
+				buffer.writeInt(g.iconId);
+				buffer.writeUTF(g.name);
+				buffer.writeUTF(g.objectIndex+"");
+				buffer.writeInt(g.level);
+				buffer.writeInt(g.goodsCount);
+				buffer.writeUTF(cg.getName());
+				buffer.writeInt(cg.getPoint());
+				buffer.writeByte(cg.getTimeHour());	
+				count++;
+			}
+		}
+		target.centerGoodsCount = count;
+		
+		ByteBuffer sendBuffer = new ByteBuffer(buffer.available()+5);
+		sendBuffer.writeByte(MYLIST);
+		sendBuffer.writeInt(count);
+		sendBuffer.writeBytes(buffer.getBytes());
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,sendBuffer));
+		buffer = null;
+	}
+
+	private void cancelGoodsFromCenter(PlayerController target,
+			ByteBuffer buffer)
+	{
+		long objectIndex = 0;
+		
+		try
+		{
+			objectIndex = Long.parseLong(buffer.readUTF());//流水号
+		}
+		catch(NumberFormatException e)
+		{
+			System.out.println("NumberFormatException ShopCenter getGoodsFromCenter");
+			return;
+		}
+		
+		CenterGoods cg = getCenterGoodsByObjectIndex(objectIndex);
+		
+		if(cg == null)
+		{
+			target.sendError("寄卖中心没有该物品");
+			return;
+		}
+		
+		if(!(target.getPlayer().accountName.equals(cg.getAccountName())))
+		{
+			//target.sendError("这件物品不是你的");
+			return;
+		}
+		
+		Bag bag = (Bag)target.getPlayer().getExtPlayerInfo("bag");
+		
+		if(bag.isBagFull())
+		{
+			target.sendError("您的背包满的");
+			return;
+		}
+/*		if(bag.point < cg.getPoint())
+		{
+			target.sendError("对不起，你的金钱不足撤销");
+			return;
+		}*/
+		bag.sendAddGoods(target, cg.getGoods());
+
+		removeToCenter(cg);
+		onAddOrRemove(cg, false);
+		
+		
+		buffer = new ByteBuffer(16);
+		buffer.writeByte(CANCEL);
+		buffer.writeUTF(objectIndex+"");
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+	}
+
+	private void getGoodsFromCenter(PlayerController target, ByteBuffer buffer)
+	{
+		long objectIndex = 0;
+		
+		try
+		{
+			objectIndex = Long.parseLong(buffer.readUTF());//流水号
+		}
+		catch(NumberFormatException e)
+		{
+			System.out.println("NumberFormatException ShopCenter getGoodsFromCenter");
+			return;
+		}
+		
+		
+		CenterGoods cg = getCenterGoodsByObjectIndex(objectIndex);
+		
+		if(cg == null)
+		{
+			buffer = new ByteBuffer(16);
+			buffer.writeByte(GOODS_NOHAS);
+			buffer.writeUTF(objectIndex+"");
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+			return;
+		}
+		
+		if(cg.getGoods() == null)
+		{
+			System.out.println("cg.getGoods() == null");
+			return;
+		}
+		
+		Bag bag = (Bag)target.getPlayer().getExtPlayerInfo("bag");
+		
+		if(bag.point < cg.getPoint())
+		{
+			target.sendError("对不起，你的金钱不足不能购买此物品");
+			return;
+		}
+		
+		if(bag.isBagFull())
+		{
+			target.sendError("你的背包空间不足");
+			return;
+		}
+		
+		bag.sendAddGoods(target, cg.getGoods());
+		bag.addMoney(target, -cg.getPoint(),0);
+		
+		onAddOrRemove(cg, false);
+		
+		removeToCenter(cg);
+		
+		
+		buffer = new ByteBuffer(16);
+		buffer.writeByte(GET);
+		buffer.writeUTF(objectIndex+"");
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+		
+		
+		WorldManager world = target.getWorldManager();
+		PlayerController seller = world.getPlayer(cg.getName());
+		
+		
+		int r = cg.getRevenue()/2;
+		r = r == 0 ? 1 : r;
+		if(seller == null)
+		{
+			//卖家不在线。写入卖家数据库
+			Mail mail = new Mail("寄卖中心");
+			mail.setTitle("卖出确认");
+			mail.setContent("您的 "+cg.getGoods().name+" 已经卖出成功 !! ");
+			mail.setPoint(cg.getPoint()+r);
+			mail.sendOffLineWithAccountName(cg.getAccountName());
+		}
+		else
+		{
+			//卖家在线直接发邮件给卖家
+			
+			Mail mail = new Mail("寄卖中心");
+			mail.setTitle("卖出确认");
+			mail.setContent("您的 "+cg.getGoods().name+" 已经卖出成功 !! ");
+			mail.setPoint(cg.getPoint()+r);
+			mail.send(seller);
+		}
+		
+	}
+
+	private void addGoodsToCenter(PlayerController target, ByteBuffer buffer)
+	{
+		
+		if(target.centerGoodsCount >= PlayerController.TOTALCENTERGOODSCOUNT)
+		{
+			target.sendError("已达到寄卖上限数量");
+			return;
+		}
+		target.centerGoodsCount++;
+
+		long objectIndex = 0;
+		
+		try
+		{
+			objectIndex = Long.parseLong(buffer.readUTF());//流水号
+		}
+		catch(NumberFormatException e)
+		{
+			System.out.println("NumberFormatException ShopCenter addGoodsToCenter");
+			return;
+		}
+		
+		int inputPoint = buffer.readInt(); //金钱
+		int timeHour = buffer.readByte(); //小时 24 48
+		
+		if(timeHour != 12 || inputPoint < 0)
+		{
+			if(timeHour != 24)
+				return;
+		}
+
+		Bag bag = (Bag)target.getPlayer().getExtPlayerInfo("bag");
+
+		Goods goods= bag.getGoodsByObjectIndex(objectIndex);
+
+		if(goods == null)
+		{
+			return;
+		}
+		
+		int count = goods.goodsCount;
+		
+		double l = timeHour == 12 ? 0.05:0.08;
+		
+
+		int p3 = (int) (goods.point * 0.3);
+		int revenue = (int) (p3* 3 * l*(double)count); 
+		revenue = revenue == 0 ? 1 : revenue;
+		
+		//System.out.println(p3 +"  " +revenue);
+
+		if(bag.point < revenue)
+		{
+			target.sendAlert(ErrorCode.ALERT_SHOP_NO_POINT);
+			return;
+		}
+		
+		if(!bag.removeGoods(target, objectIndex, count))
+			return;
+		
+		goods.goodsCount = count;//重新设定数量
+		
+		bag.addMoney(target, -revenue, 0);
+		
+		CenterGoods cg = new CenterGoods();
+		cg.setGoods(goods);
+		cg.setPlayer(target);
+		cg.setPoint(inputPoint);
+		cg.setTimeHour((byte)(timeHour-1));
+		cg.setTimer(System.currentTimeMillis());
+		cg.setRevenue(revenue);
+		 
+		addToCenter(cg);
+		
+		onAddOrRemove(cg,true);
+
+		buffer = new ByteBuffer(1);
+		buffer.writeByte(ADD);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+	}
+
+	public void addToCenter(CenterGoods cg)
+	{
+		synchronized(centerGoods)
+		{
+			centerGoods.add(cg);
+		}
+	}
+	
+	public void removeToCenter(CenterGoods cg)
+	{
+		synchronized(centerGoods)
+		{
+			centerGoods.remove(cg);
+		}
+	}
+	
+
+	/**
+	 * 增加或者减少单个的总数量
+	 * @param goods
+	 * @param b
+	 */
+	private void onAddOrRemove(CenterGoods cg,boolean b)
+	{
+		Goods goods = cg.getGoods();
+
+		if(goods.type == 1)
+		{
+			if(goods instanceof GoodsEquip)
+			{
+				GoodsEquip ge = (GoodsEquip)goods;
+				
+				/*0：通用1：士兵 2：运动员 3：医护人员 4：超能力者5：军官 6：特种兵 7：足球运动员 8： 篮球运动员9：医生10：护士11：超人12：赌圣*/
+				String jobs [] = Utils.split(ge.job, ":");
+				
+				//武器0，头盔1，上衣2，裤子3，鞋4，护腕5，手套6，饰品7（项链，戒指，装饰）equipCount
+				int equipIndex = 0;
+				if(ge.equipLocation >= 7)
+					equipIndex = 7;
+				else 
+					equipIndex = ge.equipLocation;
+				
+				
+				for (int i = 0; i < jobs.length; i++)
+				{
+					int jobIndex = Integer.parseInt(jobs[i]);
+					
+					if(b)
+						jobsCount[jobIndex][equipIndex]++;
+					else
+						jobsCount[jobIndex][equipIndex]--;
+
+				}
+			}
+		}
+		else 
+		{
+			if(b)
+				otherCount ++;
+			else
+				otherCount --;
+		}
+	}
+
+	/**
+	 * 查询客户端
+	 * @param target
+	 * @param buffer
+	 */
+	private void centerQuery(PlayerController target, ByteBuffer buffer)
+	{
+		
+		int currentPage = buffer.readInt();//客户端发送页码
+		int type = buffer.readByte(); //按类型 -1 则是无类型 0武器 1防具 2 饰品 3道具
+		
+		int size = centerGoods.size();
+
+		if(size <= 0)
+			return;
+		
+		if(type == -1)  // -1
+		{
+			//System.out.println("收到  "+type+"  页码 "+currentPage);
+			
+			int totalPage = size/PAGECOUNT;
+			totalPage += (size%PAGECOUNT != 0 ?1:0);
+
+			if(currentPage <= 0 || currentPage > totalPage)
+				return;
+			
+			buffer = new ByteBuffer(256);
+			buffer.writeByte(BASEQUERY);
+			buffer.writeByte(type);
+			buffer.writeInt(currentPage);
+			buffer.writeInt(totalPage);
+			
+			if(currentPage == totalPage)  
+				buffer.writeByte(size%PAGECOUNT);
+			else
+				buffer.writeByte(PAGECOUNT);
+			
+			for (int i = (currentPage-1)*PAGECOUNT,j = i+PAGECOUNT; i < size; i++)
+			{
+				if(i >= j)
+					break;
+				
+				CenterGoods cg = (CenterGoods)centerGoods.get(i);
+				Goods g = cg.getGoods();
+				buffer.writeInt(g.id);
+				buffer.writeInt(g.iconId);
+				buffer.writeUTF(g.name);
+				buffer.writeUTF(g.objectIndex+"");
+				buffer.writeInt(g.level);
+				buffer.writeInt(g.goodsCount);
+				buffer.writeUTF(cg.getName());
+				buffer.writeInt(cg.getPoint());
+				buffer.writeByte(cg.getTimeHour());
+			}
+		}
+		else if(type == 3) // 3道具
+		{
+			int index = buffer.readInt(); //发送index过来，下次就接着从index开始循环
+			
+			if(index >= size)
+				return;
+			
+			int blevel = buffer.readInt(); //起始物品等级
+			int elevel = buffer.readInt();
+			
+			
+			//System.out.println("收到  "+type+"  页码 "+currentPage+"  ---- 等级区间 " +blevel+"!"+elevel);
+			
+			int totalPage = otherCount/PAGECOUNT;
+			totalPage += (otherCount%PAGECOUNT != 0 ?1:0);
+	
+			buffer = new ByteBuffer(256);
+			
+			int count = 0;
+			int i = index;
+			for ( ; i < size; i++)
+			{
+				
+				CenterGoods cg = (CenterGoods)centerGoods.get(i);
+				Goods g = cg.getGoods();
+					
+				if(g.type == 1)
+					continue;
+				
+				if(g.level == 0 || g.level >= blevel && g.level <= elevel)
+				{
+					buffer.writeInt(g.id);
+					buffer.writeInt(g.iconId);
+					buffer.writeUTF(g.name);
+					buffer.writeUTF(g.objectIndex+"");
+					buffer.writeInt(g.level);
+					buffer.writeInt(g.goodsCount);
+					buffer.writeUTF(cg.getName());
+					buffer.writeInt(cg.getPoint());
+					buffer.writeByte(cg.getTimeHour());
+					
+					if(++count >= PAGECOUNT)
+					{
+						break;
+					}
+				}
+			} 
+			
+			ByteBuffer sendBuffer = new ByteBuffer();
+			sendBuffer.writeByte(BASEQUERY);
+			sendBuffer.writeByte(type);
+			sendBuffer.writeInt(currentPage);
+			sendBuffer.writeInt(totalPage);
+			
+			sendBuffer.writeInt(i);  //返回服务器用的index
+
+			sendBuffer.writeByte(count);
+			sendBuffer.writeBytes(buffer.getBytes());
+			buffer = sendBuffer;
+		}
+		else  // 0武器 1防具 2 饰品 
+		{
+
+			int index = buffer.readInt(); //发送index过来，下次就接着从index开始循环
+			
+			if(index >= size)
+				return;
+			
+			int blevel = buffer.readInt(); //起始物品等级
+			int elevel = buffer.readInt();
+			int jobIndex = buffer.readByte();	//0：通用1：士兵 2：运动员 3：医护人员 4：超能力者5：军官 6：特种兵 7：足球运动员 8： 篮球运动员9：医生10：护士11：超人12：赌圣
+			int equipIndex = buffer.readByte();  //武器0，头盔1，上衣2，裤子3，鞋4，护腕5，手套6，饰品7（项链，戒指，装饰)
+
+			//System.out.println("收到  "+type+"  页码 "+currentPage+"  ---- 等级区间 " +blevel+"!"+elevel+"  jobIndex "+jobIndex +"  equipIndex "+equipIndex);
+			
+			if(jobIndex < 0 || jobIndex > 12 || equipIndex < 0 || equipIndex > 7)
+			{
+				System.out.println(jobIndex + " -- 越界 -- "+equipIndex);
+				return;
+			}
+
+			int totalPage = jobsCount[jobIndex][equipIndex]/PAGECOUNT;
+			totalPage += (jobsCount[jobIndex][equipIndex]%PAGECOUNT != 0 ?1:0);
+			
+			//System.out.println("查询类型 "+jobIndex+" " +equipIndex +" ----------- "+jobsCount[jobIndex][equipIndex]+" "+totalPage);
+			
+			buffer = new ByteBuffer(256);
+			
+			int count = 0;
+			int i = index;
+			for ( ; i < size; i++)
+			{
+				
+				CenterGoods cg = (CenterGoods)centerGoods.get(i);
+				Goods g = cg.getGoods();
+				
+				if(g.type != 1)
+					continue;
+				
+				
+				//g.level//多少级之间的物品
+				if(g.level >= blevel && g.level <= elevel)
+				{
+					if(!(g instanceof GoodsEquip))
+						continue;
+					
+					GoodsEquip ge = (GoodsEquip)g;
+					
+					String [] jobs = Utils.split(ge.job, ":");
+					
+					boolean flag = false;
+					
+					for (int j = 0; j < jobs.length; j++)
+					{
+						int eJobIndex= Integer.parseInt(jobs[j]);
+						
+						if(eJobIndex == jobIndex)
+						{
+							int eEquipIndex = 0;
+							
+							if(ge.equipLocation >= 7)
+								eEquipIndex = 7;
+							else 
+								eEquipIndex = ge.equipLocation;
+							
+							if(eEquipIndex == equipIndex)
+							{
+								flag = true;
+								break;
+							}
+						}
+					}
+					
+					if(!flag)
+						continue;
+					
+					buffer.writeInt(g.id);
+					buffer.writeInt(g.iconId);
+					buffer.writeUTF(g.name);
+					buffer.writeUTF(g.objectIndex+"");
+					buffer.writeInt(g.level);
+					buffer.writeInt(g.goodsCount);
+					buffer.writeUTF(cg.getName());
+					buffer.writeInt(cg.getPoint());
+					buffer.writeByte(cg.getTimeHour());
+					
+					if(++count >= PAGECOUNT)
+					{
+						break;
+					}
+				}
+			}
+			
+			
+			ByteBuffer sendBuffer = new ByteBuffer();
+			sendBuffer.writeByte(BASEQUERY);
+			sendBuffer.writeByte(type);
+			sendBuffer.writeInt(currentPage);
+			sendBuffer.writeInt(totalPage);
+			
+			sendBuffer.writeInt(i);  //返回服务器用的index
+			
+			sendBuffer.writeByte(count);
+			sendBuffer.writeBytes(buffer.getBytes());
+			buffer = sendBuffer;
+		}
+
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SHOPCENTER_COMMAND,buffer));
+	}
+
+	
+	public CenterGoods getCenterGoodsByObjectIndex(long objectIndex)
+	{
+		for (int i = 0; i < centerGoods.size(); i++)
+		{
+			CenterGoods cg = (CenterGoods)centerGoods.get(i);
+			Goods g = cg.getGoods();
+			
+			if(g.objectIndex == objectIndex)
+				return cg;
+		}
+		return null;
+	}
+	
+	public void update(long timeMillis)
+	{
+		synchronized(centerGoods)
+		{
+			int size = centerGoods.size();
+			
+			for (int i = 0; i < size; i++)
+			{
+				CenterGoods cg = ((CenterGoods)centerGoods.get(i));
+				cg.update(timeMillis);
+				
+				
+				if(cg.getTimeHour() <= 0)
+				{
+					centerGoods.remove(i--);
+					size--;
+					
+					
+					WorldManager world = GameServer.getInstance().getWorldManager();
+					PlayerController seller = world.getPlayer(cg.getName());
+					
+					Utils.sleep(20);
+					
+					if(seller == null)
+					{
+						Mail mail = new Mail("寄卖系统",timeMillis);
+						mail.setTitle("寄卖中心");
+						mail.setContent("您寄卖的物品已经到期");
+						mail.addAttach(cg.getGoods());
+						mail.setPoint(cg.getRevenue());
+						mail.sendOffLineWithAccountName(cg.getAccountName());
+					}
+					else
+					{
+						Mail mail = new Mail("寄卖系统",timeMillis);
+						mail.setTitle("寄卖中心");
+						mail.setContent("您寄卖的物品已经到期");
+						mail.addAttach(cg.getGoods());
+						mail.setPoint(cg.getRevenue());
+						mail.send(seller);
+					}
+				}
+			}
+		}
+	}
+}

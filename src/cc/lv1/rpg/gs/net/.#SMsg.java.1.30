@@ -1,0 +1,444 @@
+package cc.lv1.rpg.gs.net;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+
+public class SMsg extends AppMessage
+{
+	 /** 
+	 * 登陆类型 
+	 */
+	 public static final int T_LOGIN_COMMAND = 0x00010000;  
+	 /** 登陆 */
+	 public static final int C_LOGIN_COMMAND = 0x00010001;       
+	 public static final int S_LOGIN_COMMAND = 0x00010001; 
+	 
+	 /** 创建角色 */
+	 public static final int C_CREATE_ROLE_COMMAND = 0x00010002;       
+	 public static final int S_CREATE_ROLE_COMMAND = 0x00010002;
+    
+	 /** 删除角色 */
+	 public static final int C_DELETE_ROLE_COMMAND = 0x00010003;
+	 public static final int S_DELETE_ROLE_COMMAND = 0x00010003;
+	 
+	 /** 检查重名 */
+	 public static final int C_ROLENAME_REPEAT_COMMAND = 0x00010004;
+	 public static final int S_ROLENAME_REPEAT_COMMAND = 0x00010004;
+	 
+	 /** 进入游戏 */
+	 public static final int C_PLAYER_ENTER_GAME_COMMAND = 0x00010005;
+	 public static final int S_PLAYER_ENTER_GAME_COMMAND = 0x00010005;
+	 
+	 /** heart ping */
+	 public static final int C_PLAYER_HEART_PING_COMMAND = 0x00010006;
+	 public static final int S_PLAYER_HEART_PING_COMMAND = 0x00010006;
+
+	 /**
+	  * 房间消息
+	  */
+	 public static final int T_ROOM_COMMAND = 0x00020000;
+	 /** 返回房间信息 */
+	 public static final int C_ROOM_INFO_COMMAND = 0x00020001;
+	 public static final int S_ROOM_INFO_COMMAND = 0x00020001;
+	 
+	 /** 玩家进出房间通知房间内的其他人 */
+	 public static final int C_ROOM_IO_COMMAND = 0x00020002;
+	 public static final int S_ROOM_IO_COMMAND = 0x00020002;
+	 
+	 /** 玩家进入房间 */
+	 public static final int C_ROOM_ADD_COMMAND = 0x00020003;
+	 public static final int S_ROOM_ADD_COMMAND = 0x00020003;
+	 
+	 /** 玩家离开房间 */
+	 public static final int C_ROOM_REMOVE_COMMAND = 0x00020004;
+	 public static final int S_ROOM_REMOVE_COMMAND = 0x00020004;
+	 
+	 /** 玩家请求出口并返回新房间 */
+	 public static final int C_ROOM_EXIT_COMMAND = 0x00020005;
+	 public static final int S_ROOM_EXIT_COMMAND = 0x00020005;
+	 
+	 /** Player Hit Enemy 玩家在房间请求打怪 */
+	 public static final int C_ROOM_PVE_COMMAND = 0x00020006;
+	 public static final int S_ROOM_PVE_COMMAND = 0x00020006;
+	 
+	 /** Player Hit Enemy 玩家在房间请求PK(不需要对方同意的) */
+	 public static final int C_ROOM_PVP_COMMAND = 0x00020007;
+	 public static final int S_ROOM_PVP_COMMAND = 0x00020007;
+	 
+	 /** 玩家是否在战斗 进入退出时转发给非战斗本房间非战斗玩家 */
+	 public static final int C_ROOM_PLAYER_ISBATTLE = 0x00020008;
+	 public static final int S_ROOM_PLAYER_ISBATTLE = 0x00020008;
+	 
+	 /** 玩家升级 通知当前房间内的所有玩家 */
+	 public static final int C_ROOM_PLAYER_LEVELUP = 0x00020009;
+	 public static final int S_ROOM_PLAYER_LEVELUP = 0x00020009;
+	 
+	 /** 房间是否隐藏怪物组 */
+	 public static final int C_ROOM_VISIBLE_MG = 0x00020010;
+	 public static final int S_ROOM_VISIBLE_MG = 0x00020010;
+	 
+	 
+	 /** 更新战斗内玩家改变的状况
+	  * 当战斗结束后发送请求获取当前玩家的变量信息
+	  *  */
+	 public static final int C_ROOM_PLAYER_UPDATE_PLAYER = 0x00020011;
+	 public static final int S_ROOM_PLAYER_UPDATE_PLAYER = 0x00020011;
+	 
+	 
+	 /**
+	  * 请求当前房间可接任务的npc
+	  */
+	 public static final int C_ROOM_GET_ROOM_TASKS = 0x00020012;
+	 public static final int S_ROOM_GET_ROOM_TASKS = 0x00020012;
+	 
+	 /** 
+	  * 玩家类型
+	  */
+	 public static final int T_PLAYER_COMMAND = 0x00030000;  
+	 /** 返回玩家信息 */
+	 public static final int C_PLAYER_INFO_COMMAND = 0x00030001;
+	 public static final int S_PLAYER_INFO_COMMAND = 0x00030001;
+	 
+	 /** 玩家移动信息(键盘) */
+	 public static final int C_PLAYER_ONKEYMOVE_COMMAND = 0x00030003;
+	 public static final int S_PLAYER_ONKEYMOVE_COMMAND = 0x00030003;
+	 
+	 /** 玩家移动信息(鼠标) */
+	 public static final int C_PLAYER_ONMOUSEMOVE_COMMAND = 0x00030004;
+	 public static final int S_PLAYER_ONMOUSEMOVE_COMMAND = 0x00030004;
+	 
+	 /** 查看玩家装备面板 */
+	 public static final int C_GET_PLAYER_EQUIPSET_COMMAND = 0x00030005;
+	 public static final int S_GET_PLAYER_EQUIPSET_COMMAND = 0x00030005;
+
+	 /** 取得tasks */
+	 public static final int C_GET_TASKS_COMMAND = 0x00030006;
+	 public static final int S_GET_TASKS_COMMAND = 0x00030006;
+	 
+	 /** 取消玩家的某个任务 */
+	 public static final int C_CANCEL_TASKS_COMMAND = 0x00030007;
+	 public static final int S_CANCEL_TASKS_COMMAND = 0x00030007;
+	 
+	 /** 玩家请求组队 */
+	 public static final int C_PLAYER_REQUEST_TEAM_COMMAND = 0x00030008;
+	 public static final int S_PLAYER_REQUEST_TEAM_COMMAND = 0x00030008;
+	 
+	 /** 加入队伍 */
+	 public static final int C_ADD_TEAM_COMMAND = 0x00030009;
+	 public static final int S_ADD_TEAM_COMMAND = 0x00030009;
+	 
+	 /** 聊天 */
+	 public static final int C_CHAT_COMMAND = 0x00030010;
+	 public static final int S_CHAT_COMMAND = 0x00030010;
+	 
+	 /** 取得技能 消息*/
+	 public static final int C_GET_SKILL_COMMAND = 0x00030011;
+	 public static final int S_GET_SKILL_COMMAND = 0x00030011;
+	 
+	 /** 玩家请求PK */
+	 public static final int C_PLAYER_REQUEST_PK_COMMAND = 0x00030012;
+	 public static final int S_PLAYER_REQUEST_PK_COMMAND = 0x00030012;
+	 
+	 /** 玩家回复PK邀请 */
+	 public static final int C_PLAYER_RESPONSE_PK_COMMAND = 0x00030013;
+	 public static final int S_PLAYER_RESPONSE_PK_COMMAND = 0x00030013;
+	 
+	 /** 玩家好友列表 */
+	 public static final int C_PLAYER_FRIENDLIST_COMMAND = 0x00030014;
+	 public static final int S_PLAYER_FRIENDLIST_COMMAND = 0x00030014;	 
+	 
+	 /** 玩家家族邀请 request */
+	 public static final int C_PLAYER_FAMILYREQUEST_COMMAND = 0x00030015;
+	 public static final int S_PLAYER_FAMILYREQUEST_COMMAND = 0x00030015;	 
+	 
+	 /** 玩家家族邀请 response */
+	 public static final int C_PLAYER_FAMILYRESPONSE_COMMAND = 0x00030016;
+	 public static final int S_PLAYER_FAMILYRESPONSE_COMMAND = 0x00030016;	
+	 
+	 /** 家族创建命令 */
+	 public static final int C_PLAYER_FAMILYCREATE_COMMAND = 0x00030017;
+	 public static final int S_PLAYER_FAMILYCREATE_COMMAND = 0x00030017;	
+	 
+	 /** 请求家族列表 */
+	 public static final int C_PLAYER_FAMILYLIST_COMMAND = 0x00030018;
+	 public static final int S_PLAYER_FAMILYLIST_COMMAND = 0x00030018;
+	 
+	 /** 族长T人 */
+	 public static final int C_PLAYER_FAMILYKICK_COMMAND = 0x00030019;
+	 public static final int S_PLAYER_FAMILYKICK_COMMAND = 0x00030019;
+	 
+	 /** 解散家族 */
+	 public static final int C_PLAYER_FAMILYREMOVE_COMMAND = 0x00030020;
+	 public static final int S_PLAYER_FAMILYREMOVE_COMMAND = 0x00030020;	
+	 
+	 /** 退出家族 */
+	 public static final int C_PLAYER_FAMILYOUT_COMMAND = 0x00030021;
+	 public static final int S_PLAYER_FAMILYOUT_COMMAND = 0x00030021;
+	 
+	 /** 族长转让 */
+	 public static final int C_PLAYER_FAMILYLEADERCHANGE_COMMAND = 0x00030023;
+	 public static final int S_PLAYER_FAMILYLEADERCHANGE_COMMAND = 0x00030023;
+	 
+	 /** 交易邀请 */
+	 public static final int C_PLAYER_BUSINESS_REQUEST_COMMAND = 0x00030024;
+	 public static final int S_PLAYER_BUSINESS_REQUEST_COMMAND = 0x00030024;
+	 
+	 /** 交易回复 */
+	 public static final int C_PLAYER_BUSINESS_RESPONSE_COMMAND = 0x00030025;
+	 public static final int S_PLAYER_BUSINESS_RESPONSE_COMMAND = 0x00030025;
+	 
+	 /** 吃药 */
+	 public static final int C_EAT_DRUG_COMMAND = 0x00030026;
+	 public static final int S_EAT_DRUG_COMMAND = 0x00030026;
+	 
+	 /** 阵营选择 */
+	 public static final int C_PLAYER_CAMP_SET_COMMAND = 0x00030027;
+	 public static final int S_PLAYER_CAMP_SET_COMMAND = 0x00030027;
+	 
+	 /** 转职 */
+	 public static final int C_PLAYER_UP_PROFESSION_COMMAND = 0x00030028;
+	 public static final int S_PLAYER_UP_PROFESSION_COMMAND = 0x00030028;
+	 
+	 /** 更新自己的属性 */
+	 public static final int C_PLAYER_UPDATE_COMMAND = 0x00030029;
+	 public static final int S_PLAYER_UPDATE_COMMAND = 0x00030029;
+	 
+	 /** 更新玩家自己的属性(左上角的属性) */
+	 public static final int C_PLAYER_ATT_UPDATE_COMMAND = 0x00030030;
+	 public static final int S_PLAYER_ATT_UPDATE_COMMAND = 0x00030030;
+	 
+	 /** 
+	  * NPC消息类型
+	  */
+	 public static final int T_NPC_COMMAND = 0x00040000;  
+	
+	 /** 请求NPC对话 */
+	 public static final int C_CLICK_NPC_COMMAND = 0x00040001;
+	 public static final int S_CLICK_NPC_COMMAND = 0x00040001;
+	 
+	 /** npc任务消息头 */
+	 public static final int C_TASK_NPC_COMMAND = 0x00040002;
+	 public static final int S_TASK_NPC_COMMAND = 0x00040002;
+
+	 /** 
+	  * 商店消息
+	  */
+	 public static final int T_SHOP_COMMAND = 0x00050000;
+	 /** 打开商店 */
+	 public static final int C_OPEN_SHOP_COMMAND = 0x00050001;
+	 public static final int S_OPEN_SHOP_COMMAND = 0x00050001;
+	 
+	 /** 购买物品 */
+	 public static final int C_BUY_GOODS_COMMAND = 0x00050002;
+	 public static final int S_BUY_GOODS_COMMAND = 0x00050002;
+	 
+	 /** 出售物品 */
+	 public static final int C_SALE_GOODS_COMMAND = 0x00050003;
+	 public static final int S_SALE_GOODS_COMMAND = 0x00050003;
+	 
+	 
+	 /**
+	  *  背包信息
+	  */
+	 public static final int T_BAG_COMMAND = 0x00060000;
+	 
+	 /** 删除背包中的物品 */
+	 public static final int C_DELETE_GOODS_FROM_BAG_COMMAND = 0x00060001;
+	 public static final int S_DELETE_GOODS_FROM_BAG_COMMAND = 0x00060001;
+	 
+	 /** 取下装备 */
+	 public static final int C_TAKE_OFF_EQUIP_COMMAND = 0x00060003;
+	 public static final int S_TAKE_OFF_EQUIP_COMMAND = 0x00060003;
+	 
+	 /** 穿上装备 */
+	 public static final int C_PUT_ON_EQUIP_COMMAND = 0x00060004;
+	 public static final int S_PUT_ON_EQUIP_COMMAND = 0x00060004;
+	 
+	 /** 使用物品 */
+	 public static final int C_USE_GOODS_COMMAND = 0x00060005;
+	 public static final int S_USE_GOODS_COMMAND = 0x00060005;
+	 
+	 /** 改变物品在背包中的位置 */
+	 public static final int C_CHANGE_BAG_GOODS_LOCATION_COMMAND = 0x00060006;
+	 public static final int S_CHANGE_BAG_GOODS_LOCATION_COMMAND = 0x00060006;
+	 
+	 /** 查看玩家背包 */
+	 public static final int C_GET_PLAYER_BAG_COMMAND = 0x00060007;
+	 public static final int S_GET_PLAYER_BAG_COMMAND = 0x00060007;
+	 
+	 /** 请求玩家快捷栏列表 */
+	 public static final int C_GET_PLAYER_SHORTCUT_BAR_COMMAND = 0x00060009;
+	 public static final int S_GET_PLAYER_SHORTCUT_BAR_COMMAND = 0x00060009;
+	 
+	 /** 设置玩家玩家快捷栏列表 */
+	 public static final int C_SET_PLAYER_SHORTCUT_BAR_COMMAND = 0x00060010;
+	 public static final int S_SET_PLAYER_SHORTCUT_BAR_COMMAND = 0x00060010;
+	 
+	 /** 取消物品快捷方式 */
+	 public static final int C_CANCEL_GOODS_SHORTCUT_COMMAND = 0x00060011;
+	 public static final int S_CANCEL_GOODS_SHORTCUT_COMMAND = 0x00060011;
+	 
+	 /**  获取物品对象 */
+	 public static final int C_GET_GOODS_INFO_COMMAND = 0x00060012;
+	 public static final int S_GET_GOODS_INFO_COMMAND = 0x00060012;
+	 
+	 /** 拆分物品 */
+	 public static final int C_SPLIT_GOODS_COMMAND = 0x00060013;
+	 public static final int S_SPLIT_GOODS_COMMAND = 0x00060013;
+	 
+	 /** 叠加物品 */
+	 public static final int C_SUPERPOSE_GOODS_COMMAND = 0x00060014;
+	 public static final int S_SUPERPOSE_GOODS_COMMAND = 0x00060014;
+	 
+	 /**
+	  * 增加物品
+	  */
+	 public static final int C_ADD_GOODS_COMMAND = 0x00060015;
+	 public static final int S_ADD_GOODS_COMMAND = 0x00060015;
+	 
+	 /** 学习技能 */
+	 public static final int C_STUDY_SKILL_COMMAND = 0x00060016;
+	 public static final int S_STUDY_SKILL_COMMAND = 0x00060016;
+	 
+	 /** 合成材料 */
+	 public static final int C_BAG_SYNTHETIZE_COMMAND = 0x00060017;
+	 public static final int S_BAG_SYNTHETIZE_COMMAND = 0x00060017;
+	 	 
+	 /** 合成装备 */
+	 public static final int C_BAG_SSHOP_COMMAND = 0x00060018;
+	 public static final int S_BAG_SSHOP_COMMAND = 0x00060018;
+	 
+	 /** 拆解装备 */
+	 public static final int C_BAG_DSHOP_COMMAND = 0x00060019;
+	 public static final int S_BAG_DSHOP_COMMAND = 0x00060019;
+	 
+	 /** 绑定物品 */
+	 public static final int C_BAG_GOODS_BIND = 0x00060020;
+	 public static final int S_BAG_GOODS_BIND = 0x00060020;
+	 
+	 
+	 /** 玩家仓库指令 */
+	 public static final int T_STORAGE_COMMAND = 0x00070000;
+	 
+	 /** 仓库密码(设置密码，修改密码) */
+	 public static final int C_STORAGE_PASSWORD_OPTION_COMMAND = 0x00070001;
+	 public static final int S_STORAGE_PASSWORD_OPTION_COMMAND = 0x00070001;
+	 
+	 /** 打开仓库 */
+	 public static final int C_OPEN_STORAGE_COMMAND = 0x00070002;
+	 public static final int S_OPEN_STORAGE_COMMAND = 0x00070002;
+	 
+	 /** 添加物品到仓库 */
+	 public static final int C_ADD_GOODS_TO_STORAGE_COMMAND = 0x00070003;
+	 public static final int S_ADD_GOODS_TO_STORAGE_COMMAND = 0x00070003;
+	 
+	 /** 从仓库中取出物品 */
+	 public static final int C_TAKEOUT_GOODS_FROM_STORAGE_COMMAND = 0x00070004;
+	 public static final int S_TAKEOUT_GOODS_FROM_STORAGE_COMMAND = 0x00070004;
+	 
+	 /** 改变物品在仓库中位置 */
+	 public static final int C_CHANGE_STORAGE_GOODS_LOCATION_COMMAND = 0x00070005;
+	 public static final int S_CHANGE_STORAGE_GOODS_LOCATION_COMMAND = 0x00070005;
+	 
+	 /** 仓库中金钱的操作(存钱，取钱)(游戏币) */
+	 public static final int C_MONEY_OPTION_COMMAND = 0x00070006;
+	 public static final int S_MONEY_OPTION_COMMAND = 0x00070006;
+	 
+	 /** 验证仓库是否有密码 */
+	 public static final int C_VALIDATE_STORAGE_ISPASSWORD_COMMAND = 0x00070007;
+	 public static final int S_VALIDATE_STORAGE_ISPASSWORD_COMMAND = 0x00070007;
+	 
+	 
+	 /**
+	  * 战斗消息
+	  */
+	 public static final int T_BATTLE_COMMAND = 0x00080000;
+	 
+	 /** 玩家退出战斗,可能是短线可能是逃跑... */
+	 public static final int S_BATTLE_REMOVE_COMMAND = 0x00080001;
+	 public static final int C_BATTLE_REMOVE_COMMAND = 0x00080001;
+	 
+	 /** 玩家进出战斗，通知战斗内的其他玩家 */
+	 public static final int C_BATTLE_IO_COMMAND = 0x00080002;
+	 public static final int S_BATTLE_IO_COMMAND = 0x00080002;
+	 
+	 /** 接收玩家动作... */
+	 public static final int C_BATTLE_ACTION_COMMAND = 0x00080003;
+	 public static final int S_BATTLE_ACTION_COMMAND = 0x00080003;
+	 
+	 /** 通知本场战斗中战斗结束 */
+	 public static final int C_BATTLE_PLAYER_BATTLEEND = 0x00080004;
+	 public static final int S_BATTLE_PLAYER_BATTLEEND = 0x00080004;
+	 
+	 /** 通知本场战斗中战斗结果 true 胜利，false 失败 */
+	 public static final int C_BATTLE_PLAYER_BATTLERESULT = 0x00080005;
+	 public static final int S_BATTLE_PLAYER_BATTLERESULT = 0x00080005;
+	 
+	 /** 战斗中死亡通知 */
+	 public static final int C_BATTLE_DIE = 0x00080006;
+	 public static final int S_BATTLE_DIE = 0x00080006;
+	
+	 
+	 /**
+	  * 组队消息
+	  */
+	 public static final int T_TEAM_COMMAND = 0x00100000;
+	 
+	 /** 队长转让 */
+	 public static final int C_LEADER_TRANSFER_COMMAND = 0x00100001;
+	 public static final int S_LEADER_TRANSFER_COMMAND = 0x00100001;
+	 
+	 /** 队长T人 */
+	 public static final int C_LEADER_T_MEMBER_COMMAND = 0x00100002;
+	 public static final int S_LEADER_T_MEMBER_COMMAND = 0x00100002;
+	 
+	 /** 解散组 */
+	 public static final int C_LEADER_DISBAND_TEAM_COAMMAND = 0x00100003;
+	 public static final int S_LEADER_DISBAND_TEAM_COAMMAND = 0x00100003;
+	 
+	 /** 玩家离开组 */
+	 public static final int C_MEMBER_LEAVE_TEAM_COMMAND = 0x00100004;
+	 public static final int S_MEMBER_LEAVE_TEAM_COMMAND = 0x00100004;
+	
+	 
+	 
+	 /**
+	  * 交易消息
+	  */
+	 public static final int T_BUSINESS_COMMAND = 0x00110000;
+	 
+	 /** 物品放入拿出，通知交易双方 */
+	 public static final int C_BUSINESS_GOODS_IO_COMMAND = 0x00110001;
+	 public static final int S_BUSINESS_GOODS_IO_COMMAND = 0x00110001;
+	 
+	 /** 交易结束 */
+	 public static final int C_BUSINESS_OVER_COMMAND = 0x00110002;
+	 public static final int S_BUSINESS_OVER_COMMAND = 0x00110002;
+	 
+	 /** 交易完成(成功或者失败) */
+	 public static final int C_BUSINESS_OK_COMMAND = 0x00110003;
+	 public static final int S_BUSINESS_OK_COMMAND = 0x00110003;
+	 
+
+	 /** 错误提示类型*/
+
+	 public static final int T_ERROR_COMMAND = 0x00090000;
+	 
+	 public static final int S_ERROR_MESSAGE = 0x00090001;
+	 public static final int S_ALERT_MESSAGE = 0x00090002;
+	 public static final int S_EXCEPTION_MESSAGE = 0x00090003;
+	
+
+	 
+
+	public SMsg(int type)
+	{
+		super(type, 256);
+	}
+
+	public SMsg(int type, ByteBuffer buffer)
+	{
+		super(type, buffer, null);
+	}
+
+}

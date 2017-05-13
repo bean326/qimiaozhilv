@@ -1,0 +1,17 @@
+<dialog>
+
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<text textId="100000">帅哥，你好！我这没有你要的东西。到别处看看吧。#靓女，你好！我这没有你要的东西，到别处看看吧。</text>
+		</words>
+    		<options>
+            		 <item textId="100001" text="离开这里"  command="" />
+		</options>
+	</s01>
+   </default>
+
+
+</dialog>

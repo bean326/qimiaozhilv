@@ -1,0 +1,464 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.TaskManager;
+import cc.lv1.rpg.gs.entity.ConfirmJob;
+import cc.lv1.rpg.gs.entity.RoomExit;
+import cc.lv1.rpg.gs.entity.TeamInvitation;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.Role;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+/**
+ * 玩家控制器
+ * @author dxw
+ *
+ */
+public class PlayerController extends SpriteController
+{
+	
+	private WorldManager worldManager;
+	
+	private NetConnection netConnection;
+	
+	private Player player;
+	
+	private boolean online;
+	
+	private TeamController team;
+	
+	private RoomExit roomExit = null;
+
+	public PlayerController(Player player)
+	{
+		this.player = player;
+	}
+
+	/** 获得玩家所在区域 */
+	public AreaController getArea()
+	{
+		PlayerContainer container = getParent();
+		if(container instanceof RoomController) 
+			return ((RoomController)container).getParent();
+ 		return worldManager.getAreaById(player.areaId);
+	}
+	
+	/** 获得玩家所在房间 */
+	public RoomController getRoom()
+	{
+		PlayerContainer container = getParent();
+			if(container instanceof RoomController)
+				return ((RoomController)container);
+			
+		RoomController room = null;
+ 		AreaController area = getArea();
+		if(area != null)
+		{
+			room = area.getRoomById(player.roomId);	
+		}
+		return room;
+	}
+	
+	public void close()
+	{
+		netConnection.close();
+	}
+	
+	public void sendAlert(int alert)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(alert);
+		netConnection.sendMessage(new SMsg(SMsg.S_ALERT_MESSAGE,buffer));
+	}
+	
+	public void sendError(String error)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeUTF(error);
+		netConnection.sendMessage(new SMsg(SMsg.S_ERROR_MESSAGE,buffer));
+	}
+
+	public void sendException(int exception)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeInt(exception);
+		netConnection.sendMessage(new SMsg(SMsg.S_EXCEPTION_MESSAGE,buffer));
+	}
+	
+
+
+	/**
+     * 与客户端通信
+     * @param msg
+     */
+	public void clientMessageChain(AppMessage msg)
+	{
+		int type = msg.getType();
+		
+		if(type == SMsg.C_PLAYER_INFO_COMMAND)
+		{
+			sendInfo();
+		}
+		else if(type == SMsg.C_PLAYER_ONKEYMOVE_COMMAND)
+		{
+			keyMoveTo(msg);
+		}
+		else if(type == SMsg.C_PLAYER_ONMOUSEMOVE_COMMAND)
+		{
+			mouseMoveTo(msg);
+		}
+		else if(type == SMsg.C_GET_PLAYER_EQUIPSET_COMMAND)
+		{
+			int playerId = msg.getBuffer().readInt();
+			PlayerController target = null;
+			if(playerId == getPlayer().id)
+				target = this;
+			else
+				target = worldManager.getPlayerControllerById(playerId);
+			Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+			ByteBuffer buffer = new ByteBuffer();
+			bag.getPlayerEquipSet(target,buffer);
+			netConnection.sendMessage(new SMsg(SMsg.S_GET_PLAYER_EQUIPSET_COMMAND,buffer));
+		}	
+		else if(type == SMsg.C_GET_TASKS_COMMAND)
+		{
+			ByteBuffer buffer = new ByteBuffer(32);
+
+			if(msg.getBuffer().readByte() == 0)//0 自己的  1可接
+			{
+				TaskInfo taskInfo = (TaskInfo)player.getExtPlayerInfo("taskInfo");
+				buffer.writeByte(0);
+				taskInfo.writeTo(buffer);
+				netConnection.sendMessage(new SMsg(SMsg.S_GET_TASKS_COMMAND,buffer));
+			}
+			else
+			{
+				TaskManager.getInstance().writeCandoTasks(this);
+			}
+		}
+		else if(type == SMsg.C_CANCEL_TASKS_COMMAND)
+		{
+			int id = msg.getBuffer().readInt();
+			
+			TaskInfo taskinfo = (TaskInfo)player.getExtPlayerInfo("taskInfo");
+			
+			if(!taskinfo.cancelTask(id))
+			{
+				sendAlert(ErrorCode.ALERT_TASK_NOT_CANCEL);
+				return;
+			}
+			ByteBuffer buffer = new ByteBuffer(4);
+			buffer.writeInt(id);
+			netConnection.sendMessage(new SMsg(SMsg.S_CANCEL_TASKS_COMMAND,buffer));
+		}
+		else if(type == SMsg.C_PLAYER_REQUEST_TEAM_COMMAND)
+		{
+			if(getParent() instanceof RoomController)
+			{
+				requestTeam(msg,((RoomController)getParent()));
+			}
+		}
+		else if(type == SMsg.C_ADD_TEAM_COMMAND)
+		{
+			if(getParent() instanceof RoomController)
+			{
+				addTeam(msg,((RoomController)getParent()));
+			}
+		}
+	}
+	
+	/**
+	 * 加入队伍
+	 * @param msg
+	 * @param room
+	 */
+	private void addTeam(AppMessage msg,RoomController room)
+	{
+		int playerId = msg.getBuffer().readInt();//要加入谁的队伍
+		boolean accepted = msg.getBuffer().readBoolean();//是否同意加入队伍
+		PlayerController inviter = room.getPlayer(playerId);
+		if(inviter == null)
+		{
+			sendAlert(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			return;
+		}
+		if(inviter.getRoom().id != getRoom().id)
+		{
+			sendAlert(ErrorCode.ALERT_PLAYER_NOTAT_ROOM);
+			return;
+		}
+		if(inviter.getTeam() != null && inviter.getTeam().getPlayer(player.id) != null)
+		{
+			sendAlert(ErrorCode.ALERT_PLAYER_IN_TEAM);
+			return;
+		}
+		String inviteName = inviter.getName() + "-teamInvitation-" + getName();
+		Object obj = worldManager.getConfirmation(inviteName);
+		if(obj == null)
+		{
+			sendAlert(ErrorCode.ALERT_TEAM_INVITE_CANCEL);
+			return;
+		}
+		if(!(obj instanceof TeamInvitation))
+		{
+			System.out.println("系统错误！");
+			return;
+		}
+		TeamInvitation ti = (TeamInvitation) worldManager.getConfirmation(inviteName);
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeUTF(getName());//被邀方
+		if(!accepted)
+		{	
+			buffer.writeBoolean(false);//不同意加入队伍
+			inviter.netConnection.sendMessage(new SMsg(SMsg.S_ADD_TEAM_COMMAND,buffer));
+		}
+		else
+		{
+			TeamController team = ti.confirm(accepted);
+			if(team == null)
+				return;
+			ti.setDefaultLifeTime();
+			buffer.writeBoolean(true);//同意加入队伍
+			team.writeTo(buffer);
+			team.dispatchMsg(SMsg.S_ADD_TEAM_COMMAND,buffer);//转发给队伍中所有队员
+		}
+	}
+	
+	/**
+	 * 玩家向另一个玩家发出组队请求
+	 * @param target
+	 * @param msg
+	 */
+	private void requestTeam(AppMessage msg,RoomController room)
+	{
+		if(getTeam() != null && getTeam().getLeader().getPlayer().id != player.id)
+		{
+			sendAlert(ErrorCode.ALERT_PLAYER_INVITE_ERROR);
+			return;
+		}
+		int playerId = msg.getBuffer().readInt();//要邀请谁加入 队伍
+
+		PlayerController player = room.getPlayer(playerId);
+		if(player == null)
+		{
+			sendAlert(ErrorCode.EXCEPTION_LOGIN_PLAYERNOTATGAME);
+			return;
+		}
+		if(player.getRoom().id != getRoom().id)
+		{
+			sendAlert(ErrorCode.ALERT_PLAYER_NOTAT_ROOM);
+			return;
+		}
+		if(player.getTeam() != null)
+		{
+			sendAlert(ErrorCode.ALERT_PLAYER_IN_TEAM);
+			return;
+		}
+		ConfirmJob cj = new TeamInvitation(this,player);
+		cj.setName(getName()+"-teamInvitation-"+player.getName());
+		
+		if(worldManager.getConfirmation(cj.getName()) == null)
+		{
+			worldManager.addConfirmJob(cj);
+		}
+		ByteBuffer buffer = new ByteBuffer(8);
+		buffer.writeInt(getID());
+		buffer.writeUTF(getName());
+		player.getNetConnection().sendMessage(new SMsg(SMsg.S_PLAYER_REQUEST_TEAM_COMMAND,buffer));
+	}
+	
+	/**
+	 * 发送自己的完整信息
+	 */
+	public void sendInfo()
+	{	
+		ByteBuffer buffer = new ByteBuffer(64);
+		player.writeTo(buffer);
+		sendSkill(buffer);
+		netConnection.sendMessage(new SMsg(SMsg.S_PLAYER_INFO_COMMAND,buffer));
+	}
+	
+	public void sendSkill(ByteBuffer buffer)
+	{
+		SkillTome skill = (SkillTome)player.getExtPlayerInfo("skillTome");
+		skill.writeActiveSkill(buffer);
+	}
+	
+	/**
+	 * 键盘移动
+	 * @param msg
+	 */
+	public void keyMoveTo(AppMessage msg)
+	{
+		RoomController room  = getRoom();
+		
+		if(room == null)
+			return;
+		
+		ByteBuffer readBuff = msg.getBuffer();
+		int state = readBuff.readByte(); //0停 1走
+		int pos = readBuff.readByte(); //1上   2下   4左  8右   5上左 6下左 9上右 10下右
+		int x = readBuff.readInt(); //发送按下坐标 x
+		int y = readBuff.readInt(); //发送按下坐标 x
+		
+		
+		ByteBuffer writeBuff = new ByteBuffer(14);
+		writeBuff.writeInt(player.id);
+		writeBuff.writeByte(state);
+		writeBuff.writeByte(pos);
+		writeBuff.writeInt(x);
+		writeBuff.writeInt(y);
+		
+		if(state == 0) //停下的时候记录玩家的坐标
+		{
+			getPlayer().x = x;
+			getPlayer().y = y;
+		}
+		room.dispatchMsg(SMsg.S_PLAYER_ONKEYMOVE_COMMAND, writeBuff);
+	}
+	
+	/**
+	 * 鼠标移动
+	 * @param msg
+	 */
+	private void mouseMoveTo(AppMessage msg)
+	{
+		RoomController room  = getRoom();
+		
+		if(room == null)
+			return;
+		
+		ByteBuffer readBuff = msg.getBuffer();
+		int x = readBuff.readInt();  //发送目标坐标 x
+		int y = readBuff.readInt();  //发送目标坐标 y
+		
+		ByteBuffer writeBuff = new ByteBuffer(12);
+		writeBuff.writeInt(player.id);
+		writeBuff.writeInt(x);
+		writeBuff.writeInt(y);
+		room.dispatchMsg(SMsg.S_PLAYER_ONMOUSEMOVE_COMMAND, writeBuff);
+	}
+	
+	
+	public String getName()
+	{
+		return player.name;
+	}
+
+	public int getID()
+	{
+		return player.id;
+	}
+
+	public long getObjectIndex()
+	{
+		return 0;
+	}
+	
+	public Player getPlayer()
+	{
+		return player;
+	}
+
+	public void setPlayer(Player player)
+	{
+		this.player = player;
+	}
+
+	public WorldManager getWorldManager()
+	{
+		return worldManager;
+	}
+
+	public void setWorldManager(WorldManager worldManager)
+	{
+		this.worldManager = worldManager;
+	}
+
+	public boolean isOnline()
+	{
+		return online;
+	}
+
+	public void setOnline(boolean online)
+	{
+		this.online = online;
+	}
+
+	public NetConnection getNetConnection()
+	{
+		return netConnection;
+	}
+
+	public void setNetConnection(NetConnection netConnection)
+	{
+		this.netConnection = netConnection;
+	}
+
+
+	public TeamController getTeam()
+	{
+		return team;
+	}
+
+	public void setTeam(TeamController team)
+	{
+		this.team = team;
+	}
+
+	public RoomExit getRoomExit()
+	{
+		return roomExit;
+	}
+
+	public void setRoomExit(RoomExit roomExit)
+	{
+		this.roomExit = roomExit;
+	}
+
+	public void update(long currentMillis)
+	{
+/*		if(player.isHaveBuff)
+		{
+			BufferBox buffBox = (BufferBox)player.getExtPlayerInfo("buffBox");
+			buffBox.update(currentMillis);
+		}*/
+	}
+
+	public boolean isDead()
+	{
+		return player.hitPoint <= 1;
+	}
+	
+	/**
+	 * 设置玩家凶恶值
+	 */
+	public void setAtrocity()
+	{
+		int at = player.atrocity;
+		if(at >= 0 && at < 40)
+			at += 100;
+		else if(at >= 40 && at <  90)
+			at += 150;
+		else if(at >= 90 && at <  200)
+			at += 200;
+		else if(at >= 200 && at <  400)
+			at += 300;
+		else if(at >= 400 && at <  600)
+			at += 450;
+		else if(at >= 600 && at <  1200)
+			at += 650;
+		else if(at > 1200)
+			at = 1200;
+	}
+
+
+}

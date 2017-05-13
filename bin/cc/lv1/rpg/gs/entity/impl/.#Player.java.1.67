@@ -1,0 +1,551 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.Exp;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+
+import cc.lv1.rpg.gs.entity.ext.MailBox;
+import cc.lv1.rpg.gs.entity.ext.PVPInfo;
+import cc.lv1.rpg.gs.entity.ext.FriendList;
+import cc.lv1.rpg.gs.entity.ext.PetTome;
+import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.ext.PlayerExtInfo;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.Storage;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+//import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.PlayerSetting;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PetSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.entity.impl.pet.Pet;
+
+/**
+ * 玩家实体
+ * @author dxw
+ *
+ */
+public class Player extends Role
+{
+	/** 回城复活生命回复百分比 */
+	public static final int LIFERATE = 10;
+	
+	/** 玩家基本信息 */
+	private PlayerBaseInfo baseInfo = new PlayerBaseInfo(this);
+	                                                                                                     
+	/** 玩家附加信息 */
+	private PlayerExtInfo [] extInfos = new PlayerExtInfo[0];
+	
+	/** 帐户名 */
+	public String accountName;
+	
+	/** 是否是族长 **/
+	public boolean isFamilyLeader = false;
+
+	/** 家族id */
+	public int familyId;
+	
+	/** 家族名称 */
+	public String familyName;
+	
+	/** 帮会id */
+	public int communityId;
+	
+	/** 帮会名称 */
+	public String communityName;
+	
+	/** 家族贡献值 */
+	public int familyContribution;
+	
+	/** 帮会贡献值 */
+	public int tongContribution;
+	
+	/** 逃跑时间 */
+	public long escTimer = 0;
+	
+	/** 领取宝箱次数() */
+	public int boxCount;
+	
+	/** 多倍经验开始时间 */
+	public long expMultTime;
+	
+	/** 血槽点数 */
+	public int extLife;
+	
+	/** 蓝槽点数 */
+	public int extMagic;
+	
+	public static int FLYACTIVEPOINTDEFAULT = 10;
+	
+	/** 每日传送行动值  当行动值用光后，第二天不用的*/
+	public int flyActivePoint = 10;
+	
+	/** 事件值 每个怪物打死了过后都把值给主角的事件值加上 */
+	public int eventPoint;
+	
+	/** 上线日期 */
+	public byte date;
+	
+	public Player()
+	{
+		Bag bag = new Bag();
+		addExtPlayerInfo(bag);
+		
+		SkillTome st = new SkillTome();
+		addExtPlayerInfo(st);
+		
+		BuffBox bb = new BuffBox();
+		bb.setPlayer(this);
+		addExtPlayerInfo(bb);
+		
+		PVPInfo pvp = new PVPInfo();
+		pvp.setPlayer(this);
+		addExtPlayerInfo(pvp);
+		
+		EquipSet es = new EquipSet();
+		es.setPlayer(this);
+		addExtPlayerInfo(es);
+		
+		addExtPlayerInfo(new FriendList());
+		addExtPlayerInfo(new TaskInfo());
+		addExtPlayerInfo(new PlayerSetting());
+		addExtPlayerInfo(new Storage(0));//玩家个人仓库
+		//addExtPlayerInfo(new Storage(1));//家族仓库
+		//addExtPlayerInfo(new Storage(2));//工会仓库
+		
+		PetTome pet = new PetTome();
+		addExtPlayerInfo(pet);
+		
+		MailBox mb = new MailBox();
+		addExtPlayerInfo(mb);
+	}
+	
+	public void setSkill()
+	{
+		SkillTome skillTome = (SkillTome) getExtPlayerInfo("skillTome");
+		PlayerSetting ps = (PlayerSetting) getExtPlayerInfo("playerSetting");
+		
+		Skill skill = skillTome.getSkill(1031000001);
+		if(skill == null)
+			return;
+		Skill sk1 = (Skill) Skill.cloneObject(skill);
+		ps.addPlayerBar(sk1, 0, 1);
+	}
+
+	/**
+	 * 初始化角色信息
+	 */
+	public void initial()
+	{
+		/**
+		 * 足球...
+		    力量=ROUND(2*LV,0)
+敏捷=ROUND(1.5*LV,0)
+精神=ROUND(0.5*LV,0)
+智慧=ROUND(0.5*LV,0)
+		 */
+		if(profession == 2)
+		{
+			baseInfo.power = Math.round(2*level);
+			baseInfo.nimble = (int) Math.round(1.5*level);
+			baseInfo.spirit= (int) Math.round(0.5*level);
+			baseInfo.wisdom = (int) Math.round(0.5*level);
+		}
+		/**
+		 * 军官...
+			力量=ROUND(1.5*LV,0)
+敏捷=ROUND(2*LV,0)
+精神=ROUND(0.75*LV,0)
+智慧=ROUND(1.125*LV,0)
+		 */
+		else if(profession == 1)
+		{
+			baseInfo.power = (int) Math.round(1.5*level);
+			baseInfo.nimble = (int) Math.round(2*level);
+			baseInfo.spirit= (int) Math.round(0.75*level);
+			baseInfo.wisdom = (int) Math.round(1.125*level);
+		}
+		/**
+		 * 护士...
+			力量=ROUND(1*LV,0)
+敏捷=ROUND(0.75*LV,0)
+精神=ROUND(1.125*LV,0)
+智慧=ROUND(2.5*LV,0)
+		 */
+		else if(profession == 3)
+		{
+			baseInfo.power = (int) Math.round(level);
+			baseInfo.nimble = (int) Math.round(0.75*level);
+			baseInfo.spirit= (int) Math.round(1.125*level);
+			baseInfo.wisdom = (int) Math.round(2.5*level);
+		}
+		/**
+		 * 超人...
+		力量=ROUND(1*LV,0)
+敏捷=ROUND(0.5*LV,0)
+精神=ROUND(2*LV,0)
+智慧=ROUND(1*LV,0)
+		 */
+		else if(profession == 4)
+		{
+			baseInfo.power = (int) Math.round(level);
+			baseInfo.nimble = (int) Math.round(0.5*level);
+			baseInfo.spirit= (int) Math.round(2*level);
+			baseInfo.wisdom = (int) Math.round(level);
+		}
+		
+		baseInfo.updateBaseValue();
+	}
+	
+
+	public void loadFrom(ByteBuffer byteBuffer)
+	{
+		super.loadFrom(byteBuffer);
+		accountName = byteBuffer.readUTF();
+		
+		familyId = byteBuffer.readInt();
+		familyName = byteBuffer.readUTF();
+		isFamilyLeader = byteBuffer.readBoolean();
+		communityId = byteBuffer.readInt();
+		communityName = byteBuffer.readUTF();
+		familyContribution = byteBuffer.readInt();
+		tongContribution = byteBuffer.readInt();
+		
+		escTimer = byteBuffer.readLong();
+		boxCount = byteBuffer.readInt();
+		expMultTime = byteBuffer.readLong();
+		extLife = byteBuffer.readInt();
+		extMagic = byteBuffer.readInt();
+	    flyActivePoint = byteBuffer.readInt();
+	    eventPoint = byteBuffer.readInt();
+	    date =(byte)byteBuffer.readByte();
+	    
+	    if(date != WorldManager.date)
+	    {
+	    	date = WorldManager.date;
+	    	flyActivePoint = FLYACTIVEPOINTDEFAULT;
+	    }
+	    
+		int extLen = byteBuffer.readInt();
+
+		for(int i = 0 ; i < extLen ; i ++)
+		{
+			String ext = byteBuffer.readUTF();
+			getExtPlayerInfo(ext).loadFrom(byteBuffer);
+		}
+		
+		PetTome pt =(PetTome) getExtPlayerInfo("petTome");
+		Pet pet = pt.getActivePet();
+		if(pet != null)
+		{
+			pet.setPlayer(this);
+		}
+		
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		int mhp = es.getTotalAtt("maxHitPoint") + maxHitPoint;
+		if(hitPoint <= 1)
+			hitPoint = mhp * Player.LIFERATE / 100;
+	}
+	
+
+	public void saveTo(ByteBuffer byteBuffer)
+	{
+		super.saveTo(byteBuffer);
+		
+		byteBuffer.writeUTF(accountName);
+
+		byteBuffer.writeInt(familyId);
+		byteBuffer.writeUTF(familyName);
+		byteBuffer.writeBoolean(isFamilyLeader);
+		byteBuffer.writeInt(communityId);
+		byteBuffer.writeUTF(communityName);
+		byteBuffer.writeInt(familyContribution);
+		byteBuffer.writeInt(tongContribution);
+	    byteBuffer.writeLong(escTimer);
+	    byteBuffer.writeInt(boxCount);
+	    byteBuffer.writeLong(expMultTime);
+	    byteBuffer.writeInt(extLife);
+	    byteBuffer.writeInt(extMagic);
+	    byteBuffer.writeInt(flyActivePoint);
+	    byteBuffer.writeInt(eventPoint);
+	    byteBuffer.writeByte(date);
+	    
+		int extLen = extInfos.length;
+		byteBuffer.writeInt(extLen);
+		
+		for(int i = 0 ; i < extLen ; i ++)
+		{
+			String extName = extInfos[i].getName();
+
+			byteBuffer.writeUTF(extName);
+			extInfos[i].saveTo(byteBuffer);
+		}
+	}
+	
+	public void readFrom(ByteBuffer byteBuffer)
+	{
+		super.readFrom(byteBuffer);
+	}
+	
+	public void writeTo(ByteBuffer byteBuffer)
+	{
+		super.writeTo(byteBuffer);
+		byteBuffer.writeInt(familyId);
+		byteBuffer.writeUTF(familyName);
+		byteBuffer.writeBoolean(isFamilyLeader);
+		byteBuffer.writeInt(flyActivePoint);
+		byteBuffer.writeInt(eventPoint);
+
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		int mhp = es.getTotalAtt("maxHitPoint") + maxHitPoint;
+		int mmp = es.getTotalAtt("maxMagicPoint") + maxMagicPoint;
+		byteBuffer.writeInt(mhp);
+		byteBuffer.writeInt(mmp);
+		byteBuffer.writeInt(baseInfo.speed);
+		
+		PVPInfo pvpInfo = (PVPInfo) getExtPlayerInfo("PVPInfo");
+		byteBuffer.writeInt(pvpInfo.honourPoint);
+	}
+	
+	public void writeBaseTo(ByteBuffer buffer)
+	{
+		
+	}
+	
+	public PlayerExtInfo getExtPlayerInfo(String name)
+	{
+		for (int i = 0; i < extInfos.length; i++)
+		{	
+			if (extInfos[i].getName().equals(name))
+				return extInfos[i];
+		}
+		return null;
+	}
+	
+	public void addExtPlayerInfo(PlayerExtInfo extInfo)
+	{
+		PlayerExtInfo[] infos = new PlayerExtInfo[extInfos.length+1];
+		for (int i = 0; i < extInfos.length; i++)
+			infos[i] = extInfos[i];
+		infos[extInfos.length] = extInfo;
+		extInfos = infos;
+	}
+	
+	public List getExtPlayerInfos(String name)
+	{
+		List list = new ArrayList();
+		for (int i = 0; i < extInfos.length; i++)
+		{	
+			if (extInfos[i].getName().equals(name))
+				list.add(extInfos[i]);
+		}
+		return list;
+	}
+	
+	public boolean insteadExt(PlayerExtInfo ext)
+	{
+
+		return false;
+	}
+
+	public PlayerBaseInfo getBaseInfo()
+	{
+		return baseInfo;
+	}
+
+	public void setCamp(int camp)
+	{
+		this.camp = camp;
+	}
+
+	/**
+	 * 设置角色模型ID
+	 */
+	public void setPlayerModelMotionId()
+	{
+		if(upProfession == 0)
+		{
+			if(sex == 1)
+				modelMotionId = 1190000101;
+			else if(sex == 0)
+				modelMotionId = 1190000001;
+		}
+		else
+		{
+			if(sex == 1)
+			{
+				if(upProfession == 1)
+					modelMotionId = 1190105101;
+				else if(upProfession == 2)
+					modelMotionId = 1190106101;
+				else if(upProfession == 3)
+					modelMotionId = 1190107101;
+				else if(upProfession == 4)
+					modelMotionId = 1190108101;
+				else if(upProfession == 5)
+					modelMotionId = 1190109101;
+				else if(upProfession == 6)
+					modelMotionId = 1190110101;
+				else if(upProfession == 7)
+					modelMotionId = 1190111101;
+				else if(upProfession == 8)
+					modelMotionId = 1190112101;
+			}
+			else if(sex == 0)
+			{
+				if(upProfession == 1)
+					modelMotionId = 1190105001;
+				else if(upProfession == 2)
+					modelMotionId = 1190106001;
+				else if(upProfession == 3)
+					modelMotionId = 1190107001;
+				else if(upProfession == 4)
+					modelMotionId = 1190108001;
+				else if(upProfession == 5)
+					modelMotionId = 1190109001;
+				else if(upProfession == 6)
+					modelMotionId = 1190110001;
+				else if(upProfession == 7)
+					modelMotionId = 1190111001;
+				else if(upProfession == 8)
+					modelMotionId = 1190112001;
+			}
+		}
+	}
+	
+	public boolean setHitPoint(int point)
+	{
+		hitPoint += point;
+		if(hitPoint <= 0)
+		{
+			hitPoint = 0;
+			return false;
+		}
+		
+		EquipSet equipSet = (EquipSet) getExtPlayerInfo("equipSet");
+		int maxPoint = maxHitPoint + equipSet.getTotalAtt("maxHitPoint");
+		
+		if(hitPoint > maxPoint)
+			hitPoint = maxPoint;
+		return true;
+	}
+	
+	public boolean setMagicPoint(int point)
+	{
+		magicPoint += point;
+		
+		if(magicPoint <= 0)
+		{
+			magicPoint = 0;
+			return false;
+		}
+		EquipSet equipSet = (EquipSet) getExtPlayerInfo("equipSet");
+		int maxPoint = maxMagicPoint + equipSet.getTotalAtt("maxMagicPoint");
+		
+		if(magicPoint > maxPoint)
+			magicPoint = maxPoint;
+		return true;
+	}
+
+	public void sendAlwaysValue(ByteBuffer buffer)
+	{
+		buffer.writeInt(id);
+		buffer.writeInt(hitPoint);
+		buffer.writeInt(magicPoint);
+		buffer.writeInt(level);
+		if(nextExp == 0)
+		{
+			Map map = (Map)DataFactory.getInstance().getAttachment(DataFactory.ATTACH_EXP);
+			Exp exp = (Exp)map.get(level+1);
+			if(exp != null)
+				nextExp = exp.levelExp;
+		}
+		long exp = nextExp - requireExp;
+		if(exp < 0)
+			exp = 0;
+		buffer.writeUTF(exp+"");
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		es.writeBaseTo(buffer);
+		buffer.writeUTF(nextExp+"");
+		int rate = 10000;
+		if(nextExp != 0)
+		    rate = (int) (exp * 10000 / nextExp);
+		buffer.writeInt(rate);
+	}
+   
+	public void sendLifeInfo(ByteBuffer buffer)
+	{
+		buffer.writeInt(id);
+		buffer.writeInt(hitPoint);
+		buffer.writeInt(magicPoint);
+	}
+	
+
+
+	
+	public void sendPlayerBattleInfo(ByteBuffer buffer)
+	{
+		buffer.writeInt(magicPoint);
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		es.writeBaseTo(buffer);
+	}
+	
+	
+	/**
+	 * 升级时更新BUFF的值到玩家身上
+	 */
+	public void uptateBuffPoint()
+	{
+		BuffBox buffBox = (BuffBox) getExtPlayerInfo("buffBox");
+		List buffList = buffBox.getEffectList();
+		for (int k = 0; k < buffList.size(); k++) 
+		{
+			TimeEffect effect = (TimeEffect) buffList.get(k);
+			int addPoint = 0,point = 0;
+			for (int j = 0; j < effect.dataType.length; j++)
+			{
+				if(effect.dataType[j].equals("0"))
+					break;
+				if(effect.dataType[j].equals("noDefAtt"))
+				{
+					baseInfo.setNoDefAtt(true);
+				}
+				else if(effect.dataType[j].equals("chaos") || effect.dataType[j].equals("damageModify")
+						|| effect.dataType[j].equals("timeEffectInvain") || effect.dataType[j].equals("dizzy"))
+				{
+					continue;
+				}
+				else
+				{
+					int currPoint = Integer.parseInt(baseInfo.getVariable(effect.dataType[j]));
+					if(effect.dataPattern[j] == 1)
+					{
+						addPoint = effect.effectPoint[j];
+					}
+					else if(effect.dataPattern[j] == 2)
+					{
+						addPoint = (currPoint*effect.effectPoint[j]/100);
+						
+					}
+
+					point = addPoint+currPoint;
+					if(point < 0)
+						point = 0;
+					baseInfo.setVariable(effect.dataType[j], String.valueOf(point));
+			
+					baseInfo.updateLifeValue(addPoint, effect.dataType[j]);
+				}
+			}
+		}
+	}
+
+}

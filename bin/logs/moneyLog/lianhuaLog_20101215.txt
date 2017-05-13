@@ -1,0 +1,3 @@
+account	name	count	point	money	daijin	goods
+all	all	5	0	1900	0	炼化宝石x1900
+shouhu	守护	5	0	1900	0	炼化宝石x1900

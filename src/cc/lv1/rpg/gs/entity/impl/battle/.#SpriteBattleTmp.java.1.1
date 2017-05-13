@@ -1,0 +1,1043 @@
+package cc.lv1.rpg.gs.entity.impl.battle;
+
+
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.entity.controller.BattleController;
+import cc.lv1.rpg.gs.entity.controller.MonsterController;
+import cc.lv1.rpg.gs.entity.controller.PVEController;
+import cc.lv1.rpg.gs.entity.controller.PVPController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.controller.SpriteController;
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.i.Sprite;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.Effect;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.FlashEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.effect.TimeEffect;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.net.SMsg;
+
+/**
+ * 精灵临时数据
+ * @author dxw
+ *
+ */
+public abstract class SpriteBattleTmp
+{
+	
+	/***
+	 * 用来存带出战斗的buff
+	 */
+	protected BuffBox buffBox;
+	
+	protected int teamNo; 
+	
+	protected int index;
+	
+	protected PlayerBaseInfo baseInfo;
+	
+	private ByteBuffer effectBuffer = new ByteBuffer(10);
+	
+	protected SpriteController currentController;
+	
+	protected Sprite currentSprite;
+	
+	protected PlayerController targetPlayer = null;
+	
+	protected MonsterController targetMonster = null;
+	
+	protected BattleController battle = null;
+	
+	protected int effectCount = 0;
+	
+	protected boolean isLocked = false;
+	
+	protected int pCdTimer = 0;
+	
+	protected long lastPingTime = 0;
+	
+	protected boolean isAction = false;
+	
+	public void setCDTimer(int pCdTimer)
+	{
+		this.pCdTimer = pCdTimer;
+	}
+	
+	public boolean isLocked()
+	{
+		return isLocked;
+	}
+
+	public void setLocked(boolean isLocked)
+	{
+		this.isLocked = isLocked;
+	}
+
+	public BattleController getBattle()
+	{
+		return battle;
+	}
+
+	public void setBattle(BattleController battle)
+	{
+		this.battle = battle;
+	}
+
+	/**
+	 * 战斗临时的buff
+	 */
+	protected ArrayList effectList = new ArrayList();
+	
+	private HashMap inBattleEffect = new HashMap(20);
+	
+	private boolean isDead = false;
+
+	public void setIndex(int i)
+	{
+		index = i;
+	}
+	
+	public int getIndex()
+	{
+		return index;
+	}
+	
+	public boolean isDead()
+	{
+		return isDead;
+	}
+
+	public void setDead(boolean isDead)
+	{
+		this.isDead = isDead;
+		
+		if(!isDead)
+			return;
+		
+		ByteBuffer buffer = new ByteBuffer(2);
+		buffer.writeByte(teamNo);
+		buffer.writeByte(index);
+		battle.dispatchMsg(SMsg.S_BATTLE_DIE, buffer);
+	}
+	
+	public void setTeamNo(int teamNo)
+	{
+		this.teamNo = teamNo;
+	}
+	
+	public int getTeamNo()
+	{
+		return teamNo;
+	}
+	
+	/**
+	 * 特殊技能....
+	 * @param effect
+	 * @param isAdd
+	 */
+	private void changeUnusualEffectState(TimeEffect effect,boolean isAdd)
+	{
+		int length = effect.dataType.length;
+		for (int i = 0; i < length; i++)
+		{
+			if(effect.dataType[i].equals("0"))
+				break;
+			
+			if(effect.dataType[i].equals("chaos")) //混乱
+			{
+				isChaos = isAdd;
+				isBeforeUnusualEffect = isAdd;
+				break;
+			}
+			else if(effect.dataType[i].equals("damageModify")) //伤害修改
+			{
+				if(isAdd)
+					damageTimeEffect = effect;
+				else
+					damageTimeEffect = null;
+				break;
+			}
+			else if(effect.dataType[i].equals("timeEffectInvain"))
+			{
+				isTimeEffectInvain = isAdd;
+			}
+		}
+
+	}
+	
+	protected boolean isBeforeUnusualEffect = false;
+	
+	protected boolean isTimeEffectInvain = false;
+	
+	protected boolean isChaos = false;
+	
+	protected TimeEffect damageTimeEffect = null;
+
+	protected boolean checkUnusualEffect()
+	{
+		PVEController pve = null;
+		PVPController pvp = null;
+		
+		if(battle instanceof PVEController)
+		{
+			pve = (PVEController)battle;
+		}
+		else if(battle instanceof PVPController)
+		{
+			pvp = (PVPController)battle;
+		}
+
+		if(isChaos && isBeforeUnusualEffect) //混乱
+		{
+			if(pve != null)
+			{
+				MonsterController [] monsters = pve.getMonsters();
+				
+				for (int i = 0; i < monsters.length; i++)
+				{
+					if(monsters[i].getAttachment().isDead)
+						continue;
+					
+					if(((int)(Math.random()*4)) == 3)
+					{
+						setSkillTarget(monsters[i]);
+						return true;
+					}	
+				}
+				
+				PlayerController []players = pve.getPlayers();
+				
+				for (int i = 0; i < players.length; i++)
+				{
+					if(players[i].getAttachment().isDead)
+						continue;
+					
+					if(((int)(Math.random()*4)) == 3)
+					{
+						setSkillTarget(players[i]);
+						return true;
+					}	
+				}
+			}
+			else if(pvp != null)
+			{
+				
+			}
+		}
+		return false;
+	}
+	
+	
+	public boolean addEffect(TimeEffect effect)
+	{
+		TimeEffect te = (TimeEffect)inBattleEffect.get(effect.id);
+		System.out.println("增加战斗内 buff..... "+ effect.name);
+		if(te == null)
+		{
+			effectList.add(effect);
+			inBattleEffect.put(effect.id, effect);
+			effect.setBeginTime(System.currentTimeMillis());
+			changeUnusualEffectState(effect,true);
+			return true;
+		}
+		te.setBeginTime(System.currentTimeMillis());
+		return false;
+	}
+	
+	public void removeEffect(TimeEffect effect)
+	{
+		effectList.remove(effect);
+		inBattleEffect.remove(effect.id);
+		changeUnusualEffectState(effect,false);
+		System.out.println("删除战斗内 buff..... "+ effect.name);
+	}
+	
+	public int EffectSize()
+	{
+		return effectList.size();
+	}
+	
+	public boolean isEmptyEffect()
+	{
+		return EffectSize() <= 0;
+	}
+
+	public ByteBuffer getEffectBuffer()
+	{
+		return effectBuffer;
+	}
+	
+	public void addEffectBuffer(ByteBuffer effectBuff)
+	{
+		if(effectBuff != null)
+		{
+			effectBuffer.writeBytes(effectBuff.getBytes());
+			effectCount++;
+		}
+		else
+		{
+			effectBuffer = new ByteBuffer(10);
+			effectCount = 0;
+		}
+	}
+	
+	public int getEffectCount()
+	{
+		return effectCount;
+	}
+
+	public void update(long timeMillis)
+	{
+		if(isAction)
+			return;
+		
+		if(lastPingTime == 0)
+		{
+			lastPingTime = timeMillis;
+			return;
+		}
+		if(lastPingTime + pCdTimer < timeMillis)
+			isAction = true;
+	}
+	
+	public abstract void processActiveSkill(ActiveSkill skill);
+	
+	
+	/**
+	 * 取得单纯伤害
+	 * @param effect
+	 * @return
+	 */
+	public int getDamageOnly(FlashEffect effect)
+	{
+		int result = 0;
+		if(effect.dataPattern == 1) //数值
+		{
+			if(effect.dataType == 1) //当前生命力
+			{
+				result = effect.effectPoint;
+				result = setDamage(-result);
+			}
+			else if(effect.dataType == 2)  //当前精力
+			{
+				result = effect.effectPoint;
+				currentSprite.setMagicPoint(-result);
+			}
+		}
+		else if(effect.dataPattern == 2)//百分比
+		{
+			if(effect.dataType == 1) //当前生命力
+			{
+				result = currentSprite.maxHitPoint / effect.effectPoint;
+				result = setDamage(-result);
+			}
+			else if(effect.dataType == 2)  //当前精力
+			{
+				result = currentSprite.maxMagicPoint / effect.effectPoint;
+				currentSprite.setMagicPoint(-result);
+			}
+		}
+		return result;
+	}
+	
+	
+	public int setDamage(int damage)
+	{
+
+		if(damageTimeEffect != null)
+		{
+			int length = damageTimeEffect.dataType.length;
+			for (int i = 0; i < length; i++)
+			{
+				if(damageTimeEffect.dataType[i].equals("0"))
+					break;
+				
+				if(damageTimeEffect.dataType[i].equals("damageModify")) //伤害修改
+				{
+					if(damageTimeEffect.dataPattern[i] == 1) //数值
+					{
+						damage += damageTimeEffect.effectPoint[i]; 
+					}
+					else if(damageTimeEffect.dataPattern[i] == 2)//百分比
+					{
+						damage = damage * damageTimeEffect.effectPoint[i] /100;
+					}
+					break;
+				}
+			}
+		}
+
+		setDead(!currentSprite.setHitPoint(damage));
+		if(currentSprite instanceof Player)
+		{
+			if(currentSprite.hitPoint == 0)
+			{
+				currentSprite.hitPoint = 1;
+				battle.uninit();
+			}
+		}
+		
+		return damage;
+	}
+	
+	protected void processTimeEffectExt(TimeEffect effect, int index)
+	{
+		System.out.println("..................");
+		
+		if(effect.dataType[index].equals("currentHP")) //加减血
+		{
+			if(effect.isFirstUse)
+			{
+				effect.isFirstUse = false;
+				return;
+			}
+			setDamage(effect.effectPoint[index]/effect.interval);
+		}
+		else if(effect.dataType[index].equals("currentMP")) //加减魔力
+		{
+			if(effect.isFirstUse)
+			{
+				effect.isFirstUse = false;
+				return;
+			}
+			currentSprite.setMagicPoint(effect.effectPoint[index]/effect.interval);
+		}
+		else if(effect.dataType[index].equals("dizzy")) //眩晕
+		{
+			setLocked(true);
+		}
+	}
+
+	protected void processTimeEffectEndExt(TimeEffect effect, int index)
+	{
+		if(effect.dataType[index].equals("currentHP")) //加减血
+		{
+			if(effect.isFirstUse)
+			{
+				effect.isFirstUse = false;
+				return;
+			}
+			setDamage(effect.effectPoint[index]/effect.interval);
+		}
+		else if(effect.dataType[index].equals("currentMP")) //加减魔力
+		{
+			if(effect.isFirstUse)
+			{
+				effect.isFirstUse = false;
+				return;
+			}
+			currentSprite.setMagicPoint(effect.effectPoint[index]/effect.interval);
+		}
+		else if(effect.dataType[index].equals("dizzy")) //眩晕
+		{
+			setLocked(false);
+		}
+	}
+	
+	/**
+	 * 加血效果
+	 * @param targetSprite
+	 * @param flashEffect
+	 * @return
+	 */
+	public int pointUp(FlashEffect flashEffect)
+	{
+		
+		int resultPoint = 0;
+		if(flashEffect.dataPattern == 1) //数值
+		{
+			if(flashEffect.dataType == 1) //当前生命力
+			{
+				resultPoint = flashEffect.effectPoint;
+				currentSprite.setHitPoint(resultPoint);
+			}
+			else if(flashEffect.dataType == 2)  //当前精力
+			{
+				resultPoint = flashEffect.effectPoint;
+				currentSprite.setMagicPoint(resultPoint);
+			}
+		}
+		else if(flashEffect.dataPattern == 2)//百分比
+		{
+			if(flashEffect.dataType == 1) //当前生命力
+			{
+				resultPoint = currentSprite.maxHitPoint / flashEffect.effectPoint;
+				currentSprite.setHitPoint(resultPoint);
+			}
+			else if(flashEffect.dataType == 2)  //当前精力
+			{
+				resultPoint = currentSprite.maxMagicPoint / flashEffect.effectPoint;
+				currentSprite.setMagicPoint(resultPoint);
+			}
+		}
+		return resultPoint;	
+	}
+	
+	/**
+	 * 设置技能释放对象
+	 */
+	public void setSkillTarget(SpriteController target)
+	{
+		targetPlayer = null;
+		targetMonster = null;
+		if(target instanceof PlayerController)
+			targetPlayer = (PlayerController)target;
+		else if(target instanceof MonsterController)
+			targetMonster = (MonsterController)target;
+	}
+
+	
+	public int getSkillTargeType()
+	{
+		if(targetPlayer != null)
+			return ActiveSkill.TARGET_TYPE_PLAYERS;
+		else if(targetMonster != null)
+			return ActiveSkill.TARGET_TYPE_MONSTERS;
+		else 
+			return ActiveSkill.ERROR;
+	}
+
+	public void setSpriteController(SpriteController currentController)
+	{
+		this.currentController = currentController;	
+	}
+	
+	public void setSprite(Sprite currentSprite)
+	{
+		this.currentSprite = currentSprite;
+	}
+	
+
+	
+	//给予百分之30的随机互动伤害
+	public int getRamdomDamage(int damage)
+	{
+		int t = damage / 3;
+		return (int)(Math.random()*(t*2))+(damage-t);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//-----------------------------------------------------------------------------------------
+	
+	/**
+	 * 当瞬时效果对怪物和玩家使用
+	 * @return
+	 */
+	protected boolean onFlashEffectUse(FlashEffect effect)
+	{
+		int targetType = getSkillTargeType();
+		
+		if(targetType == Skill.TARGET_TYPE_PLAYERS) //目标是玩家
+		{
+			PlayerBattleTmp pbt = (PlayerBattleTmp)targetPlayer.getAttachment();
+
+			if(pbt.isDead())
+				return false;
+			
+			ByteBuffer buffer = new ByteBuffer(10);
+			
+			if(effect.type == FlashEffect.FE_TYPE_ATTACK) //攻击
+			{
+				int rdp = getTotalDamageByPlayer(effect);
+				System.out.println("对玩家造成固定伤害："+rdp);
+				rdp = pbt.setDamage(-rdp);
+				System.out.println("对玩家造成伤害："+rdp);
+				buffer.writeInt(rdp);
+			}
+			else if(effect.type == FlashEffect.FE_TYPE_CURE) //治疗
+			{
+				int curePoint = pbt.pointUp(effect);
+				buffer.writeInt(curePoint);
+			}
+			else if(effect.type == FlashEffect.FE_TYPE_DAMAGE) //伤害
+			{
+				int damage = pbt.getDamageOnly(effect);
+				buffer.writeInt(damage);
+			}
+			
+			buffer.writeByte(effect.dataType);
+			buffer.writeByte(pbt.getTeamNo());
+			buffer.writeByte(pbt.getIndex());
+			
+			addEffectBuffer(buffer);
+		}
+		else if(targetType == Skill.TARGET_TYPE_MONSTERS) //目标是怪物
+		{
+			MonsterBattleTmp mbt = (MonsterBattleTmp)targetMonster.getAttachment();
+			
+			if(mbt.isDead())
+				return false;
+			
+			ByteBuffer buffer = new ByteBuffer(10);
+				
+			if(effect.type == FlashEffect.FE_TYPE_ATTACK)
+			{ 
+				int rdp = getTotalDamageByMonster(effect);
+System.out.println("对怪的固定攻防计算 "+rdp);
+				rdp = getRamdomDamage(rdp);
+System.out.println("对怪的随机攻防计算 "+rdp);		
+				rdp = mbt.setDamage(-rdp);
+System.out.println("对怪的加上buff的攻防计算 "+rdp);	
+				buffer.writeInt(rdp); 
+			}
+			else if(effect.type == FlashEffect.FE_TYPE_DAMAGE) //伤害
+			{
+				int damage = mbt.getDamageOnly(effect);
+				
+				buffer.writeInt(damage);
+			}
+			
+			buffer.writeByte(effect.dataType);
+			buffer.writeByte(mbt.getTeamNo());
+			buffer.writeByte(mbt.getIndex()); 
+
+			addEffectBuffer(buffer);
+		}
+
+		return true;
+	}
+	
+	
+	protected abstract int getTotalDamageByMonster(FlashEffect effect);
+	
+	protected abstract int getTotalDamageByPlayer(FlashEffect effect);
+	
+	
+	
+	/**
+	 * 设定其他目标
+	 */
+	protected boolean setNextPlayer()
+	{
+		PlayerController [] everyone = null;
+		
+		if(battle instanceof PVEController)
+		{
+			PVEController pve = (PVEController)battle;
+			everyone = pve.getPlayers();
+		}
+		int length = everyone.length;
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(everyone[i] == null)
+				continue;
+			
+			if(everyone[i].getAttachment().isDead())
+				continue;
+			
+			setTargetPlayer(everyone[i]);
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * 设定其他怪物目标
+	 */
+	protected boolean setNextMonster()
+	{
+		PVEController pve = (PVEController)battle;
+		MonsterController [] monsters = pve.getMonsters();
+		int length = monsters.length;
+		
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(monsters[i] == null)
+				continue;
+			
+			if(monsters[i].getAttachment().isDead())
+				continue;
+			
+			setTargetMonster(monsters[i]);
+			return true;
+		}
+		return false;
+	}
+	
+	
+	public void setTargetPlayer(PlayerController targetPlayer)
+	{
+		this.targetPlayer = targetPlayer;
+	}
+	
+	public void setTargetMonster(MonsterController targetMonster)
+	{
+		this.targetMonster = targetMonster;
+	}
+	
+	/**
+	 * 除了主打人以外的其他人
+	 * @param effect
+	 * @param effectRangeList
+	 */
+	protected void hitMorePlayerByFlashEffect(Effect effect, int effectRangeList)
+	{
+		
+		PlayerController [] playerArray  = null; 
+
+		if(battle instanceof PVEController)
+		{
+			playerArray =  ((PVEController)battle).getPlayers();
+		}
+	
+		int length = playerArray.length;
+		
+		PlayerBattleTmp pbt = (PlayerBattleTmp)targetPlayer.getAttachment();
+		
+		for (int i = 0; i < length; i++)
+		{
+			if(pbt.getIndex() == i)
+				continue;
+			
+			if(playerArray[i].getAttachment().isDead())
+				continue;
+			
+			if(--effectRangeList <= 0)
+				break;
+			
+			setTargetPlayer(playerArray[i]);
+			onFlashEffectUse((FlashEffect)effect);
+		}
+
+	}
+	
+	/**
+	 * 把效果使用到除了主打怪以外的怪上
+	 * @param effect
+	 * @param effectRangeList
+	 */
+	protected void hitMoreMonsterByFlashEffect(Effect effect, int effectRangeList)
+	{
+		MonsterController [] monsterArray = ((PVEController)battle).getMonsters();
+		int length = monsterArray.length;
+		
+		MonsterBattleTmp mbt = (MonsterBattleTmp)targetMonster.getAttachment();
+		
+		for(int i = 0 ; i < length ; i ++)
+		{
+
+			if(mbt.getIndex() == i)
+				continue;
+			
+			if(monsterArray[i].getAttachment().isDead())
+				continue;
+			
+			
+			if(--effectRangeList <= 0)
+				break;
+			
+			
+			setTargetMonster(monsterArray[i]);
+			onFlashEffectUse((FlashEffect)effect);
+		}
+	}
+	
+	
+	protected boolean onTimeEffectUse(TimeEffect effect)
+	{
+
+		
+		int targetType = getSkillTargeType();
+		
+		if(targetType == Skill.TARGET_TYPE_PLAYERS) //目标是玩家
+		{
+			PlayerBattleTmp pbt = (PlayerBattleTmp)targetPlayer.getAttachment();
+			
+			ByteBuffer buffer = new ByteBuffer(10);
+			
+			buffer.writeUTF(effect.name);
+			buffer.writeInt((int)effect.duration);//效果时间
+			buffer.writeInt(effect.interval);//次数
+			buffer.writeByte(pbt.getTeamNo());
+			buffer.writeByte(pbt.getIndex());
+			
+			if(pbt.isTimeEffectInvain)
+			{
+				if(effect.buffType == 2)//负面buff失效
+				{
+					buffer.writeByte(1);
+					buffer.writeUTF(effect.dataType[0]); 
+					buffer.writeInt(-1); 
+					addEffectBuffer(buffer);
+					return false;
+				}
+			}
+
+			
+			if(effect.isOutBattle)
+			{
+
+				int count = 0;
+				
+				for (int i = 0; i < effect.dataType.length; i++)
+				{
+					if(effect.dataType[i].equals("0"))
+					{
+						break;
+					}
+					count++;
+				}
+				buffer.writeByte(count);
+
+				
+				for(int i = 0 ; i < effect.dataType.length ; i ++)
+				{
+					
+					if(effect.dataType[i].equals("0"))
+					{
+						break;
+					}
+					
+					
+					TimeEffect nte = new TimeEffect();
+					effect.copyTo(nte);
+					
+					int point = 0;
+					
+					if(buffBox.addEffect(nte))
+					{
+						
+						
+						int currPoint = Integer.parseInt(baseInfo.getVariable(effect.dataType[i]));
+						
+						if(effect.dataPattern[i] == 1)
+						{
+							point = currPoint+effect.effectPoint[i];
+							baseInfo.setVariable(effect.dataType[i], String.valueOf(point));
+						}
+						else if(effect.dataPattern[i] == 2)
+						{
+							point = (currPoint*effect.effectPoint[i]/100)+currPoint;
+							baseInfo.setVariable(effect.dataType[i], String.valueOf(point));
+						}
+					}
+
+					buffer.writeUTF(effect.dataType[i]); // 上升效果
+					buffer.writeInt(point); // 上升点数
+					
+
+				}
+			}
+			else
+			{
+				//在战斗中的buff
+				int count = 0;
+				
+				for (int i = 0; i < effect.dataType.length; i++)
+				{
+					if(effect.dataType[i].equals("0"))
+						break;
+					count++;
+				}
+				buffer.writeByte(count);
+				
+				
+				TimeEffect nte = new TimeEffect();
+				effect.copyTo(nte);
+				
+				boolean isAdd = pbt.addEffect(nte);
+				
+				for(int i = 0 ; i < count ; i ++)
+				{
+					
+					int point = 0;
+					
+					if(isAdd)
+					{
+						if(effect.interval == 0)
+						{
+							int addPoint = 0;
+							
+							int currPoint = Integer.parseInt(baseInfo.getVariable(effect.dataType[i]));
+							
+							if(effect.dataPattern[i] == 1)
+							{
+								addPoint = effect.effectPoint[i];
+								point = currPoint+addPoint;
+								baseInfo.setVariable(effect.dataType[i], String.valueOf(point));
+							}
+							else if(effect.dataPattern[i] == 2)
+							{
+								addPoint = (currPoint*effect.effectPoint[i]/100);
+								point = addPoint+currPoint;
+								baseInfo.setVariable(effect.dataType[i], String.valueOf(point));
+							}
+							
+							nte.setPoint(i,addPoint);
+						}	
+						else
+						{
+							point = effect.effectPoint[i];
+						}
+					}
+
+							
+					buffer.writeUTF(effect.dataType[i]); // 上升效果
+					buffer.writeInt(point); // 上升点数	
+				}
+			}
+
+			addEffectBuffer(buffer);
+		}
+		else if(targetType == Skill.TARGET_TYPE_MONSTERS) //目标是怪物
+		{
+			
+			MonsterBattleTmp mbt = (MonsterBattleTmp)targetMonster.getAttachment();
+			
+			if(mbt.isDead())
+				return false;
+			
+			
+			ByteBuffer buffer = new ByteBuffer(10);
+			
+			buffer.writeUTF(effect.name);
+			buffer.writeInt((int)effect.duration);//效果时间
+			buffer.writeInt(effect.interval);//次数
+			buffer.writeByte(mbt.getTeamNo());
+			buffer.writeByte(mbt.getIndex());
+			
+			if(mbt.isTimeEffectInvain)
+			{
+				if(effect.buffType == 2)//负面buff失效
+				{
+					buffer.writeByte(1);
+					buffer.writeUTF(effect.dataType[0]); 
+					buffer.writeInt(-1); 
+					addEffectBuffer(buffer);
+					return false;
+				}
+			}
+			
+
+			
+			//在战斗中的buff
+			int count = 0;
+			
+			for (int i = 0; i < effect.dataType.length; i++)
+			{
+				if(effect.dataType[i].equals("0"))
+					break;
+				count++;
+			}
+			buffer.writeByte(count);
+
+
+			TimeEffect nte = new TimeEffect();
+			effect.copyTo(nte);
+			
+			boolean  isAdd = mbt.addEffect(nte);
+			
+			for(int i = 0 ; i < count ; i ++)
+			{
+				int point = 0;
+				
+				if(isAdd)
+				{
+					if(effect.interval == 0)
+					{
+						int addPoint = 0;
+						
+						int currPoint = Integer.parseInt(targetMonster
+						.getMonster().getVariable(effect.dataType[i]));
+						
+						if(effect.dataPattern[i] == 1)
+						{
+							addPoint = effect.effectPoint[i];
+							point = currPoint+addPoint;
+							targetMonster
+							.getMonster().setVariable
+							(effect.dataType[i], String.valueOf(point));
+						}
+						else if(effect.dataPattern[i] == 2)
+						{
+							addPoint = (currPoint*effect.effectPoint[i]/100);
+							point = addPoint+currPoint;
+							targetMonster
+							.getMonster().setVariable
+							(effect.dataType[i], String.valueOf(point));
+						}
+						
+						targetMonster.getMonster().updateMoreValue();
+						nte.setPoint(i,addPoint);
+					}
+					else
+					{
+						//中毒 等技能 正数为增加 负数为减少
+						point = effect.effectPoint[i];
+						
+					}
+					
+				}
+				
+				buffer.writeUTF(effect.dataType[i]); // 上升效果
+				buffer.writeInt(point); // 上升点数
+			}
+			
+			addEffectBuffer(buffer);
+		}
+
+		return true;
+	}
+	
+	
+	
+	protected void pack(ByteBuffer buffer)
+	{
+		ByteBuffer buff = getEffectBuffer();
+		
+		if(buff == null)
+			return;
+		
+		buffer.writeByte(effectCount);
+		buffer.writeBytes(buff.getBytes());
+		addEffectBuffer(null);
+	}
+	
+	
+	protected boolean changeTarget()
+	{
+		int targetType = getSkillTargeType();
+		
+		if(targetType == ActiveSkill.TARGET_TYPE_PLAYERS)
+		{
+			if(!setNextPlayer())
+			{
+				battle.checkDeadState();
+				return false;
+			}
+		}
+		else if(targetType == ActiveSkill.TARGET_TYPE_MONSTERS)
+		{
+			if(!setNextMonster())
+			{
+				battle.checkDeadState();
+				return false;
+			}
+		}
+		return true;
+	}
+	
+}

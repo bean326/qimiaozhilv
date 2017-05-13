@@ -1,0 +1,21 @@
+<dialog>
+
+<!--该NPC名为家族管理员 -->
+<!-- default为NPC默认的对话 -->
+   <default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="1000">//运动员、军官可以选择力量或者敏捷属性的荣誉装备。超能力、护士可以选择精神或者智慧的荣誉装备。|//挑选荣誉装备到时候要注意哦，如果选错的话，找我退换的时候只能获得一半荣誉。|//能和自己心仪的人结婚，那是多么的幸福啊！|//作为在城镇排列位置第一的NPC,我感到压力很大……</text>
+		</words>
+   		 <options>
+                          <item textId="1003" text="创立家族" command="familyCreate" />
+                          <item textId="1004" text="荣誉道具兑换" command="openShop:2000000000" />
+			  <item textId="1005" text="阵营转换" command="changeCamp" />
+ 			  <item textId="1006" text="性别转换" command="changeSex" />
+			  <item textId="1007" text="宠物转换" command="changePet" />
+		</options>
+	</s01>
+   </default>            
+</dialog>

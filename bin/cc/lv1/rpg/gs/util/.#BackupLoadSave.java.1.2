@@ -1,0 +1,586 @@
+package cc.lv1.rpg.gs.util;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.dao.DatabaseAccessor;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.CenterGoods;
+import cc.lv1.rpg.gs.entity.ShopCenter;
+import cc.lv1.rpg.gs.entity.controller.FamilyPartyController;
+import cc.lv1.rpg.gs.entity.impl.PartyReward;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.Reward;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+
+public class BackupLoadSave implements Runnable
+{
+
+	private DatabaseAccessor sourceDA;
+	
+	private DatabaseAccessor backsDA;
+	
+	private Map accountMap = new HashMap(3000);
+	
+	private Map errorMap = new HashMap(500);
+	
+	@Override
+	public void run()
+	{
+		long time1 = System.currentTimeMillis();
+		System.out.println("BackupLoadSave start with "+Utils.getCurrentTime());
+		List list ;
+		int sum = 0;
+		int i = 0;
+		Map map;
+		WorldManager world = GameServer.getInstance().getWorldManager();
+		List answerList = world.getAnswerRewards();
+		Map topFamilys = FamilyPartyController.getInstance().getTopTeamPlayers();
+		List centerGoodss = ShopCenter.getInstance().getCenterGoods();
+		System.out.println("寄卖物品 --- " + centerGoodss.size());
+		do
+		{
+			list = sourceDA.loadPlayers(i, i+1000);
+
+			i += 1000;
+		
+			map = setAccountName(list,answerList,topFamilys,centerGoodss);
+			
+			sum += list.size();
+			
+			sourceDA.createOrUpdateWorldInfo(world);
+			
+//			savePlayers(list,map); //8000条 o
+			savePlayerList(list, map); //n 
+			
+			System.out.println(list.size() +" saving .... total : "+sum);
+			System.gc();
+		}while(list.size() > 0);
+		
+		System.out.println("BackupLoadSave end with "+Utils.getCurrentTime());
+		
+		long time2 = System.currentTimeMillis();
+		System.out.println("use time:::::::::::::::::"+(time2-time1)/1000+"秒");
+	}
+	
+	public Map setAccountName(List list,List answerList,Map topFamilys,List centerGoodss)
+	{
+		Map map = new HashMap(list.size());
+		for (int i = 0; i < list.size(); i++) 
+		{
+			Player player = (Player) list.get(i);
+			String newName = getNewAccountName(player.accountName);
+			String oldName = player.accountName;
+			if(errorMap.get(oldName) != null)
+			{
+				sourceDA.delPlayer(player);
+				continue;
+			}
+//			if(player.accountName.equals(newName))
+//				continue;
+			map.put(newName, oldName);
+			player.accountName = newName;
+System.out.println("修改账户名:"+oldName+"-----To-----:"+newName);
+			for (int j = 0; j < answerList.size(); j++) 
+			{
+				Reward reward = (Reward) answerList.get(j);
+				if(reward.id == player.id)
+				{
+					reward.accountName = player.accountName;
+					break;
+				}
+			}
+			
+			if(!"".equals(player.familyName))
+			{
+				List fList = (List) topFamilys.get(player.familyId+":"+player.familyName);
+				if(fList != null)
+				{
+					for (int k = 0; k < fList.size(); k++) 
+					{
+						PartyReward pr = (PartyReward) fList.get(k);
+						if(pr.id == player.id)
+						{
+							pr.accountName = player.accountName;
+							break;
+						}
+					}
+				}
+				
+			}
+			
+			for (int j = 0; j < centerGoodss.size(); j++) 
+			{
+				CenterGoods cg = (CenterGoods) centerGoodss.get(j);
+				if(cg.getId() == player.id)
+				{
+					cg.setAccountName(player.accountName);
+				}
+			}
+
+		}
+		
+		return map;
+	}
+	
+	/**
+	 * 取得所有玩家 分页
+	 * 数量 开始 --- 结束
+	 * 0--10
+	 * 10--20
+	 * 20--30
+	 */
+	public List loadPlayers(int begin,int end)
+	{
+		PreparedStatement statement = null;
+		Connection conn = null;
+		List list = new ArrayList(end-begin);
+		byte[] data = null;
+		int type = 0;
+		String accountname = null;
+		try 
+		{
+			conn = sourceDA.getConnectionFactory().getConnection();
+//			synchronized(conn)
+//			{
+				statement = conn.prepareStatement("SELECT TOP "+(end-begin)+" accountname,playerType,playerdata FROM Playerinfo WHERE (ID NOT IN (SELECT TOP "+begin+" id FROM Playerinfo ORDER BY id))ORDER BY ID ");
+				ResultSet result = statement.executeQuery();
+				while(result.next())
+				{
+					
+					accountname = result.getString("accountname");
+					type = result.getInt("playerType");
+					data = result.getBytes("playerdata");
+					
+					Player player = null;
+					try
+					{
+						player = new Player();	
+						ByteBuffer buffer = new ByteBuffer(data);
+						player.loadFrom(buffer);
+//						player.accountName = accountname;
+						player.initial(0);
+
+						player.isClosed = type == 1? true : false; //是否封号
+					}
+					catch(Exception e)
+					{
+						System.out.println("error player data....."+player.name+"  "+player.id);
+						continue;
+					}
+
+					list.add(player);
+				}
+				statement.close();
+//			}
+			sourceDA.getConnectionFactory().recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		return list;
+	}
+	
+	/**
+	 * 取得所有玩家
+	 * @return
+	 */
+	public List loadPlayers()
+	{
+		Statement statement = null;
+		Connection conn = null;
+		List list = new ArrayList(2000);
+		byte[] data = null;
+		String accountName = null;
+		try 
+		{
+			conn = sourceDA.getConnectionFactory().getConnection();
+//			synchronized(conn)
+//			{
+				statement = conn.createStatement();
+				ResultSet result = statement.executeQuery("select accountName,playerData from playerInfo");
+				while(result.next())
+				{
+					accountName = result.getString("accountName");
+					data = result.getBytes("playerdata");
+					
+					Player player = null;
+					try
+					{
+						player = new Player();	
+						ByteBuffer buffer = new ByteBuffer(data);
+						player.loadFrom(buffer);
+						player.accountName = accountName;
+						player.initial(0);
+					}
+					catch(Exception e)
+					{
+						System.out.println("error player data..... accountName : "+accountName);
+						continue;
+					}
+
+					list.add(player);
+				}
+				statement.close();
+//			}
+			 sourceDA.getConnectionFactory().recycleConnection(conn);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		} 
+		return list;
+	}
+	
+	public void savePlayerList(List list,Map map)
+	{
+		long time1 = System.currentTimeMillis();
+		
+		Object obj = null;
+		String newName="",oldName="";
+		Player player = null;
+		byte[] data = null;
+		ByteBuffer buffer = null;
+		Connection conn = null;
+		PreparedStatement pstmt1 = null;
+		PreparedStatement pstmt2 = null;
+		
+		try 
+		{
+//			conn = sourceDA.getConnectionFactory().getConnection();
+			Class.forName("com.microsoft.jdbc.sqlserver.SQLServerDriver"); 
+			conn = DriverManager.getConnection(
+			"jdbc:microsoft:sqlserver://"+sourceDA.getDbhost()+":"+sourceDA.getDbport()+";DatabaseName="+sourceDA.getDbname()+";SelectMethod=Cursor;User="+sourceDA.getUser()+";Password="+sourceDA.getPwd());
+
+			pstmt1 = conn.prepareStatement("update Playerinfo set accountname=?,playerData=? where accountname=?");
+			pstmt2 = conn.prepareStatement("update UserInfo set name=? where name=?");
+			
+			conn.setAutoCommit(false);
+			
+			int size = list.size();
+			for (int i = 0; i < size; i++)
+			{
+				player = (Player)list.get(i);
+				obj = map.get(player.accountName);
+				if(obj == null)
+					continue;
+				if(player.accountName.equals("") || obj.toString().equals(""))
+					continue;
+				newName = player.accountName;
+				oldName = obj.toString();
+				buffer = new ByteBuffer(4096 * 10);
+				player.saveTo(buffer);
+				data = buffer.getBytes();
+
+				pstmt1.setString(1, newName);
+				pstmt1.setBytes(2, data);
+				pstmt1.setString(3, oldName); 
+	            pstmt1.addBatch();  
+	            
+	            pstmt2.setString(1, newName);
+				pstmt2.setString(2, oldName);
+				pstmt2.addBatch();
+			}
+	           
+	//增加到批量工作任务中   
+	        pstmt1.executeBatch();   
+	        pstmt2.executeBatch();  
+	//提交执行   
+	        conn.commit();   
+	        pstmt1.close();   
+	        pstmt2.close();   
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		long time2 = System.currentTimeMillis();
+		
+		System.out.println("use time*********************"+(time2-time1)/1000+"秒");
+	}
+	
+	public void savePlayers(List list,Map map)
+	{
+		Statement statement = null;
+		PreparedStatement state = null;
+		Connection conn = null;
+		Object obj = null;
+		String newName="",oldName="";
+		Player player = null;
+		byte[] data = null;
+		ByteBuffer buffer = null;
+		
+		
+		int size = list.size();
+		for (int i = 0; i < size; i++)
+		{
+			player = (Player)list.get(i);
+			obj = map.get(player.accountName);
+			if(obj == null)
+				continue;
+			if(player.accountName.equals("") || obj.toString().equals(""))
+				continue;
+			newName = player.accountName;
+			oldName = obj.toString();
+			buffer = new ByteBuffer(4096 * 10);
+			player.saveTo(buffer);
+			data = buffer.getBytes();
+			
+			try 
+			{
+					conn = sourceDA.getConnectionFactory().getConnection();
+//					synchronized(conn)
+//					{
+						state = conn.prepareStatement("update UserInfo set name=? where name=?");
+						state.setString(1, newName);
+						state.setString(2, oldName);
+						state.execute();
+						state = conn.prepareStatement("update Playerinfo set accountname=?,playerData=? where accountname=?");
+						state.setString(1, newName);
+						state.setBytes(2, data);
+						state.setString(3, oldName);
+						state.execute();
+						
+//					}
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			finally
+			{
+				try
+				{
+					if(statement != null)
+						statement.close();
+					
+					sourceDA.getConnectionFactory().recycleConnection(conn);
+				} 
+				catch (SQLException e)
+				{
+					e.printStackTrace();
+				}
+			}
+//			updatePlayer(player,map.get(player.accountName).toString());
+		}
+	}
+	
+	private void updatePlayer(Player player,String oldName)
+	{
+		String newName = player.accountName;
+		if(oldName.equals("") || newName.equals(""))
+			return;
+		
+		ByteBuffer buffer = new ByteBuffer(4096 * 10);
+		player.saveTo(buffer);
+		byte[] data = buffer.getBytes();
+		
+		
+		Statement statement = null;
+		PreparedStatement state = null;
+		Connection conn = null;
+		try 
+		{
+				conn = sourceDA.getConnectionFactory().getConnection();
+//				synchronized(conn)
+//				{
+					state = conn.prepareStatement("update UserInfo set name=? where name=?");
+					state.setString(1, newName);
+					state.setString(2, oldName);
+					state.execute();
+					state = conn.prepareStatement("update Playerinfo set accountname=?,playerData=? where accountname=?");
+					state.setString(1, newName);
+					state.setBytes(2, data);
+					state.setString(3, oldName);
+					state.execute();
+					
+//				}
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if(statement != null)
+					statement.close();
+				
+				sourceDA.getConnectionFactory().recycleConnection(conn);
+			} 
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void queryPlayer()
+	{
+		List list = sourceDA.loadPlayers();
+		for (int i = 0; i < list.size(); i++) 
+		{
+			Player player = (Player) list.get(i);
+			System.out.println("玩家数据账号："+player.accountName);
+		}
+		PreparedStatement statement = null;
+		Connection conn = null;
+		try 
+		{
+				conn = sourceDA.getConnectionFactory().getConnection();
+//				synchronized(conn)
+//				{
+					conn.setAutoCommit(false);
+					statement = conn.prepareStatement("select accountname from Playerinfo");
+					ResultSet rs = statement.executeQuery();
+					while(rs.next())
+					{
+						String str = rs.getString(1);
+						System.out.println("Playerinfo表里账号："+str);
+					}
+//				}
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if(statement != null)
+					statement.close();
+				
+				sourceDA.getConnectionFactory().recycleConnection(conn);
+			} 
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		try 
+		{
+				conn = sourceDA.getConnectionFactory().getConnection();
+//				synchronized(conn)
+//				{
+					conn.setAutoCommit(false);
+					statement = conn.prepareStatement("select name from UserInfo");
+					ResultSet rs = statement.executeQuery();
+					while(rs.next())
+					{
+						String str = rs.getString(1);
+						System.out.println("UserInfo表里账号："+str);
+					}
+//				}
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if(statement != null)
+					statement.close();
+				
+				sourceDA.getConnectionFactory().recycleConnection(conn);
+			} 
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public String getNewAccountName(String accountName)
+	{
+		Object obj = accountMap.get(accountName);
+		return obj!=null?obj.toString():accountName;
+	}
+	
+	
+	public void init()
+	{
+		GameServer.getInstance().initialWithoutNetServer();
+		loadAccountList();
+		sourceDA = GameServer.getInstance().getDatabaseAccessor();
+		sourceDA.loadWorldInfo(GameServer.getInstance().getWorldManager());
+		backsDA = new DatabaseAccessor(sourceDA.getDbhost(),sourceDA.getDbport(),sourceDA.getDbname(),sourceDA.getUser(),sourceDA.getPwd(),sourceDA.getHeart());
+	}
+	
+	private String accountStr = GameServer.getAbsolutePath()+"config/userIds.txt";
+	
+	private String errorsStr = GameServer.getAbsolutePath()+"config/errors.txt";
+	
+	public void loadAccountList()
+	{
+		try 
+		{
+			accountStr = Utils.readFile2(accountStr);
+			String[] strs = Utils.split(accountStr, Utils.LINE_SEPARATOR);
+			for (int i = 0; i < strs.length; i++) 
+			{
+				String[] as = Utils.split(strs[i], ",");
+				if(!"".equals(as[0]))
+				{
+					accountMap.put(as[0], as[1]);
+				}
+				else
+				{
+					System.out.println("loadAccountList accountList error:"+strs[i]+" i="+i+" lengh:"+strs.length);
+				}
+			}
+			
+			errorsStr = Utils.readFile2(errorsStr);
+			strs = Utils.split(errorsStr, Utils.LINE_SEPARATOR);
+			for (int i = 0; i < strs.length; i++) 
+			{
+				if(!"".equals(strs[i]))
+				{
+					errorMap.put(strs[i], strs[i]);
+				}
+				else
+				{
+					System.out.println("loadAccountList errorList error:"+strs[i]+" i="+i+" lengh:"+strs.length);
+				}
+			}
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) 
+	{
+		BackupLoadSave backup = new BackupLoadSave();
+		backup.init();
+		
+		Thread thread = new Thread(backup);
+		thread.start();
+		
+//		backup.updatePlayer("bean3", "*bean3",1);
+		
+//		backup.queryPlayer();
+		
+//		String a=\u0022a\u0022;
+//		System.out.print(a);
+	}
+
+}

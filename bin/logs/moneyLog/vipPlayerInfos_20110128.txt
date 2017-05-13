@@ -1,0 +1,2 @@
+time	account	name	level	data
+2011-01-28-09:28:11	shouhu	超人	6000	進化無雙雞蛋,消耗[無雙雞蛋x1金砂x40],消耗無雙金蛋

@@ -1,0 +1,225 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.NpcController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.PlayerSetting;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.net.impl.SaveJob;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.xml.XMLNode;
+
+
+public class Shop extends RPGameObject{
+	
+	/** 装备列表 */
+	private List goodsList = new ArrayList(60);
+
+	public Shop(int shopId,List list)
+	{
+		id = shopId;
+		goodsList = list;
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		int count = goodsList.size();
+		buffer.writeInt(id);
+		buffer.writeInt(count);
+		for (int i = 0; i < count; i++) {
+			Goods goods = (Goods) goodsList.get(i);
+			goods.writeTo(buffer);
+		}
+	}
+	
+	/**
+	 * 打开商城
+	 * @param target
+	 */
+	private void openShop(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		writeTo(buffer);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_OPEN_SHOP_COMMAND,buffer));
+	}
+	
+	
+	/**
+	 * 购买商品
+	 * @param target 玩家
+	 * @param buffer 接收参数
+	 */
+	private void buyGoods(PlayerController target, ByteBuffer buffer)
+	{
+		int goodsId = buffer.readInt();//物品ID
+		int count = buffer.readInt();//要购买的物品数量
+		//判断商店是否有这个物品
+		Object goodsObject = getGoodsById(goodsId);
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		if(count > goods.repeatNumber)
+		{
+			//数量超出限制 
+			target.sendAlert(ErrorCode.ALERT_GOODS_COUNT_OVERRUN);
+			return;
+		}
+		//判断玩家的钱够不够买商品
+		int needPoint = (int) (goods.point * ((float)(goods.buyRate/100)) * count);
+		int needMoney = (int) (goods.money * ((float)(goods.buyRate/100)) * count);
+		
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		if(bag.point < needPoint || bag.money < needMoney)
+		{
+			//玩家的钱不够了
+			target.sendAlert(ErrorCode.ALERT_SHOP_NO_MONEY);
+			return;
+		}
+		
+		if(bag.isBagFull(target))
+			return;
+		Goods newGoods = (Goods) Goods.cloneObject(goods);
+		newGoods.objectIndex = target.getWorldManager().getDatabaseAccessor().getGoodsObjIndex();
+		newGoods.id = goods.id;
+		newGoods.name = goods.name;
+		newGoods.type = goods.type;
+		newGoods.repeatNumber = goods.repeatNumber;
+		newGoods.iconId = goods.iconId;
+		newGoods.goodsCount = count;
+		
+		//扣除金钱，
+		bag.point -= needPoint;
+		bag.money -= needMoney;
+
+		ByteBuffer buff = new ByteBuffer(128);
+		bag.addGoodsToBag(target,newGoods,buff);
+		target.getWorldManager().getJobObserver().addJob(GameServer.JOB_DATABASEJOB,
+					new SaveJob(target.getWorldManager(),target.getPlayer()));
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_BUY_GOODS_COMMAND,buff));
+	}
+	
+	/**
+	 * 玩家出售商品
+	 * @param target
+	 * @param buffer
+	 */
+	private void saleGoods(PlayerController target,ByteBuffer buffer)
+	{
+		int goodsId = buffer.readInt();
+		int count = buffer.readInt();
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		Object goodsObject = bag.getGoodsById(goodsId);
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		int bagGoodsCount = bag.getGoodsCount(goods.id);
+		if(count > bagGoodsCount)
+		{
+			//想要出售的物品超出玩家背包中同类物品的总数
+			target.sendAlert(ErrorCode.ALERT_GOODS_COUNT_OVERRUN);
+			return;
+		}
+		int salePoint = (int) (goods.point * ((float)(goods.saleRate/100)) * count);
+		int saleMoney = (int) (goods.money * ((float)(goods.saleRate/100)) * count);
+		bag.point += salePoint;
+		bag.money += saleMoney;
+		
+		ByteBuffer buff = new ByteBuffer();
+		buff.writeInt(goods.id);
+		buff.writeInt(count);
+		buff.writeInt(bag.point);
+		buff.writeInt(bag.money);
+		List sameIdGoods = bag.getGoodsSameId(goods.id);
+		buff.writeInt(sameIdGoods.size());
+	    for (int i = 0; i < sameIdGoods.size(); i++) 
+	    {
+	    	Goods go = (Goods) sameIdGoods.get(i);
+			if(count > go.goodsCount)
+			{
+				count -= go.goodsCount;
+				go.goodsCount = 0;
+			}
+			else
+			{
+				go.goodsCount -= count;
+				count = 0;
+			}
+			buff.writeUTF(go.objectIndex+"");
+			buff.writeInt(go.goodsCount);
+			buff.writeInt(bag.getGoodsLocation(go.objectIndex));
+			buff.writeInt(count);
+			bag.updateGoodsList(go);
+			if(count <= 0)
+				break;
+		}
+	    PlayerSetting ps = (PlayerSetting) target.getPlayer().getExtPlayerInfo("playerSetting");
+	    ps.updatePlayerBar(goods.id,bag.getGoodsCount(goods.id));
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_SALE_GOODS_COMMAND,buff));
+	}
+	
+	 /**
+	  * 根据ID获取物品
+	  * @param id
+	  * @return
+	  */
+	private Goods getGoodsById(int id)
+	{
+		for (int i = 0; i < goodsList.size(); i++) 
+		{
+			Goods goods = (Goods) goodsList.get(i);
+			if(goods.id == id)
+				return goods;
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * 与商店有关的客户端消息通道
+	 * @param target
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		ByteBuffer buffer = msg.getBuffer();
+		if(type == SMsg.C_BUY_GOODS_COMMAND)
+		{
+			buyGoods(target,buffer);
+		}
+		else if(type == SMsg.C_SALE_GOODS_COMMAND)
+		{
+			saleGoods(target,buffer);
+		}
+		else if(type == SMsg.C_OPEN_SHOP_COMMAND)
+		{
+			openShop(target);
+		}
+			
+	}
+	
+	
+	
+
+	
+}

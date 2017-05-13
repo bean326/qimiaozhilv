@@ -1,0 +1,84 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.util.ByteBuffer;
+import cc.lv1.rpg.gs.entity.i.Sprite;
+/**
+ * 角色实体
+ * @author dxw
+ *
+ */
+public class Role extends Sprite
+{
+	public static final int STATE_LEISURE = 0; //空闲
+	public static final int STATE_BUSY = 1; //繁忙
+	public static final int STATE_TEAMLEADER = 2; //带队
+	public static final int STATE_TEAMMEMBER = 4; //队员
+	public static final int STATE_FIGHTING = 8; //战斗
+	public static final int STATE_TRADING = 16; //贸易
+	public static final int STATE_PERSONALSHOP = 32; //交易
+	public static final int STATE_UPGRADEPACK = 64; //更新
+	
+	/** 性别 1男 0女 */
+	public int sex;
+	
+	/** 状态 */
+	public int state = 0;
+	
+	/** 称号 */
+	public String title = "小蜜蜂";
+	
+	/** 职业 (0.通用,1运动员,2士兵,3医护人员,4超能力者......) */
+	public int profession = 1;
+	
+	/** 当前经验 */
+	public int experience = 0;
+	
+	/** 本级需要经验 */
+	public int requireExp = 50;
+	
+	public Role()
+	{	
+	}
+	
+	public void loadFrom(ByteBuffer byteBuffer)
+	{
+		super.loadFrom(byteBuffer);
+		sex = byteBuffer.readByte();
+		title = byteBuffer.readUTF();
+		profession = byteBuffer.readInt();
+		experience = byteBuffer.readInt();
+		requireExp = byteBuffer.readInt();
+	}
+	
+	public void saveTo(ByteBuffer byteBuffer)
+	{
+		super.saveTo(byteBuffer);
+		byteBuffer.writeByte(sex);
+		byteBuffer.writeUTF(title);
+		byteBuffer.writeInt(profession);
+		byteBuffer.writeInt(experience);
+		byteBuffer.writeInt(requireExp);
+	}
+	
+	public void readFrom(ByteBuffer byteBuffer)
+	{
+		super.readFrom(byteBuffer);
+		sex = byteBuffer.readByte();
+		state = byteBuffer.readInt();
+		title = byteBuffer.readUTF();
+		profession = byteBuffer.readInt();
+		experience = byteBuffer.readInt();
+		requireExp = byteBuffer.readInt();
+	}
+	
+	public void writeTo(ByteBuffer byteBuffer)
+	{
+		super.writeTo(byteBuffer);
+		byteBuffer.writeByte(sex);
+		byteBuffer.writeInt(state);
+		byteBuffer.writeUTF(title);
+		byteBuffer.writeInt(profession);
+		byteBuffer.writeInt(experience);
+		byteBuffer.writeInt(requireExp);
+	}
+}

@@ -1,0 +1,4 @@
+rank	account	name	level	point	logTime
+1	null	MLGB	5608	6656	20101109-03:11:11
+2	null	gfdgfd	60	6483	20101109-03:11:28
+3	null	bean03	58	5797	20101109-02:47:57

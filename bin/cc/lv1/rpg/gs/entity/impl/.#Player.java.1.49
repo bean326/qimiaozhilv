@@ -1,0 +1,511 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.i.Map;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.data.Exp;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+
+import cc.lv1.rpg.gs.entity.ext.BuffBox;
+
+import cc.lv1.rpg.gs.entity.ext.MailBox;
+import cc.lv1.rpg.gs.entity.ext.PVPInfo;
+import cc.lv1.rpg.gs.entity.ext.FriendList;
+import cc.lv1.rpg.gs.entity.ext.Pet;
+import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.ext.PlayerExtInfo;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.Storage;
+import cc.lv1.rpg.gs.entity.ext.TaskInfo;
+//import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.ext.PlayerSetting;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PetSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+
+/**
+ * 玩家实体
+ * @author dxw
+ *
+ */
+public class Player extends Role
+{
+
+	/** 玩家基本信息 */
+	private PlayerBaseInfo baseInfo = new PlayerBaseInfo(this);
+	                                                                                                     
+	/** 玩家附加信息 */
+	private PlayerExtInfo [] extInfos = new PlayerExtInfo[0];
+	
+	/** 帐户名 */
+	public String accountName;
+	
+	/** 是否是族长 **/
+	public boolean isFamilyLeader = false;
+
+	/** 家族id */
+	public int familyId;
+	
+	/** 家族名称 */
+	public String familyName;
+	
+	/** 帮会id */
+	public int communityId;
+	
+	/** 帮会名称 */
+	public String communityName;
+	
+	/** 家族贡献值 */
+	public int familyContribution;
+	
+	/** 帮会贡献值 */
+	public int tongContribution;
+	
+	/** 逃跑时间 */
+	public long escTimer = 0;
+	
+	/** 领取宝箱次数() */
+	public int boxCount;
+	
+	/** 多倍经验开始时间 */
+	public long expMultTime;
+	
+	/** 血槽点数 */
+	public int extLife;
+	
+	/** 蓝槽点数 */
+	public int extMagic;
+	
+	public Player()
+	{
+		Bag bag = new Bag();
+		addExtPlayerInfo(bag);
+		
+		SkillTome st = new SkillTome();
+		addExtPlayerInfo(st);
+		
+		BuffBox bb = new BuffBox();
+		bb.setPlayer(this);
+		addExtPlayerInfo(bb);
+		
+		PVPInfo pvp = new PVPInfo();
+		pvp.setPlayer(this);
+		addExtPlayerInfo(pvp);
+		
+		EquipSet es = new EquipSet();
+		es.setPlayer(this);
+		addExtPlayerInfo(es);
+		
+		addExtPlayerInfo(new FriendList());
+		addExtPlayerInfo(new TaskInfo());
+		addExtPlayerInfo(new PlayerSetting());
+		addExtPlayerInfo(new Storage(0));//玩家个人仓库
+		//addExtPlayerInfo(new Storage(1));//家族仓库
+		//addExtPlayerInfo(new Storage(2));//工会仓库
+		
+		Pet pet = new Pet();
+		pet.setPlayer(this);
+		pet.setDefault();
+		addExtPlayerInfo(pet);
+		
+		
+		MailBox mb = new MailBox();
+		addExtPlayerInfo(mb);
+	}
+	
+	public void setSkill()
+	{
+		SkillTome skillTome = (SkillTome) getExtPlayerInfo("skillTome");
+		PlayerSetting ps = (PlayerSetting) getExtPlayerInfo("playerSetting");
+		
+		Skill skill = skillTome.getSkill(1031000001);
+		if(skill == null)
+			return;
+		Skill sk1 = (Skill) Skill.cloneObject(skill);
+		ps.addPlayerBar(sk1, 0, 1);
+		
+		Skill sk = skillTome.getSkill(1031030201);
+		if(sk == null)
+			return;
+		Skill sk2 = (Skill) Skill.cloneObject(sk);
+		skillTome.addSkill(1031030201);
+		ps.addPlayerBar(sk2, 0, 2);
+	}
+	
+	/**
+	 * 初始化角色信息
+	 */
+	public void initial()
+	{
+
+		/**
+		 * 运动员...
+		    力量=24
+			敏捷=22
+			体质=20
+			精神=17
+			智慧=17
+		 */
+		if(profession == 2)
+		{
+			baseInfo.power = (int) (24+Math.round(2.2*level));
+			baseInfo.nimble = (int) (22+Math.round(2*level));
+			baseInfo.physique = (int) (20+Math.round(1*level));
+			baseInfo.spirit= (int) (17+Math.round(0.6*level));
+			baseInfo.wisdom = (int) (17+Math.round(0.4*level));
+		}
+		/**
+		 * 士兵...
+			力量=22
+			敏捷=18
+			体质=24
+			精神=20
+			智慧=16
+		 */
+		else if(profession == 1)
+		{
+			baseInfo.power = (int) (22+Math.round(2*level));
+			baseInfo.nimble = (int) (18+Math.round(0.6*level));
+			baseInfo.physique = (int) (24+Math.round(2*level));
+			baseInfo.spirit= (int) (20+Math.round(1*level));
+			baseInfo.wisdom = (int) (16+Math.round(0.4*level));
+		}
+		/**
+		 * 医护人员...
+			力量=17
+			敏捷=16
+			体质=18
+			精神=23
+			智慧=26
+		 */
+		else if(profession == 3)
+		{
+			baseInfo.power = (int) (17+Math.round(0.7*level));
+			baseInfo.nimble = (int) (16+Math.round(0.6*level));
+			baseInfo.physique = (int) (18+Math.round(0.8*level));
+			baseInfo.spirit= (int) (23+Math.round(2*level));
+			baseInfo.wisdom = (int) (26+Math.round(3.5*level));
+		}
+		/**
+		 * 超能力者...
+			力量=16
+			敏捷=19
+			体质=17
+			精神=26
+			智慧=22
+		 */
+		else if(profession == 4)
+		{
+			baseInfo.power = (int) (16+Math.round(0.6*level));
+			baseInfo.nimble = (int) (19+Math.round(0.9*level));
+			baseInfo.physique = (int) (17+Math.round(0.8*level));
+			baseInfo.spirit= (int) (26+Math.round(2*level));
+			baseInfo.wisdom = (int) (22+Math.round(2*level));
+		}
+		
+		baseInfo.updateBaseValue();
+	}
+	
+
+	public void loadFrom(ByteBuffer byteBuffer)
+	{
+		super.loadFrom(byteBuffer);
+		accountName = byteBuffer.readUTF();
+		
+		familyId = byteBuffer.readInt();
+		familyName = byteBuffer.readUTF();
+		isFamilyLeader = byteBuffer.readBoolean();
+		communityId = byteBuffer.readInt();
+		communityName = byteBuffer.readUTF();
+		familyContribution = byteBuffer.readInt();
+		tongContribution = byteBuffer.readInt();
+		
+		escTimer = byteBuffer.readLong();
+		boxCount = byteBuffer.readInt();
+		expMultTime = byteBuffer.readLong();
+		extLife = byteBuffer.readInt();
+		extMagic = byteBuffer.readInt();
+		
+		int extLen = byteBuffer.readInt();
+
+		for(int i = 0 ; i < extLen ; i ++)
+		{
+			String ext = byteBuffer.readUTF();
+			getExtPlayerInfo(ext).loadFrom(byteBuffer);
+			
+			if(ext.equals("pet"))
+			{
+				break;
+			}
+		}
+		
+		if(hitPoint <= 0)
+			hitPoint = 1;
+	}
+	
+
+	public void saveTo(ByteBuffer byteBuffer)
+	{
+		super.saveTo(byteBuffer);
+		
+		byteBuffer.writeUTF(accountName);
+
+		byteBuffer.writeInt(familyId);
+		byteBuffer.writeUTF(familyName);
+		byteBuffer.writeBoolean(isFamilyLeader);
+		byteBuffer.writeInt(communityId);
+		byteBuffer.writeUTF(communityName);
+		byteBuffer.writeInt(familyContribution);
+		byteBuffer.writeInt(tongContribution);
+	    byteBuffer.writeLong(escTimer);
+	    byteBuffer.writeInt(boxCount);
+	    byteBuffer.writeLong(expMultTime);
+	    byteBuffer.writeInt(extLife);
+	    byteBuffer.writeInt(extMagic);
+		
+		int extLen = extInfos.length;
+		byteBuffer.writeInt(extLen);
+		
+		for(int i = 0 ; i < extLen ; i ++)
+		{
+			String extName = extInfos[i].getName();
+			
+			if(extName.equals("mailbox"))
+			{
+				break;
+			}
+			
+			byteBuffer.writeUTF(extName);
+			extInfos[i].saveTo(byteBuffer);
+		}
+	}
+	
+	public void readFrom(ByteBuffer byteBuffer)
+	{
+		super.readFrom(byteBuffer);
+	}
+	
+	public void writeTo(ByteBuffer byteBuffer)
+	{
+		super.writeTo(byteBuffer);
+		byteBuffer.writeInt(familyId);
+		byteBuffer.writeUTF(familyName);
+		byteBuffer.writeBoolean(isFamilyLeader);
+		
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		int mhp = es.getTotalAtt("maxHitPoint") + maxHitPoint;
+		int mmp = es.getTotalAtt("maxMagicPoint") + maxMagicPoint;
+		byteBuffer.writeInt(mhp);
+		byteBuffer.writeInt(mmp);
+		byteBuffer.writeInt(baseInfo.speed);
+	}
+	
+	public void writeBaseTo(ByteBuffer buffer)
+	{
+		
+	}
+	
+	public PlayerExtInfo getExtPlayerInfo(String name)
+	{
+		for (int i = 0; i < extInfos.length; i++)
+		{	
+			if (extInfos[i].getName().equals(name))
+				return extInfos[i];
+		}
+		return null;
+	}
+	
+	public void addExtPlayerInfo(PlayerExtInfo extInfo)
+	{
+		PlayerExtInfo[] infos = new PlayerExtInfo[extInfos.length+1];
+		for (int i = 0; i < extInfos.length; i++)
+			infos[i] = extInfos[i];
+		infos[extInfos.length] = extInfo;
+		extInfos = infos;
+	}
+	
+	public List getExtPlayerInfos(String name)
+	{
+		List list = new ArrayList();
+		for (int i = 0; i < extInfos.length; i++)
+		{	
+			if (extInfos[i].getName().equals(name))
+				list.add(extInfos[i]);
+		}
+		return list;
+	}
+	
+	public boolean insteadExt(PlayerExtInfo ext)
+	{
+		for (int i = 0; i < extInfos.length; i++) 
+		{
+			if(extInfos[i].getName().equals(ext.getName()))
+			{
+				if(extInfos[i] instanceof Pet)
+				{
+					Pet pet = (Pet) extInfos[i];
+					PetSkill[] pss = pet.getPetSkills();
+					for (int j = 0; j < pss.length; j++) 
+					{
+						if(pss[j] == null)
+							continue;
+						pss[j].setValue(this,0);
+					}
+				}
+				if(ext instanceof Pet)
+				{
+					Pet pet = (Pet) ext;
+					PetSkill[] pss = pet.getPetSkills();
+					for (int j = 0; j < pss.length; j++) 
+					{
+						if(pss[j] == null)
+							continue;
+						pss[j].setValue(this,1);
+					}
+				}
+				extInfos[i] = ext;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public PlayerBaseInfo getBaseInfo()
+	{
+		return baseInfo;
+	}
+
+	public void setCamp(int camp)
+	{
+		this.camp = camp;
+	}
+	
+	/**
+	 * 设置角色模型ID
+	 */
+	public void setPlayerModelMotionId()
+	{
+		if(upProfession == 0)
+		{
+			if(sex == 1)
+				modelMotionId = 1190000011;
+			else if(sex == 0)
+				modelMotionId = 1190000001;
+		}
+		else
+		{
+			if(sex == 1)
+			{
+				if(upProfession == 1)
+					modelMotionId = 1190010511;
+				else if(upProfession == 2)
+					modelMotionId = 1190010611;
+				else if(upProfession == 3)
+					modelMotionId = 1190010711;
+				else if(upProfession == 4)
+					modelMotionId = 1190010811;
+				else if(upProfession == 5)
+					modelMotionId = 1190010911;
+				else if(upProfession == 6)
+					modelMotionId = 1190011011;
+				else if(upProfession == 7)
+					modelMotionId = 1190011111;
+				else if(upProfession == 8)
+					modelMotionId = 1190011211;
+			}
+			else if(sex == 0)
+			{
+				if(upProfession == 1)
+					modelMotionId = 1190010501;
+				else if(upProfession == 2)
+					modelMotionId = 1190010601;
+				else if(upProfession == 3)
+					modelMotionId = 1190010701;
+				else if(upProfession == 4)
+					modelMotionId = 1190010801;
+				else if(upProfession == 5)
+					modelMotionId = 1190010901;
+				else if(upProfession == 6)
+					modelMotionId = 1190011001;
+				else if(upProfession == 7)
+					modelMotionId = 1190011101;
+				else if(upProfession == 8)
+					modelMotionId = 1190011201;
+			}
+		}
+	}
+	
+	public boolean setHitPoint(int point)
+	{
+		hitPoint += point;
+		if(hitPoint <= 0)
+		{
+			hitPoint = 0;
+			return false;
+		}
+		
+		EquipSet equipSet = (EquipSet) getExtPlayerInfo("equipSet");
+		int maxPoint = maxHitPoint + equipSet.getTotalAtt("maxHitPoint");
+		
+		if(hitPoint > maxPoint)
+			hitPoint = maxPoint;
+		return true;
+	}
+	
+	public boolean setMagicPoint(int point)
+	{
+		magicPoint += point;
+		
+		if(magicPoint <= 0)
+		{
+			magicPoint = 0;
+			return false;
+		}
+		EquipSet equipSet = (EquipSet) getExtPlayerInfo("equipSet");
+		int maxPoint = maxMagicPoint + equipSet.getTotalAtt("maxMagicPoint");
+		
+		if(magicPoint > maxPoint)
+			magicPoint = maxPoint;
+		return true;
+	}
+
+	public void sendAlwaysValue(ByteBuffer buffer)
+	{
+		buffer.writeInt(id);
+		buffer.writeInt(hitPoint);
+		buffer.writeInt(magicPoint);
+		buffer.writeInt(level);
+		buffer.writeInt(requireExp);
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		es.writeBaseTo(buffer);
+		if(nextExp == 0)
+		{
+			Map map = (Map)DataFactory.getInstance().getAttachment(DataFactory.ATTACH_EXP);
+			Exp exp = (Exp)map.get(level+1);
+			if(exp != null)
+				nextExp = exp.levelExp;
+		}
+		buffer.writeInt(nextExp);
+	}
+   
+	public void sendLifeInfo(ByteBuffer buffer)
+	{
+		buffer.writeInt(id);
+		buffer.writeInt(hitPoint);
+		buffer.writeInt(magicPoint);
+	}
+	
+
+
+	
+	public void sendPlayerBattleInfo(ByteBuffer buffer)
+	{
+		buffer.writeInt(magicPoint);
+		EquipSet es = (EquipSet) getExtPlayerInfo("equipSet");
+		es.writeBaseTo(buffer);
+	}
+
+}

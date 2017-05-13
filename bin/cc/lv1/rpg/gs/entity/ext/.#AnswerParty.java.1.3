@@ -1,0 +1,718 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import java.text.SimpleDateFormat;
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.impl.answer.AnswerReward;
+import cc.lv1.rpg.gs.entity.impl.answer.Question;
+import cc.lv1.rpg.gs.entity.impl.answer.RankReward;
+import cc.lv1.rpg.gs.entity.impl.answer.RewardPlayer;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+
+/**
+ * 问答活动相关信息
+ * @author bean
+ *
+ */
+public class AnswerParty extends PlayerExtInfo
+{
+	public static final int FREE_ANSWER = 0;
+	public static final int POINT_ANSWER = 1;
+	public static final int MONEY_ANSWER = 2;
+	public static final int CONTINUE = 3;
+	public static final int NOANSWER = 4;
+	public static final int NOANSWERTIME = 5;
+	
+	public static final int OVERTIME = 22;
+	public static final int STARTIME = 23;
+
+	
+	/**  一轮的题目的数量 */
+	public static final int ROUND = 18;
+	
+	/** 需要游戏币 */
+	public static final int NEEDPOINT = 10000;
+	/** 需要元宝 */
+	public static final int NEEDMONEY = 10;
+	
+	/** 当天累计获得经验 */
+	public long expCount;
+	
+	/** 当天累计获得积分 */
+	public int pointCount;
+	
+	/** 获得的图案 */
+	public byte[] pics = new byte[3];
+	
+	/** 累计答题数量 */
+	public int answerCount;
+	
+	/** 一轮的题目 */
+	public Question[] questions;
+	
+	/** 额外答题机会(以轮计算,可以购买，暂定) */
+	public int otherRound;
+	
+	/** 第一次答题时间 */
+	public long answerTime;
+	
+	public int npcId;
+
+	@Override
+	public String getName()
+	{
+		return "answerParty";
+	}
+	
+	@Override
+	public void loadFrom(ByteBuffer byteBuffer) 
+	{
+		expCount = byteBuffer.readLong();
+		pointCount = byteBuffer.readInt();
+		pics[0] = (byte) byteBuffer.readByte();
+		pics[1] = (byte) byteBuffer.readByte();
+		pics[2] = (byte) byteBuffer.readByte();
+		answerCount = byteBuffer.readInt();
+		otherRound = byteBuffer.readInt();
+		answerTime = byteBuffer.readLong();
+		int count = byteBuffer.readByte();
+		if(count > 0)
+			questions = new Question[count];
+		for (int i = 0; i < count; i++) 
+		{
+			int id = byteBuffer.readInt();
+			boolean isAnswer = byteBuffer.readBoolean();
+			int questionCount = byteBuffer.readInt();
+			
+			Question q = DataFactory.getInstance().getQuestion(id);
+			Question question = (Question) Question.cloneObject(q);
+			
+			question.id = id;
+			question.isAnswered = isAnswer;
+			question.questionCount = questionCount;
+			questions[i] = question;
+		}
+	}
+
+	@Override
+	public void saveTo(ByteBuffer byteBuffer) 
+	{
+		byteBuffer.writeLong(expCount);
+		byteBuffer.writeInt(pointCount);
+		byteBuffer.writeByte(pics[0]);
+		byteBuffer.writeByte(pics[1]);
+		byteBuffer.writeByte(pics[2]);
+		byteBuffer.writeInt(answerCount);
+		byteBuffer.writeInt(otherRound);
+		byteBuffer.writeLong(answerTime);
+		int count = (questions==null?0:questions.length);
+		byteBuffer.writeByte(count);
+		for (int i = 0; i < count; i++) 
+		{
+			byteBuffer.writeInt(questions[i].id);
+			byteBuffer.writeBoolean(questions[i].isAnswered);
+			byteBuffer.writeInt(questions[i].questionCount);
+		}
+	}
+	
+	public void setPic(byte pic)
+	{
+		for (int i = 0; i < pics.length; i++) 
+		{
+			if(pics[i] == 0)
+			{
+				pics[i] = pic;
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * 三个图片是否相同
+	 * @return
+	 */
+	public boolean isSamePic()
+	{
+		return (pics[0] == pics[1] && pics[0] == pics[2] && pics[1] == pics[2] && pics[0] != 0);
+	}
+	
+	/**
+	 * 一组是否答完
+	 * @return
+	 */
+	public boolean isTeamEnd()
+	{
+		return (pics[0] !=0 && pics[1] !=0 && pics[2] !=0);
+	}
+	
+	/**
+	 * 一轮是否答完
+	 * @return
+	 */
+	public boolean isRoundEnd()
+	{
+		if(questions == null)
+			return true;
+		for (int i = 0; i < questions.length; i++) 
+		{
+			if(!questions[i].isAnswered)
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 获取下一题
+	 * @return
+	 */
+	public Question getNextQuestion()
+	{
+		if(questions == null)
+			return null;
+		for (int i = 0; i < questions.length; i++) 
+		{
+			if(!questions[i].isAnswered)
+				return questions[i];
+		}
+		return null;
+	}
+	
+	private void clearPic()
+	{
+		pics[0] = 0;
+		pics[1] = 0;
+		pics[2] = 0;
+	}
+	
+	private void clearQuestion()
+	{
+		questions = null;
+	}
+	
+	public void clearTime()
+	{
+		if(answerTime > 0)
+			answerTime = 0;
+	}
+	
+	public void clearAll()
+	{
+		clear();
+		clearTime();
+	}
+	
+	/**
+	 * 清零
+	 */
+	public void clear()
+	{
+		expCount = 0;
+		answerCount = 0;
+		pointCount = 0;
+		clearPic();
+		clearQuestion();
+	}
+	
+	public void addQuestion(List list)
+	{
+		questions = new Question[list.size()];
+		for (int i = 0; i < questions.length; i++) 
+		{
+			questions[i] = (Question) list.get(i);
+		}
+	}
+	
+	public Question getQuestionById(int id)
+	{
+		if(questions == null)
+			return null;
+		for (int i = 0; i < questions.length; i++) 
+		{
+			if(questions[i] != null && questions[i].id == id)
+				return questions[i];
+		}
+		return null;
+	}
+	
+	public Question getNextQuestion(int id)
+	{
+		if(questions == null)
+			return null;
+		for (int i = 0; i < questions.length; i++) 
+		{
+			if(questions[i] != null && questions[i].id == id)
+				return questions[i];
+		}
+		return null;
+	}
+	
+	public boolean isPrvAnswered(int id)
+	{
+		if(questions == null)
+			return true;
+		if(questions[0].id == id)
+			return true;
+		for (int i = 1; i < questions.length; i++) 
+		{
+			if(questions[i].id == id && questions[i-1].isAnswered)
+			{
+				return true;
+			}
+			else
+			{
+				continue;
+			}
+		}
+		return false;
+	}
+	
+
+	
+	public int getAnswerType()
+	{
+		int result = 0;
+		SimpleDateFormat sdf = new SimpleDateFormat("HH");
+		int time = Integer.parseInt(sdf.format(WorldManager.currentTime));
+		if(time >= OVERTIME && time <= STARTIME) 
+		{
+			result = NOANSWERTIME;
+			clear();
+			clearTime();
+		}
+		else
+		{
+			if(questions == null)
+			{
+				if(answerCount == 0)
+				{
+					result = FREE_ANSWER;//当天还没有开始答题
+				}
+				else if(answerCount == ROUND)
+				{
+					result = POINT_ANSWER;//免费机会 没有了，要用游戏币才能答
+				}
+				else if(answerCount == 2 * ROUND)
+				{
+					result = MONEY_ANSWER;//游戏币答题机会也没有了，要用元宝才能答
+				}
+				else 
+				{
+					result = NOANSWER;//当天所有答题机会都没有了
+					clearTime();
+				}
+			}
+			else
+			{
+				result = CONTINUE;
+			}
+		}
+		return result;
+	}
+	
+
+
+	
+	
+	/**
+	 * 刷新题目 
+	 * @param target
+	 * @param questionId 题目ID
+	 */
+	public void sendNextQuestion(PlayerController target,int questionId)
+	{
+		ByteBuffer buffer = new ByteBuffer(5);
+		buffer.writeByte(answerCount%18+1);//第几道题
+		buffer.writeInt(questionId);
+		buffer.writeByte(pics[0]);
+		buffer.writeByte(pics[1]);
+		buffer.writeByte(pics[2]);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_QUESTION_FLUSH_COMMAND,buffer));
+	}
+	
+	/**
+	 * 发送答题状态
+	 * @param target
+	 */
+	public void sendAnswerQuestionState(PlayerController target)
+	{
+		checkClear();
+		
+		closeAnswer(target);
+		
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeByte(getAnswerType());
+		buffer.writeInt(npcId);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_ANSWER_QUESTION_STATE_COMMAND,buffer));
+	}
+	
+	
+	/** 一组题目答完后获得的额外经验和积分奖励 */
+	private long otherExp = 0;
+	private int otherPoint = 0;
+	/**
+	 * 发送答题结果
+	 * @param target
+	 */
+	public void sendAnswerResult(PlayerController target,boolean result,int answer,long exp,int point,int pic)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeBoolean(result);
+		buffer.writeBoolean(isRoundEnd());
+		buffer.writeByte(answer);
+		buffer.writeUTF(exp+"");
+		buffer.writeInt(point);
+		buffer.writeByte(pic);
+		buffer.writeUTF(otherExp+"");
+		buffer.writeInt(otherPoint);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_ANSWER_QUESTION_RESULT_COMMAND,buffer));
+		
+		otherExp = 0;
+		otherPoint = 0;
+	}
+	
+	/**
+	 * 发送累计获得奖励
+	 * @param target
+	 */
+	public void sendTotalReward(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeUTF(expCount+"");
+		buffer.writeInt(pointCount);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_TOTAL_REWARD_COMMAND,buffer));
+	}
+	
+	public void processAnswerResult(PlayerController target,ByteBuffer buffer)
+	{
+		int questionId = buffer.readInt();
+		int answer = buffer.readByte();
+		Question q = getQuestionById(questionId);
+		if(q == null || q.isAnswered)
+		{
+			System.out.println("question is null or question isAnswered!");
+			return;
+		}
+		if(!isPrvAnswered(questionId))
+		{
+			target.sendAlert(ErrorCode.ALERT_PRVQUESTION_NO_ANSWER);//上一题还没答
+			return;
+		}
+		q.setQuestionCount(q.getQuestionCount()+1);
+		boolean result = q.isRight(answer);
+		if(result)
+		{
+			q.setAnswered(true);
+			long exp = expCount;
+			int point = pointCount;
+			int pic = setReward(target, q.getQuestionCount());
+			if(isTeamEnd())
+			{
+				clearPic();
+			}
+			if(isRoundEnd())
+			{
+				clearQuestion();
+				closeAnswer(target);
+			}
+
+			sendAnswerResult(target, true,answer,expCount-exp,pointCount-point,pic);
+			
+			sendTotalReward(target);
+			
+			answerCount++;
+		}
+		else
+		{
+			sendAnswerResult(target, false,answer,0,0,0);
+		}
+	}
+	
+	
+	public void checkClear()
+	{
+		if(WorldManager.sendRewardDate != WorldManager.date && answerCount == 0 && WorldManager.sendRewardDate != 0)
+		{
+			if(answerTime == 0)
+				clear();
+		}
+	}
+	
+	
+	public void flushQuestion(PlayerController target)
+	{
+		checkClear();
+		int qType = getAnswerType();
+		if(qType == NOANSWERTIME)
+		{
+			target.sendAlert(ErrorCode.ALERT_NO_ANSWER_TIME);
+			return;
+		}
+		
+		if(qType == NOANSWER)
+		{
+			target.sendAlert(ErrorCode.ALERT_NO_ANSWER_DAY);
+			return;
+		}
+		if(qType == CONTINUE)
+		{
+			if(answerCount == 0)
+			{
+				sendNextQuestion(target,questions[0].id);
+			}
+			else
+				sendNextQuestion(target,questions[answerCount%18].id);
+		}
+		else 
+		{
+			if(qType == POINT_ANSWER)
+			{
+				Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+				if(bag.point < NEEDPOINT)
+				{
+					target.sendAlert(ErrorCode.ALERT_SHOP_NO_POINT);
+					return;
+				}
+				else
+				{
+					bag.point -= NEEDPOINT;
+					bag.sendAddGoods(target, null);
+				}
+			}
+			else if(qType == MONEY_ANSWER)
+			{
+				Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+				if(bag.money < NEEDMONEY)
+				{
+					target.sendAlert(ErrorCode.ALERT_SHOP_NO_MONEY);
+					return;
+				}
+				else
+				{
+					bag.money -= NEEDMONEY;
+					bag.sendAddGoods(target, null);
+				}
+			}
+			
+			addQuestion(getQuestions());
+			sendNextQuestion(target,questions[0].id);
+		}
+		
+		target.isAnswer = true;
+		
+		answerTime = WorldManager.currentTime;
+		
+		sendTotalReward(target);
+	}
+	
+	/**
+	 * 设置奖励
+	 * @param type 单题奖励还是一组完后奖励或者是一轮奖励
+	 * @param count 玩家一共答了多少次才把这题答对
+	 * @return 获得的图片
+	 * 一道题可以有无限次答题机会，即第一次回答错误，还可以继续，直到答对为止。如果一次性答对获得20-30分，第二次或更多次才答对获得15-20分，
+	每组结束后如果获得的三个图案不相同获得额外经验奖励一次,再加一次单题奖励，不加积分，如果相同获得经验再加单题奖励5倍，积分加150
+	经验奖励：一次性答对获得完全单题经验，第二次或以后答对获得一半单题经验奖励，
+	 */
+	public int setReward(PlayerController target,int count)
+	{
+		int pic = (int) (Math.random() * 3 + 1);
+		AnswerReward ar = DataFactory.getInstance().getAnswerReward(target.getPlayer().level);
+		if(ar == null)
+			return pic;
+		long soloExp = ar.expReward;//获得经验
+		int point = 0;//获得积分
+		if(count == 1)// 一次性答对
+		{
+			point = (int) (Math.random() * 10 + 20);
+			soloExp += ar.expReward;
+		}
+		else
+		{
+			point = (int) (Math.random() * 5 + 15);
+			soloExp += ar.expReward / 2;
+		}
+		setPic((byte) pic);
+		if(isTeamEnd())
+		{
+			if(isSamePic())
+			{
+				otherExp = 5 * ar.expReward;
+				otherPoint = 150;
+			}
+			else
+			{
+				otherExp = ar.expReward;
+			}
+			soloExp += otherExp;
+			point += otherPoint;
+		}
+
+		if(isRoundEnd())
+		{
+			//一轮后奖励
+			RankReward rr = DataFactory.getInstance().getRankReward(2, answerCount/ROUND+1);
+			GameServer.getInstance().getWorldManager().sendAnswerReward(target, rr, true);
+		}
+
+		target.addExp(soloExp);
+		pointCount += point;
+		expCount += soloExp;
+		GameServer.getInstance().getWorldManager().addAnswerReward(target.getPlayer(),this);
+		return pic;
+	}
+	
+	public List getQuestions()
+	{
+		List result = new ArrayList();
+		List list = DataFactory.getInstance().getQuestionList();
+		List tmpList = new ArrayList();
+		List newList = new ArrayList();
+		for (int i = 0; i < list.size(); i++)
+		{
+			Question q = (Question) list.get(i);
+			if(q.type == 1)
+				tmpList.add(q);
+		}
+		for (int i = 0; i < 3; i++) 
+		{
+			int random = (int) (Math.random() * tmpList.size());
+			Question q = (Question) tmpList.get(random);
+			Question question = (Question) Question.cloneObject(q);
+			result.add(question);
+			tmpList.remove(random);
+		}
+		
+		tmpList.clear();
+		for (int i = 0; i < list.size(); i++)
+		{
+			Question q = (Question) list.get(i);
+			if(q.type == 2)
+				tmpList.add(q);
+		}
+		for (int i = 0; i < 7; i++) 
+		{
+			int random = (int) (Math.random() * tmpList.size());
+			Question q = (Question) tmpList.get(random);
+			newList.add(q);
+			tmpList.remove(random);
+		}
+		
+		tmpList.clear();
+		for (int i = 0; i < list.size(); i++)
+		{
+			Question q = (Question) list.get(i);
+			if(q.type == 3)
+				tmpList.add(q);
+		}
+		for (int i = 0; i < 8; i++) 
+		{
+			int random = (int) (Math.random() * tmpList.size());
+			Question q = (Question) tmpList.get(random);
+			newList.add(q);
+			tmpList.remove(random);
+		}
+		tmpList.clear();
+
+		//打乱
+		for (int i = 0; i < 15; i++)
+		{
+			int random = (int) (Math.random() * newList.size());
+			Question q = (Question) newList.get(random);
+			Question question = (Question) Question.cloneObject(q);
+			result.add(question);
+			newList.remove(random);
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * 发送排名
+	 * @param target
+	 */
+	private void sendAnswerReward(PlayerController target)
+	{
+		List list = GameServer.getInstance().getWorldManager().getAnswerRewards();
+		int size = list.size();
+		ByteBuffer buffer = new ByteBuffer();
+		buffer.writeByte(size);
+		if(size == 0)
+			clear();
+		for (int i = 0; i < size; i++) 
+		{
+			RewardPlayer rp = (RewardPlayer) list.get(i);
+			buffer.writeByte(rp.rank);
+			buffer.writeUTF(rp.name);
+			buffer.writeInt(rp.level);
+			buffer.writeInt(rp.point);
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			buffer.writeUTF(sdf.format(rp.logTime));
+		}
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_ANSWER_REWARD_COMMAND,buffer));
+
+		sendTotalReward(target);
+	}
+	
+	/**
+	 * 关闭答题
+	 * @param target
+	 */
+	private void closeAnswer(PlayerController target)
+	{
+		target.isAnswer = false;
+	}
+	
+	
+	
+	/** 接收玩家和的互动 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		if(type != SMsg.C_GET_ANSWER_REWARD_COMMAND)
+		{
+			int state = getAnswerType();
+			if(state == AnswerParty.NOANSWERTIME)
+			{
+				target.sendAlert(ErrorCode.ALERT_NO_ANSWER_TIME);
+				return;
+			}
+			
+			if(state == AnswerParty.NOANSWER)
+			{
+				target.sendAlert(ErrorCode.ALERT_NO_ANSWER_DAY);
+				return;
+			}
+		}
+		
+		if(type == SMsg.C_QUESTION_FLUSH_COMMAND)
+		{
+			flushQuestion(target);
+		}
+		else if(type == SMsg.C_ANSWER_QUESTION_RESULT_COMMAND)
+		{
+			processAnswerResult(target, msg.getBuffer());
+		}
+		else if(type == SMsg.C_ANSWER_QUESTION_STATE_COMMAND)
+		{
+			sendAnswerQuestionState(target);
+		}
+		else if(type == SMsg.C_GET_ANSWER_REWARD_COMMAND)
+		{
+			sendAnswerReward(target);
+		}
+		else if(type == SMsg.C_CLOSE_ANSWER_COMMAND)
+		{
+			closeAnswer(target);
+		}
+	}
+	
+
+}

@@ -1,0 +1,2 @@
+time	account	name	level	data
+2011-01-12-17:21:52	shouhu01	守护2	102	丢弃生锈火箭筒射击（二级）x1

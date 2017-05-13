@@ -1,0 +1,4935 @@
+<dialog>
+
+<!--该NPC名为冲级奖励任务官 -->
+<!-- default为NPC默认的对话 -->
+	<default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="100000">//好好练级，天天向上。等级提高以后，记得到我这里领取奖励哦~|//VIP称号不但是尊贵身份的象征，还可以大大提高你的战斗力。不过高级VIP称号的任务可是有等级要求的。|//VIP商店的老板委托了一些奖励丰厚的任务给我，他说是要拓展市场，我看是想借此讨好我吧。男人啊……</text>
+		</words>
+		<options>
+			<item textId="1021090080">taskList</item>
+		</options>
+	</s01>
+	</default>
+	<t1074020101>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020101">任务:☆黑夜骑士☆</text>
+			</words>
+		<options>
+		</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000001">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000002" text="接受任务" command="accept:1074020101" />
+				<item textId="4000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000004">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020101" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000005">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000006" text="完成任务" command="finish:1074020101" />
+			</options>
+		 </s03>
+   	</t1074020101>
+	<t1074020102>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020102">任务:☆舞林高手☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000007">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000008" text="接受任务" command="accept:1074020102" />
+				<item textId="4000009" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000010">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020102" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000011">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000012" text="完成任务" command="finish:1074020102" />
+			</options>
+		 </s03>
+   	</t1074020102>
+	<t1074020103>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020103">任务:☆热血英豪☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000013">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000014" text="接受任务" command="accept:1074020103" />
+				<item textId="4000015" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000016">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020103" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000017">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000018" text="完成任务" command="finish:1074020103" />
+			</options>
+		 </s03>
+   	</t1074020103>
+	<t1074020104>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020104">任务:☆可爱萌娘☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000019">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000020" text="接受任务" command="accept:1074020104" />
+				<item textId="4000021" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000022">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020104" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000023">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000024" text="完成任务" command="finish:1074020104" />
+			</options>
+		 </s03>
+   	</t1074020104>
+	<t1074020105>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020105">任务:☆今晚打老虎☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000025">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000026" text="接受任务" command="accept:1074020105" />
+				<item textId="4000027" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000028">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020105" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000029">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000030" text="完成任务" command="finish:1074020105" />
+			</options>
+		 </s03>
+   	</t1074020105>
+	<t1074020106>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020106">任务:☆我的心里只有你☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000031">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000032" text="接受任务" command="accept:1074020106" />
+				<item textId="4000033" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000034">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020106" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000035">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000036" text="完成任务" command="finish:1074020106" />
+			</options>
+		 </s03>
+   	</t1074020106>
+	<t1074020107>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020107">任务:☆辣手回春☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000037">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000038" text="接受任务" command="accept:1074020107" />
+				<item textId="4000039" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000040">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020107" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000041">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000042" text="完成任务" command="finish:1074020107" />
+			</options>
+		 </s03>
+   	</t1074020107>
+	<t1074020108>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020108">任务:☆烈火红颜☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000043">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000044" text="接受任务" command="accept:1074020108" />
+				<item textId="4000045" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000046">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020108" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000047">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000048" text="完成任务" command="finish:1074020108" />
+			</options>
+		 </s03>
+   	</t1074020108>
+	<t1074020109>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020109">任务:☆活力宝贝☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000049">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000050" text="接受任务" command="accept:1074020109" />
+				<item textId="4000051" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000052">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020109" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000053">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000054" text="完成任务" command="finish:1074020109" />
+			</options>
+		 </s03>
+   	</t1074020109>
+	<t1074020110>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020110">任务:☆黑侠☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000055">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000056" text="接受任务" command="accept:1074020110" />
+				<item textId="4000057" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000058">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020110" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000059">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000060" text="完成任务" command="finish:1074020110" />
+			</options>
+		 </s03>
+   	</t1074020110>
+	<t1074020111>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020111">任务:☆多情男子☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000061">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000062" text="接受任务" command="accept:1074020111" />
+				<item textId="4000063" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000064">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020111" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000065">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000066" text="完成任务" command="finish:1074020111" />
+			</options>
+		 </s03>
+   	</t1074020111>
+	<t1074020112>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020112">任务:☆月光美眉☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000067">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000068" text="接受任务" command="accept:1074020112" />
+				<item textId="4000069" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000070">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020112" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000071">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000072" text="完成任务" command="finish:1074020112" />
+			</options>
+		 </s03>
+   	</t1074020112>
+	<t1074020113>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020113">任务:☆代表月亮惩罚你☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000073">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000074" text="接受任务" command="accept:1074020113" />
+				<item textId="4000075" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000076">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020113" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000077">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000078" text="完成任务" command="finish:1074020113" />
+			</options>
+		 </s03>
+   	</t1074020113>
+	<t1074020114>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020114">任务:☆在世小强☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000079">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000080" text="接受任务" command="accept:1074020114" />
+				<item textId="4000081" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000082">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020114" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000083">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000084" text="完成任务" command="finish:1074020114" />
+			</options>
+		 </s03>
+   	</t1074020114>
+	<t1074020115>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020115">任务:☆霸王之拳☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000085">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000086" text="接受任务" command="accept:1074020115" />
+				<item textId="4000087" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000088">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020115" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000089">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000090" text="完成任务" command="finish:1074020115" />
+			</options>
+		 </s03>
+   	</t1074020115>
+	<t1074020116>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020116">任务:☆孤傲一支花☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000091">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000092" text="接受任务" command="accept:1074020116" />
+				<item textId="4000093" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000094">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020116" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000095">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000096" text="完成任务" command="finish:1074020116" />
+			</options>
+		 </s03>
+   	</t1074020116>
+	<t1074020117>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020117">任务:☆冰山美人☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000097">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000098" text="接受任务" command="accept:1074020117" />
+				<item textId="4000099" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000100">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020117" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000101">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000102" text="完成任务" command="finish:1074020117" />
+			</options>
+		 </s03>
+   	</t1074020117>
+	<t1074020118>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020118">任务:☆太空漫步者☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000103">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000104" text="接受任务" command="accept:1074020118" />
+				<item textId="4000105" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000106">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020118" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000107">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000108" text="完成任务" command="finish:1074020118" />
+			</options>
+		 </s03>
+   	</t1074020118>
+	<t1074020119>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020119">任务:☆闪灵游侠☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000109">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000110" text="接受任务" command="accept:1074020119" />
+				<item textId="4000111" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000112">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020119" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4000113">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4000114" text="完成任务" command="finish:1074020119" />
+			</options>
+		 </s03>
+   	</t1074020119>
+
+	 <t1074020274>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020274">任务:☆人类的救星☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001050">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001051" text="接受任务" command="accept:1074020274" />
+				<item textId="4001052" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001053">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020274" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001054">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001055" text="完成任务" command="finish:1074020274" />
+			</options>
+		 </s03>
+   	</t1074020274>
+	<t1074020275>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020275">任务:☆莉莉·丝的愤怒☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001056">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001057" text="接受任务" command="accept:1074020275" />
+				<item textId="4001058" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001059">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020275" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001060">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001061" text="完成任务" command="finish:1074020275" />
+			</options>
+		 </s03>
+   	</t1074020275>
+	<t1074020276>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020276">任务:☆安娜·金的微笑☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001062">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001063" text="接受任务" command="accept:1074020276" />
+				<item textId="4001064" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001065">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020276" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001066">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001067" text="完成任务" command="finish:1074020276" />
+			</options>
+		 </s03>
+   	</t1074020276>
+	<t1074020277>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020277">任务:☆世界小姐☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001068">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001069" text="接受任务" command="accept:1074020277" />
+				<item textId="4001070" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001071">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020277" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001072">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001073" text="完成任务" command="finish:1074020277" />
+			</options>
+		 </s03>
+   	</t1074020277>
+	<t1074020278>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020278">任务:☆妖颜惑众☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001074">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001075" text="接受任务" command="accept:1074020278" />
+				<item textId="4001076" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001077">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020278" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001078">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001079" text="完成任务" command="finish:1074020278" />
+			</options>
+		 </s03>
+   	</t1074020278>
+	<t1074020279>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020279">任务:☆摇滚女王☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001080">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001081" text="接受任务" command="accept:1074020279" />
+				<item textId="4001082" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001083">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020279" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001084">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001085" text="完成任务" command="finish:1074020279" />
+			</options>
+		 </s03>
+   	</t1074020279>
+	<t1074020280>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020280">任务:☆极限武神☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001086">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001087" text="接受任务" command="accept:1074020280" />
+				<item textId="4001088" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001089">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020280" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001090">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001091" text="完成任务" command="finish:1074020280" />
+			</options>
+		 </s03>
+   	</t1074020280>
+	<t1074020281>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020281">任务:☆爷是个传说☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001092">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001093" text="接受任务" command="accept:1074020281" />
+				<item textId="4001094" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001095">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020281" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001096">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001097" text="完成任务" command="finish:1074020281" />
+			</options>
+		 </s03>
+   	</t1074020281>
+
+	<t1074020313>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020313">任务:☆十番队斩魄队长☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001278">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001279" text="接受任务" command="accept:1074020313" />
+				<item textId="4001280" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001281">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020313" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001282">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001283" text="完成任务" command="finish:1074020313" />
+			</options>
+		 </s03>
+   	</t1074020313>
+	<t1074020314>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020314">任务:☆寻找英灵者☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001284">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001285" text="接受任务" command="accept:1074020314" />
+				<item textId="4001286" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001287">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020314" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001288">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001289" text="完成任务" command="finish:1074020314" />
+			</options>
+		 </s03>
+   	</t1074020314>
+
+	<t1074020322>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020322">任务:☆超级猎人☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001337">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001338" text="接受任务" command="accept:1074020322" />
+				<item textId="4001339" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001340">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020322" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001341">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001342" text="完成任务" command="finish:1074020322" />
+			</options>
+		 </s03>
+   	</t1074020322>
+
+	<t1074020324>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1074020324">任务:☆姐是个神话☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001349">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001350" text="接受任务" command="accept:1074020324" />
+				<item textId="4001351" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001352">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020324" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="4001353">多余的VIP形象，可以兑换成独有的VIP称号。不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001354" text="完成任务" command="finish:1074020324" />
+			</options>
+		 </s03>
+   	</t1074020324>
+
+	
+	<t1074020362>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="402036201">任务:☆性感女神☆</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="402036202">多余的VIP形象，可以兑换成独有的VIP称号！不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001536" text="接受任务" command="accept:1074020362" />
+				<item textId="4001537" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="402036202">多余的VIP形象，可以兑换成独有的VIP称号！不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1074020362" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="402036202">多余的VIP形象，可以兑换成独有的VIP称号！不包括进化后的真、绝系列形象。</text>
+			</words>
+			<options>
+				<item textId="4001540" text="完成任务" command="finish:1074020362" />
+			</options>
+		 </s03>
+   	</t1074020362>
+
+	<t1075010101>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010101">任务:100级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000001">100级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000002" text="接受任务" command="accept:1075010101" />
+				<item textId="5000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000004">100级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010101" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000005">100级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000006" text="完成任务" command="finish:1075010101" />
+			</options>
+		 </s03>
+   	</t1075010101>
+	<t1075010102>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010102">任务:200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000007">200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000008" text="接受任务" command="accept:1075010102" />
+				<item textId="5000009" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000010">200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010102" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000011">200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000012" text="完成任务" command="finish:1075010102" />
+			</options>
+		 </s03>
+   	</t1075010102>
+	<t1075010103>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010103">任务:300级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000013">300级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000014" text="接受任务" command="accept:1075010103" />
+				<item textId="5000015" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000016">300级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010103" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000017">300级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000018" text="完成任务" command="finish:1075010103" />
+			</options>
+		 </s03>
+   	</t1075010103>
+	<t1075010104>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010104">任务:400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000019">400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000020" text="接受任务" command="accept:1075010104" />
+				<item textId="5000021" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000022">400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010104" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000023">400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000024" text="完成任务" command="finish:1075010104" />
+			</options>
+		 </s03>
+   	</t1075010104>
+	<t1075010105>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010105">任务:500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000025">500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000026" text="接受任务" command="accept:1075010105" />
+				<item textId="5000027" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000028">500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010105" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000029">500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000030" text="完成任务" command="finish:1075010105" />
+			</options>
+		 </s03>
+   	</t1075010105>
+	<t1075010106>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010106">任务:600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000031">600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000032" text="接受任务" command="accept:1075010106" />
+				<item textId="5000033" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000034">600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010106" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000035">600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000036" text="完成任务" command="finish:1075010106" />
+			</options>
+		 </s03>
+   	</t1075010106>
+	<t1075010107>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010107">任务:700级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000037">700级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000038" text="接受任务" command="accept:1075010107" />
+				<item textId="5000039" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000040">700级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010107" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000041">700级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000042" text="完成任务" command="finish:1075010107" />
+			</options>
+		 </s03>
+   	</t1075010107>
+	<t1075010108>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010108">任务:800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000043">800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000044" text="接受任务" command="accept:1075010108" />
+				<item textId="5000045" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000046">800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010108" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000047">800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000048" text="完成任务" command="finish:1075010108" />
+			</options>
+		 </s03>
+   	</t1075010108>
+	<t1075010109>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010109">任务:900级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000049">900级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000050" text="接受任务" command="accept:1075010109" />
+				<item textId="5000051" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000052">900级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010109" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000053">900级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000054" text="完成任务" command="finish:1075010109" />
+			</options>
+		 </s03>
+   	</t1075010109>
+	<t1075010110>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010110">任务:1000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000055">1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000056" text="接受任务" command="accept:1075010110" />
+				<item textId="5000057" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000058">1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010110" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000059">1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000060" text="完成任务" command="finish:1075010110" />
+			</options>
+		 </s03>
+   	</t1075010110>
+	<t1075010112>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010112">任务:1100级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000061">1100级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000062" text="接受任务" command="accept:1075010112" />
+				<item textId="5000063" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000064">1100级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010112" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000065">1100级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000066" text="完成任务" command="finish:1075010112" />
+			</options>
+		 </s03>
+   	</t1075010112>
+	<t1075010113>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010113">任务:1300级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000067">1300级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000068" text="接受任务" command="accept:1075010113" />
+				<item textId="5000069" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000070">1300级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010113" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000071">1300级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000072" text="完成任务" command="finish:1075010113" />
+			</options>
+		 </s03>
+   	</t1075010113>
+	<t1075010114>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010114">任务:1500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000073">1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000074" text="接受任务" command="accept:1075010114" />
+				<item textId="5000075" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000076">1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010114" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000077">1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000078" text="完成任务" command="finish:1075010114" />
+			</options>
+		 </s03>
+   	</t1075010114>
+	<t1075010115>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010115">任务:1700级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000079">1700级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000080" text="接受任务" command="accept:1075010115" />
+				<item textId="5000081" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000082">1700级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010115" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000083">1700级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000084" text="完成任务" command="finish:1075010115" />
+			</options>
+		 </s03>
+   	</t1075010115>
+	<t1075010116>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010116">任务:1900级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000085">1900级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000086" text="接受任务" command="accept:1075010116" />
+				<item textId="5000087" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000088">1900级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010116" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000089">1900级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000090" text="完成任务" command="finish:1075010116" />
+			</options>
+		 </s03>
+   	</t1075010116>
+	
+
+	<t1075010122>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010122">任务:商城在哪</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000121">想知道“商城”在哪吗？点击游戏界面右下角的“商城”按钮或使用快捷键“S”进入“VIP商店”界面，你也可以点击城镇里的“VIP商店”NPC进入“VIP商店”界面</text>
+			</words>
+			<options>
+				<item textId="5000122" text="接受任务" command="accept:1075010122" />
+				<item textId="5000123" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000124">想知道“商城”在哪吗？点击游戏界面右下角的“商城”按钮或使用快捷键“S”进入“VIP商店”界面，你也可以点击城镇里的“VIP商店”NPC进入“VIP商店”界面。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010122" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000125">想知道“商城”在哪吗？点击游戏界面右下角的“商城”按钮或使用快捷键“S”进入“VIP商店”界面，你也可以点击城镇里的“VIP商店”NPC进入“VIP商店”界面。</text>
+			</words>
+			<options>
+				<item textId="5000126" text="完成任务" command="finish:1075010122" />
+			</options>
+		 </s03>
+   	</t1075010122>
+
+	<t1075010123>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010123">任务:如何充值</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000127">1、打开商城，点击“VIP商店”界面左下角“充值”按钮就可以进入充值页面。/  2、点击右下角“充值元宝”按钮也可以进入充值页面。/  3、双击“VIP商店”NPC进入“VIP商店”界面，点击左下角“充值”按钮就可以进入充值页面。</text>
+			</words>
+			<options>
+				<item textId="5000128" text="接受任务" command="accept:1075010123" />
+				<item textId="5000129" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000130">1、打开商城，点击“VIP商店”界面左下角“充值”按钮就可以进入充值页面。/  2、点击右下角“充值元宝”按钮也可以进入充值页面。/  3、双击“VIP商店”NPC进入“VIP商店”界面，点击左下角“充值”按钮就可以进入充值页面。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010123" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000131">1、打开商城，点击“VIP商店”界面左下角“充值”按钮就可以进入充值页面。/  2、点击右下角“充值元宝”按钮也可以进入充值页面。/  3、双击“VIP商店”NPC进入“VIP商店”界面，点击左下角“充值”按钮就可以进入充值页面。</text>
+			</words>
+			<options>
+				<item textId="5000132" text="完成任务" command="finish:1075010123" />
+			</options>
+		 </s03>
+   	</t1075010123>
+
+	<t1075010124>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010124">任务:VIP商店（一）</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000133">VIP商店里出售各种强力道具，其中生命宝石和精力宝石能够在战斗结束后自动补充生命和精力。</text>
+			</words>
+			<options>
+				<item textId="5000134" text="接受任务" command="accept:1075010124" />
+				<item textId="5000135" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000136">VIP商店里出售各种强力道具，其中生命宝石和精力宝石能够在战斗结束后自动补充生命和精力。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010124" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000137">VIP商店里出售各种强力道具，其中生命宝石和精力宝石能够在战斗结束后自动补充生命和精力。</text>
+			</words>
+			<options>
+				<item textId="5000138" text="完成任务" command="finish:1075010124" />
+			</options>
+		 </s03>
+   	</t1075010124>
+
+	<t1075010125>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010125">任务:VIP商店（二）</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000139">VIP商店里出售各种强力道具，其中“多倍经验卡”能够提升打怪所得经验值，“多倍挂机经验卡”能够提升非战斗时“挂机”所得经验。</text>
+			</words>
+			<options>
+				<item textId="5000140" text="接受任务" command="accept:1075010125" />
+				<item textId="5000141" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000142">VIP商店里出售各种强力道具，其中“多倍经验卡”能够提升打怪所得经验值，“多倍挂机经验卡”能够提升非战斗时“挂机”所得经验。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010125" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000143">VIP商店里出售各种强力道具，其中“多倍经验卡”能够提升打怪所得经验值，“多倍挂机经验卡”能够提升非战斗时“挂机”所得经验。</text>
+			</words>
+			<options>
+				<item textId="5000144" text="完成任务" command="finish:1075010125" />
+			</options>
+		 </s03>
+   	</t1075010125>
+
+	<t1075010126>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010126">任务:VIP商店（三）</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000145">VIP商店里出售各种强力道具，其中VIP装备和形象能大幅度提升你的实力，购买后还可以出售给商城获得代金券。</text>
+			</words>
+			<options>
+				<item textId="5000146" text="接受任务" command="accept:1075010126" />
+				<item textId="5000147" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000148">VIP商店里出售各种强力道具，其中VIP装备和形象能大幅度提升你的实力，购买后还可以出售给商城获得代金券。</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010126" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000149">VIP商店里出售各种强力道具，其中VIP装备和形象能大幅度提升你的实力，购买后还可以出售给商城获得代金券。</text>
+			</words>
+			<options>
+				<item textId="5000150" text="完成任务" command="finish:1075010126" />
+			</options>
+		 </s03>
+   	</t1075010126>
+      
+
+        <t1075010127>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010127">任务:2200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000169">2200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000170" text="接受任务" command="accept:1075010127" />
+				<item textId="5000171" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000172">2200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010127" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000173">2200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000174" text="完成任务" command="finish:1075010127" />
+			</options>
+		 </s03>
+   	</t1075010127>
+         <t1075010128>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010128">任务:2400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000175">2400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000176" text="接受任务" command="accept:1075010128" />
+				<item textId="5000177" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000178">2400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010128" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000179">2400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000180" text="完成任务" command="finish:1075010128" />
+			</options>
+		 </s03>
+   	</t1075010128>
+         <t1075010129>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010129">任务:2600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000181">2600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000182" text="接受任务" command="accept:1075010129" />
+				<item textId="5000183" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000184">2600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010129" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000185">2600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000186" text="完成任务" command="finish:1075010129" />
+			</options>
+		 </s03>
+   	</t1075010129>
+         <t1075010130>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010130">任务:2800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000187">2800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000188" text="接受任务" command="accept:1075010130" />
+				<item textId="5000189" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000190">2800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010130" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000191">2800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000192" text="完成任务" command="finish:1075010130" />
+			</options>
+		 </s03>
+   	</t1075010130>
+	<t1075010131>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="1075010131">任务:3000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000193">3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010131" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000196">3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010131" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="5000197">3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010131" />
+			</options>
+		</s03>
+   	</t1075010131>
+	
+	<t1075010132>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013201">任务:3200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013202">3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010132" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013202">3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010132" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013202">3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010132" />
+			</options>
+		</s03>
+   	</t1075010132>
+	<t1075010133>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013301">任务:3400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013302">3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010133" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013302">3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010133" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013302">3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010133" />
+			</options>
+		</s03>
+   	</t1075010133>
+	<t1075010134>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013401">任务:3600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013402">3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010134" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013402">3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010134" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013402">3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010134" />
+			</options>
+		</s03>
+   	</t1075010134>
+	<t1075010135>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013501">任务:3800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013502">3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010135" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013502">3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010135" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013502">3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010135" />
+			</options>
+		</s03>
+   	</t1075010135>
+	<t1075010136>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013601">任务:4000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013602">4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013602">4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013602">4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010136>
+	<t1075010137>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013701">任务:4200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013702">4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013702">4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013702">4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010137>
+	<t1075010138>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013801">任务:4400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013802">4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013802">4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013802">4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010138>
+	<t1075010139>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013901">任务:4600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013902">4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013902">4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501013902">4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010139>
+	<t1075010140>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014001">任务:4800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014002">4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014002">4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014002">4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010140>
+	<t1075010141>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014101">任务:5000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014102">5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014102">5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014102">5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010141>
+	<t1075010142>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014201">任务:5200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014202">5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014202">5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014202">5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010142>
+	<t1075010143>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014301">任务:5400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014302">5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014302">5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014302">5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010143>
+	<t1075010144>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014401">任务:5600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014402">5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014402">5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014402">5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010144>
+	<t1075010145>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014501">任务:5800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014502">5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014502">5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014502">5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010145>
+	<t1075010146>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014601">任务:6000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014602">6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014602">6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014602">6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010146>
+	<t1075010147>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014701">任务:一转500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014702">一转500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014702">一转500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014702">一转500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010147>
+	<t1075010148>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014801">任务:一转1000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014802">一转1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014802">一转1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014802">一转1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010148>
+	<t1075010149>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014901">任务:一转1500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014902">一转1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014902">一转1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501014902">一转1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010149>
+	<t1075010150>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015001">任务:一转2000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015002">一转2000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015002">一转2000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015002">一转2000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010150>
+	<t1075010151>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015101">任务:一转2500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015102">一转2500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015102">一转2500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015102">一转2500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010151>
+	<t1075010152>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015201">任务:一转3000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015202">一转3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015202">一转3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015202">一转3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010152>
+	<t1075010153>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015301">任务:一转3200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015302">一转3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015302">一转3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015302">一转3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010153>
+	<t1075010154>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015401">任务:一转3400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015402">一转3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015402">一转3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015402">一转3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010154>
+	<t1075010155>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015501">任务:一转3600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015502">一转3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015502">一转3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015502">一转3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010155>
+	<t1075010156>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015601">任务:一转3800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015602">一转3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015602">一转3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015602">一转3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010156>
+	<t1075010157>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015701">任务:一转4000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015702">一转4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015702">一转4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015702">一转4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010157>
+	<t1075010158>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015801">任务:一转4200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015802">一转4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015802">一转4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015802">一转4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010158>
+	<t1075010159>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015901">任务:一转4400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015902">一转4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015902">一转4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501015902">一转4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010159>
+	<t1075010160>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016001">任务:一转4600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016002">一转4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016002">一转4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016002">一转4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010160>
+	<t1075010161>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016101">任务:一转4800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016102">一转4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016102">一转4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016102">一转4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010161>
+	<t1075010162>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016201">任务:一转5000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016202">一转5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016202">一转5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016202">一转5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010162>
+	<t1075010163>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016301">任务:一转5200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016302">一转5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016302">一转5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016302">一转5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010163>
+	<t1075010164>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016401">任务:一转5400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016402">一转5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016402">一转5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016402">一转5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010164>
+	<t1075010165>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016501">任务:一转5600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016502">一转5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016502">一转5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016502">一转5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010165>
+	<t1075010166>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016601">任务:一转5800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016602">一转5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016602">一转5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016602">一转5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010166>
+	<t1075010167>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016701">任务:一转6000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016702">一转6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016702">一转6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016702">一转6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010167>
+	<t1075010168>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016801">任务:一转6200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016802">一转6200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016802">一转6200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016802">一转6200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010168>
+	<t1075010169>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016901">任务:一转6400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016902">一转6400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016902">一转6400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501016902">一转6400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010169>
+	<t1075010170>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017001">任务:一转6600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017002">一转6600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017002">一转6600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017002">一转6600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010170>
+	<t1075010171>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017101">任务:一转6800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017102">一转6800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017102">一转6800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017102">一转6800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010171>
+	<t1075010172>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017201">任务:一转7000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017202">一转7000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010136" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017202">一转7000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010136" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017202">一转7000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010136" />
+			</options>
+		</s03>
+   	</t1075010172>
+	<t1075010173>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017301">任务:二转500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017302">二转500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010173" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017302">二转500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010173" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017302">二转500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010173" />
+			</options>
+		</s03>
+   	</t1075010173>
+	<t1075010174>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017401">任务:二转1000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017402">二转1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010174" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017402">二转1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010174" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017402">二转1000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010174" />
+			</options>
+		</s03>
+   	</t1075010174>
+	<t1075010175>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017501">任务:二转1500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017502">二转1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010175" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017502">二转1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010175" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017502">二转1500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010175" />
+			</options>
+		</s03>
+   	</t1075010175>
+	<t1075010176>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017601">任务:二转2000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017602">二转2000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010176" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017602">二转2000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010176" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017602">二转2000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010176" />
+			</options>
+		</s03>
+   	</t1075010176>	
+	<t1075010177>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017701">任务:二转2500级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017702">二转2500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010177" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017702">二转2500级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010177" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017702">二转2500级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010177" />
+			</options>
+		</s03>
+   	</t1075010177>	
+	<t1075010178>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017801">任务:二转3000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017802">二转3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010178" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017802">二转3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010178" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017802">二转3000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010178" />
+			</options>
+		</s03>
+   	</t1075010178>	
+	<t1075010179>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017901">任务:二转3200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017902">二转3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010179" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017902">二转3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010179" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501017902">二转3200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010179" />
+			</options>
+		</s03>
+   	</t1075010179>	
+	<t1075010180>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018001">任务:二转3400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018002">二转3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010180" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018002">二转3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010180" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018002">二转3400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010180" />
+			</options>
+		</s03>
+   	</t1075010180>
+	<t1075010181>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018101">任务:二转3600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018102">二转3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010181" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018102">二转3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010181" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018102">二转3600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010181" />
+			</options>
+		</s03>
+   	</t1075010181>
+	<t1075010182>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018201">任务:二转3800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018202">二转3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010182" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018202">二转3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010182" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018202">二转3800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010182" />
+			</options>
+		</s03>
+   	</t1075010182>
+	<t1075010183>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018301">任务:二转4000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018302">二转4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010183" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018302">二转4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010183" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018302">二转4000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010183" />
+			</options>
+		</s03>
+   	</t1075010183>
+	<t1075010184>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018401">任务:二转4200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018402">二转4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010184" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018402">二转4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010184" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018402">二转4200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010184" />
+			</options>
+		</s03>
+   	</t1075010184>
+	<t1075010185>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018501">任务:二转4400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018502">二转4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010185" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018502">二转4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010185" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018502">二转4400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010185" />
+			</options>
+		</s03>
+   	</t1075010185>
+	<t1075010186>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018601">任务:二转4600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018602">二转4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010186" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018602">二转4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010186" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018602">二转4600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010186" />
+			</options>
+		</s03>
+   	</t1075010186>
+	<t1075010187>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018701">任务:二转4800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018702">二转4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010187" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018702">二转4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010187" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018702">二转4800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010187" />
+			</options>
+		</s03>
+   	</t1075010187>
+	<t1075010188>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018801">任务:二转5000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018802">二转5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010188" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018802">二转5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010188" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018802">二转5000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010188" />
+			</options>
+		</s03>
+   	</t1075010188>
+	<t1075010189>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018901">任务:二转5200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018902">二转5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010189" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018902">二转5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010189" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501018902">二转5200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010189" />
+			</options>
+		</s03>
+   	</t1075010189>
+	<t1075010190>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019001">任务:二转5400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019002">二转5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010190" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019002">二转5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010190" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019002">二转5400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010190" />
+			</options>
+		</s03>
+   	</t1075010190>
+	<t1075010191>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019101">任务:二转5600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019102">二转5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010191" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019102">二转5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010191" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019102">二转5600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010191" />
+			</options>
+		</s03>
+   	</t1075010191>
+	<t1075010192>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019201">任务:二转5800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019202">二转5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010192" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019202">二转5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010192" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019202">二转5800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010192" />
+			</options>
+		</s03>
+   	</t1075010192>
+	<t1075010193>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019301">任务:二转6000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019302">二转6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010193" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019302">二转6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010193" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019302">二转6000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010193" />
+			</options>
+		</s03>
+   	</t1075010193>
+	<t1075010194>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019401">任务:二转6200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019402">二转6200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010194" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019402">二转6200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010194" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019402">二转6200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010194" />
+			</options>
+		</s03>
+   	</t1075010194>
+	<t1075010195>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019501">任务:二转6400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019502">二转6400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010195" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019502">二转6400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010195" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019502">二转6400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010195" />
+			</options>
+		</s03>
+   	</t1075010195>
+	<t1075010196>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019601">任务:二转6600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019602">二转6600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010196" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019602">二转6600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010196" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019602">二转6600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010196" />
+			</options>
+		</s03>
+   	</t1075010196>
+	<t1075010197>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019701">任务:二转6800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019702">二转6800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010197" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019702">二转6800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010197" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019702">二转6800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010197" />
+			</options>
+		</s03>
+   	</t1075010197>
+	<t1075010198>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019801">任务:二转7000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019802">二转7000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010198" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019802">二转7000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010198" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019802">二转7000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010198" />
+			</options>
+		</s03>
+   	</t1075010198>
+	<t1075010199>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019901">任务:二转7200级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019902">二转7200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010199" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019902">二转7200级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010199" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501019902">二转7200级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010199" />
+			</options>
+		</s03>
+   	</t1075010199>
+	<t1075010200>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020001">任务:二转7400级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020002">二转7400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010200" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020002">二转7400级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010200" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020002">二转7400级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010200" />
+			</options>
+		</s03>
+   	</t1075010200>
+	<t1075010201>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020101">任务:二转7600级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020102">二转7600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010201" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020102">二转7600级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010201" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020102">二转7600级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010201" />
+			</options>
+		</s03>
+   	</t1075010201>
+	<t1075010202>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020201">任务:二转7800级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020202">二转7800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010202" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020202">二转7800级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010202" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020202">二转7800级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010202" />
+			</options>
+		</s03>
+   	</t1075010202>
+	<t1075010203>
+		<s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020301">任务:二转8000级阶段奖励</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+		<s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020302">二转8000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000194" text="接受任务" command="accept:1075010203" />
+				<item textId="5000195" text="不接任务" command="" />
+			</options>
+		</s01>
+		<s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020302">二转8000级了吗？</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1075010203" />
+			</options>
+		</s02>
+		<s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="501020302">二转8000级了吗？</text>
+			</words>
+			<options>
+				<item textId="5000198" text="完成任务" command="finish:1075010203" />
+			</options>
+		</s03>
+   	</t1075010203>
+</dialog>

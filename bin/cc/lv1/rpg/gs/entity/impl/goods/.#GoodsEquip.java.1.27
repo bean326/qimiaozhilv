@@ -1,0 +1,1848 @@
+package cc.lv1.rpg.gs.entity.impl.goods;
+
+
+import java.lang.reflect.Field;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+//import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+//import cc.lv1.rpg.gs.entity.ext.PlayerBaseInfo;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+
+public class GoodsEquip extends Goods
+{   
+	/**
+	 * 以下是装备主属性
+	 */
+    /** 物理攻击 */
+	public int phyAtt;
+	
+	/** 物理攻击成长 */
+	public int phyAttRate;
+	
+	/** 精神攻击 */
+	public int sptAtt;
+	
+	/** 精神攻击成长 */
+	public int sptAttRate;
+	
+	/** 物理防御 */
+	public int phyDef;
+	
+	/** 物理防御成长 */
+	public int phyDefRate;
+	
+	/** 精神防御 */
+	public int sptDef;
+	
+	/** 精神防御成长 */
+	public int sptDefRate;
+	
+	/**
+	 * 以下是装备附加属性
+	 *
+	0：武器  1：头盔
+	2：上衣  3：裤子
+	4：鞋  5：护腕
+	6：手套  7：项链
+	8：戒指
+	9：装饰
+	10：待用
+	11: 待用
+	装备位置(头盔、项链、上衣、裤子、鞋、护腕、手套、戒指、装饰、武器、龙之魔力、龙之生命) */
+	public int equipLocation;
+	
+	/** 武器类别(1.足球 2.篮球 3.手枪 4.火箭筒 5.手术刀 6.针筒 7.墨镜 8.扑克牌) */
+	public int equipType;
+	
+	/** 装备初始等级 */
+	public int equipLevel;
+	
+	/** 装备最大等级 */
+	public int maxEquipLevel;
+	
+ 	/** 职业需求 (1运动员,2士兵,3医护人员,4超能力者......) */
+	public String job;
+	
+	/** 力量 */
+	public int power;
+	
+	/** 敏捷 */
+	public int agility;
+	
+	/** 精神 */
+	public int spirit;
+	
+	/** 智慧 */ 
+	public int wisdom;
+	
+	/** 体质 */
+	public int physique;
+	
+	/** 生命 */
+	public int lifePoint;
+	
+	/** 精力 */
+	public int magicPoint;
+	
+	/** 忽视防御的物理伤害 */
+	public int noDefPhyHurt;
+	
+	/** 忽视防御的精神伤害 */
+	public int noDefSptHurt;
+	
+	/** 物理免伤 */
+	public int phyHurtAvoid;
+	
+	/** 精神免伤 */
+	public int sptHurtAvoid;
+	
+	/** 物理爆击率 */
+	public int phySmiteRate;
+	
+	/** 精神爆击率 */
+	public int sptSmiteRate;
+	
+	/** 物理爆击参数 */
+	public int phySmiteParm;
+	
+	/** 精神爆击参数 */
+	public int sptSmiteParm;
+	
+	/** 命中 */
+	public int hit;
+	
+	/** 闪避 */
+	public int avoidance;
+	
+	/** 精神抵抗 */
+	public int spiritStand;
+	
+	/** 治疗值 */
+	public int curePoint;
+	
+	/** 杀怪所得经验值增加 */
+	public int killMonsterExp;
+	
+	/** 杀怪所得经验值增加% */
+	public int killMonsterExpRate;
+	
+	/** 特定技能CD时间减少 */
+	public int skillCdTimeSub;
+	
+	/** 吸血——伤害转化为自己的生命值 */
+	public int suckBloob;
+	
+	/** 吸蓝——伤害转化为自己的精力值 */
+	public int suckMagic;
+	
+	/** 所受伤害转化为精力消耗 */
+	public int hurtToMagic;
+	
+	/** 对凡人的伤害增加 */
+	public int toMortalHurt;
+	
+	/** 对凡人的伤害增加% */
+	public int toMortalHurtRate;
+	
+	/** 对野兽的伤害增加 */
+	public int toBeastHurt;
+	
+	/** 对野兽的伤害增加% */
+	public int toBeastHurtRate;
+	
+	/** 对妖的伤害增加 */
+	public int toGoblinHurt;
+	
+	/** 对妖的伤害增加% */
+	public int toGoblinHurtRate;
+	
+	/** 对仙的伤害增加 */
+	public int toNymphHurt;
+	
+	/** 对仙的伤害增加% */
+	public int toNymphHurtRate;
+	
+	/** 对神的伤害增加 */
+	public int toDeityHurt;
+	
+	/** 对神的伤害增加% */
+	public int toDeityHurtRate;
+	
+	/** 对魔的伤害增加 */
+	public int toDemonHurt;
+	
+	/** 对魔的伤害增加% */
+	public int toDemonHurtRate;
+	
+	/** 对大体型怪物的伤害增加 */
+	public int toBigMonsterHurt;
+	
+	/** 对大体型怪物的伤害增加% */
+	public int toBigMonsterHurtRate;
+	
+	/** 对中体型的怪物伤害增加 */
+	public int toMidMonsterHurt;
+	
+	/** 对中体型的怪物伤害增加% */
+	public int toMidMonsterHurtRate;
+	
+	/** 对小体型的怪物伤害增加 */
+	public int toSmallMonsterHurt;
+	
+	/** 对小体型的怪物伤害增加% */
+	public int toSmallMonsterHurtRate;
+	
+	/** 白色装备修正值(主属性,用时要除以10000) */
+	public int modValueWhite;
+	
+	/** 绿色装备修正值(主属性,用时要除以10000) */
+	public int modValueGreen;
+	
+	/** 技能需求 */
+	public int skill;
+	
+	/** 属性点数(基础属性) */
+	public int att;
+	
+	/** 任务道具生成颜色 -1为不生成 */
+	public int taskColor;
+	
+	/** 固定生成品质 */
+	public int deQuality;
+	
+	
+	public String attStr = "";
+
+	
+	public GoodsEquip() {}
+	
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		super.writeTo(buffer);
+		buffer.writeInt(equipLocation);
+		if(equipLocation == 0)//武器
+		{
+			buffer.writeInt(phyAtt);
+			buffer.writeInt(sptAtt);
+		}
+		else if(equipLocation <= 6)//防具
+		{
+			buffer.writeInt(phyDef);
+			buffer.writeInt(sptDef);
+		}
+		buffer.writeUTF(job);
+
+		String[] strs = new String[0];
+		if(!attStr.isEmpty())
+		{
+			strs = Utils.split(attStr, ":");
+		}
+
+		int count = 0;
+		for (int i = 0; i < strs.length; i++) 
+		{
+			int value = Integer.parseInt(getVariable(strs[i]));
+			if(value == 0 || strs[i].equals("phyAtt") || strs[i].equals("phyDef") || strs[i].equals("sptAtt") || strs[i].equals("sptDef"))
+				continue;
+			count++;
+		}
+		buffer.writeInt(count);
+		for (int i = 0; i < strs.length; i++) 
+		{
+			int value = Integer.parseInt(getVariable(strs[i]));
+			if(value == 0 || strs[i].equals("phyAtt") || strs[i].equals("phyDef") || strs[i].equals("sptAtt") || strs[i].equals("sptDef"))
+				continue;
+			buffer.writeUTF(strs[i]);
+			buffer.writeInt(Integer.parseInt(getVariable(strs[i])));
+		}
+	}
+	
+	
+	public void writeAllTo(ByteBuffer buffer)
+	{
+		super.writeTo(buffer);
+		buffer.writeInt(phyAtt);
+		buffer.writeInt(phyAttRate);
+		buffer.writeInt(sptAtt);
+		buffer.writeInt(sptAttRate);
+		buffer.writeInt(phyDef);
+		buffer.writeInt(phyDefRate);
+		buffer.writeInt(sptDef);
+		buffer.writeInt(sptDefRate);
+		buffer.writeInt(equipLocation);
+		buffer.writeInt(equipType);
+		buffer.writeInt(equipLevel);
+		buffer.writeInt(maxEquipLevel);
+		buffer.writeUTF(job);
+		buffer.writeInt(agility);
+		buffer.writeInt(avoidance);
+		buffer.writeInt(att);
+		buffer.writeInt(curePoint);
+		buffer.writeInt(hit);
+		buffer.writeInt(hurtToMagic);
+		buffer.writeInt(killMonsterExp);
+		buffer.writeInt(killMonsterExpRate);
+		buffer.writeInt(lifePoint);
+		buffer.writeInt(magicPoint);
+		buffer.writeInt(noDefPhyHurt);
+		buffer.writeInt(noDefSptHurt);
+		buffer.writeInt(phyHurtAvoid);
+		buffer.writeInt(phySmiteParm);
+		buffer.writeInt(phySmiteRate);
+		buffer.writeInt(physique);
+		buffer.writeInt(power);
+		buffer.writeInt(wisdom);
+		buffer.writeInt(toSmallMonsterHurtRate);
+		buffer.writeInt(toSmallMonsterHurt);
+		buffer.writeInt(toNymphHurtRate);
+		buffer.writeInt(toNymphHurt);
+		buffer.writeInt(toMortalHurtRate);
+		buffer.writeInt(toMortalHurt);
+		buffer.writeInt(toMidMonsterHurtRate);
+		buffer.writeInt(toMidMonsterHurt);
+		buffer.writeInt(toGoblinHurtRate);
+		buffer.writeInt(toGoblinHurt);
+		buffer.writeInt(toDemonHurtRate);
+		buffer.writeInt(toDemonHurt);
+		buffer.writeInt(toDeityHurtRate);
+		buffer.writeInt(toDeityHurt);
+		buffer.writeInt(toBigMonsterHurtRate);
+		buffer.writeInt(toBigMonsterHurt);
+		buffer.writeInt(toBeastHurtRate);
+		buffer.writeInt(toBeastHurt);
+		buffer.writeInt(suckMagic);
+		buffer.writeInt(suckBloob);
+		buffer.writeInt(sptSmiteRate);
+		buffer.writeInt(sptSmiteParm);
+		buffer.writeInt(spiritStand);
+		buffer.writeInt(skillCdTimeSub);
+		buffer.writeInt(skill);
+		buffer.writeInt(spirit);
+		buffer.writeUTF(job);
+	}
+	
+	public void copyTo(GameObject go)
+	{
+		super.copyTo(go);
+		GoodsEquip goods = (GoodsEquip)go;
+
+		goods.att = att;
+		goods.phyAtt = phyAtt;
+		goods.phyAttRate = phyAttRate;
+		goods.sptAtt = sptAtt;
+		goods.sptAttRate = sptAttRate;
+		goods.phyDef = phyDef;
+		goods.phyDefRate = phyDefRate;
+		goods.sptDef = sptDef;
+		goods.sptDefRate = sptDefRate;
+		goods.equipLocation = equipLocation;
+		goods.maxEquipLevel = maxEquipLevel;
+		goods.equipLevel = equipLevel;
+		goods.job = job;
+		goods.equipType = equipType;
+		goods.agility = agility;
+		goods.avoidance = avoidance;
+		goods.curePoint = curePoint;
+		goods.hit = hit;
+		goods.hurtToMagic = hurtToMagic;
+		goods.killMonsterExp = hurtToMagic;
+		goods.killMonsterExpRate = killMonsterExpRate;
+		goods.lifePoint = lifePoint;
+		goods.magicPoint = magicPoint;
+		goods.noDefPhyHurt = noDefPhyHurt;
+		goods.noDefSptHurt = noDefSptHurt;
+		goods.phyHurtAvoid = phyHurtAvoid;
+		goods.phySmiteParm = phySmiteParm;
+		goods.phySmiteRate = phySmiteRate;
+		goods.physique = physique;
+		goods.power = power;
+		goods.wisdom = wisdom;
+		goods.toSmallMonsterHurtRate = toSmallMonsterHurtRate;
+		goods.toSmallMonsterHurt = toSmallMonsterHurt;
+		goods.toNymphHurtRate = toNymphHurtRate;
+		goods.toNymphHurt = toNymphHurt;
+		goods.toMortalHurtRate = toNymphHurt;
+		goods.toMortalHurt = toMortalHurt;
+		goods.toMidMonsterHurtRate = toMidMonsterHurtRate;
+		goods.toMidMonsterHurt = toMidMonsterHurt;
+		goods.toGoblinHurtRate = toGoblinHurtRate;
+		goods.toGoblinHurt = toGoblinHurt;
+		goods.toDemonHurtRate = toDemonHurtRate;
+		goods.toDemonHurt = toDemonHurt;
+		goods.toDeityHurtRate = toDeityHurtRate;
+		goods.toDeityHurt = toDeityHurt;
+		goods.toBigMonsterHurtRate = toBigMonsterHurtRate;
+		goods.toBigMonsterHurt = toBigMonsterHurt;
+		goods.toBeastHurtRate = toBeastHurtRate;
+		goods.toBeastHurt = toBeastHurt;
+		goods.suckMagic = suckMagic;
+		goods.suckBloob = suckBloob;
+		goods.sptSmiteRate = sptSmiteRate;
+		goods.sptSmiteParm = sptSmiteParm;
+		goods.spiritStand = spiritStand;
+		goods.skillCdTimeSub = skillCdTimeSub;
+		goods.skill = skill;
+		goods.spirit = spirit;
+		goods.modValueWhite = modValueWhite;
+		goods.modValueGreen = modValueGreen;
+		goods.attStr = attStr;
+	}
+	
+	@Override
+	public void onDeleteImpl(PlayerController target) 
+	{
+	}
+
+	@Override
+	public boolean onRemoveImpl(PlayerController target)
+	{
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");	
+		Goods[] goodsList = bag.getGoodsList();
+		if(useFlag)
+		{
+			useFlag = false;
+			int location = bag.getGoodsLocation(this.objectIndex);
+			goodsList[bag.getNullLocation()] = this;
+			goodsList[location] = null;
+			target.getPlayer().setHitPoint(0);
+			target.getPlayer().setMagicPoint(0);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onUseImpl(PlayerController target,ByteBuffer buffer) 
+	{
+		boolean result = false;
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");	
+		Goods[] goodsList = bag.getGoodsList();
+		//装备上此装备
+		result = isPlayerUseEquip(target);
+		if(result)
+		{
+			int thisLocation = bag.getGoodsLocation(this.objectIndex);
+			goodsList[thisLocation] = null;
+			Goods equip = bag.getSameLocationGoods(equipLocation);
+			if(equip != null)
+			{
+				int equipLocation = bag.getGoodsLocation(equip.objectIndex);
+				synchronized (goodsList) 
+				{
+					equip.useFlag = false;
+					this.useFlag = true;
+					goodsList[equipLocation] = this;
+					int nullLocation = bag.getNullLocation();
+					goodsList[nullLocation] = equip;
+					buffer.writeBoolean(true);
+					buffer.writeUTF(equip.objectIndex+"");
+					buffer.writeInt(nullLocation);
+				}
+			}
+			else
+			{
+				useFlag = true;
+				goodsList[goodsList.length-1-this.equipLocation] = this;
+				buffer.writeBoolean(false);
+			}
+			buffer.writeUTF(this.objectIndex+"");
+			buffer.writeInt(this.equipLocation);
+		}
+		SkillTome skillTome = (SkillTome) target.getPlayer().getExtPlayerInfo("skillTome");
+		Skill[] skills = skillTome.getSkills();
+		EquipSet es = (EquipSet) target.getPlayer().getExtPlayerInfo("equipSet");
+		if(!es.isHaveIndex(this.objectIndex))
+		{
+			if(quality == 4)
+			{
+				if(attStr.indexOf("armSkill") != -1)
+				{
+					Goods[] goList = bag.getGoodsList();
+					for (int i = 0; i < goList.length; i++) 
+					{
+						if(goList[i] == null)
+							continue;
+						if(goList[i].useFlag && goList[i] instanceof GoodsEquip)
+						{
+							GoodsEquip eq = (GoodsEquip) goList[i];
+							if(eq.skill != 0 && eq.equipLocation == 0)
+								skillTome.addSkill(eq.skill);
+						}
+					}
+				}
+				else if(attStr.indexOf("armorsSkill") != -1)
+				{
+					Goods[] goList = bag.getGoodsList();
+					for (int i = 0; i < goList.length; i++) 
+					{
+						if(goList[i] == null)
+							continue;
+						if(goList[i].useFlag && goList[i] instanceof GoodsEquip)
+						{
+							GoodsEquip eq = (GoodsEquip) goList[i];
+							if(eq.skill != 0 && eq.equipLocation > 0 && eq.equipLocation <= 6)
+								skillTome.addSkill(eq.skill);
+						}
+					}
+				}
+				else if(attStr.indexOf("otherSkill") != -1)
+				{
+					Goods[] goList = bag.getGoodsList();
+					for (int i = 0; i < goList.length; i++) 
+					{
+						if(goList[i] == null)
+							continue;
+						if(goList[i].useFlag && goList[i] instanceof GoodsEquip)
+						{
+							GoodsEquip eq = (GoodsEquip) goList[i];
+							if(eq.skill != 0 && eq.equipLocation > 6)
+								skillTome.addSkill(eq.skill);
+						}
+					}
+				}
+			}
+			else if(quality == 5) //紫色3 	所有技能等级+1；
+			{
+				for (int i = 0; i < skills.length-1; i++) 
+				{
+					if(skills[i].isStudied)
+					{
+						if(skills[i].iconId == skills[i+1].iconId && skills[i+1].level - skills[i].level == 1 && !skills[i+1].isStudied)
+						{
+							skillTome.addSkill(skills[i+1].id);
+						}
+					}
+				}
+			}
+			
+			ByteBuffer buff = new ByteBuffer();
+			buff.writeByte(1);
+			skillTome.writeTo(buff);
+			
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_GET_SKILL_COMMAND,buff));
+			
+			es.addEquip(this.objectIndex);
+		}
+		return result;
+	}
+	
+	/**
+	 * 玩家自身的条件够不够穿上装备
+	 * @return true or false
+	 */
+	public boolean isPlayerUseEquip(PlayerController target)
+	{
+		Player player = target.getPlayer();
+		if(player.level < level)
+		{
+			target.sendAlert(ErrorCode.ALERT_GOODS_LEVEL_LOW);
+			return false;
+		}
+		String[] str = job.split(":");
+
+		int goodsJob1 = -1,goodsJob2 = -1,goodsJob3 = -1;
+		if(str.length == 1)
+		{
+			if(!isJob(target, Integer.parseInt(job)))
+			{
+				target.sendAlert(ErrorCode.ALERT_PROFESSION_ERROR);
+				return false;
+			}
+		}
+		else if(str.length == 2)
+		{
+			goodsJob1 = Integer.parseInt(str[0]);
+			goodsJob2 = Integer.parseInt(str[1]);
+			if(!isJob(target, goodsJob1) && !isJob(target, goodsJob2))
+			{
+				target.sendAlert(ErrorCode.ALERT_PROFESSION_ERROR);
+				return false;
+			}
+		}
+		else if(str.length == 3)
+		{
+			goodsJob1 = Integer.parseInt(str[0]);
+			goodsJob2 = Integer.parseInt(str[1]);
+			goodsJob3 = Integer.parseInt(str[2]);
+			if(!isJob(target, goodsJob1) && !isJob(target, goodsJob2) && !isJob(target, goodsJob3))
+			{
+				target.sendAlert(ErrorCode.ALERT_PROFESSION_ERROR);
+				return false;
+			}
+		}
+		
+		SkillTome skillTome = (SkillTome) target.getPlayer().getExtPlayerInfo("skillTome");
+		if(skill != 0)
+		{
+			Skill skill = skillTome.getSkill(this.skill);
+			if(skill == null || !skill.isStudied)
+			{
+				target.sendAlert(ErrorCode.ALERT_NO_EQUIP_NEEDSKILL);
+				return false;
+			}
+		}	
+		return true;
+	}
+	
+
+	
+	
+	/**
+	 * 生成更好的装备
+	 * @param equipQuality  要生成装备的品质(白-绿-蓝-紫-紫1-紫2)
+	 * @return 生成后的新装备
+	 */
+	public GoodsEquip makeNewBetterEquip(int equipQuality)
+	{
+		GoodsEquip goods = (GoodsEquip) RPGameObject.cloneObject(this);
+		disMainGoodsAtt(goods,equipQuality);
+		if(equipQuality > 0)//白色装备没有附加属性
+		{
+			disFirstGoodsAtt(goods,equipQuality);
+			disSecondGoodsAtt(goods,equipQuality);
+			if(equipQuality > 1)
+			{
+				disThirdGoodsAtt(goods,equipQuality);
+				if(equipQuality > 2)//紫色以上装备才有以下附加属性
+				{
+					disFourthGoodsAtt(goods);
+				}
+			}
+		}
+		goods.quality = equipQuality;
+		setDefault(goods,equipQuality);
+		return goods;
+	}
+	
+	
+	/**
+	 * 分配新装备的主属性
+	 * @param goods
+	 * @param equipQuality
+	 */
+	public void disMainGoodsAtt(GoodsEquip goods,int equipQuality)
+	{
+		if(equipQuality == 0)//白色装备
+		{
+			if(goods.equipType == 0)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueWhite/10000));
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueWhite/10000));
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueWhite/10000));
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueWhite/10000));
+			}
+			else if(goods.equipType <= 4)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueWhite/10000));
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueWhite/10000));
+				goods.sptAtt = 0;
+				goods.sptDef = 0;
+			}
+			else
+			{
+				goods.phyAtt = 0;
+				goods.phyDef = 0;
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueWhite/10000));
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueWhite/10000));
+			}
+		}
+		else if(equipQuality == 1)//绿色装备
+		{
+			if(goods.equipType == 0)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueGreen/10000));
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueGreen/10000));
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueGreen/10000));
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueGreen/10000));
+			}
+			else if(goods.equipType <= 4)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueGreen/10000));;
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueGreen/10000));
+				goods.sptAtt = 0;
+				goods.sptDef = 0;
+			}
+			else
+			{
+				goods.phyAtt = 0;
+				goods.phyDef = 0;
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueGreen/10000));
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueGreen/10000));
+			}
+		}
+		else if(equipQuality == 2)//蓝色装备
+		{
+			if(goods.equipType == 0)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueGreen/10000) + goods.phyAtt);
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueGreen/10000) + 2.5 * goods.phyDef);
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueGreen/10000) + goods.sptAtt);
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueGreen/10000) + 2.5 * goods.sptDef);
+			}
+			else if(goods.equipType <= 4)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueGreen/10000) + goods.phyAtt); 
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueGreen/10000) + 2.5 * goods.phyDef);
+				goods.sptAtt = 0;
+				goods.sptDef = 0;
+			}
+			else
+			{
+				goods.phyAtt = 0;
+				goods.phyDef = 0;
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueGreen/10000) + goods.sptAtt); 
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueGreen/10000) + 2.5 * goods.sptDef);
+			}
+		}
+		else if(equipQuality >= 3)//紫色1装备
+		{
+			if(goods.equipType == 0)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueGreen/10000) + 2 * goods.phyAtt);
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueGreen/10000) + 6.5 * goods.phyDef);
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueGreen/10000) + 2 * goods.sptAtt);
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueGreen/10000) + 6.5 * goods.sptDef);
+			}
+			else if(goods.equipType <= 4)
+			{
+				goods.phyAtt = (int) (goods.phyAtt * ((double)goods.modValueGreen/10000) + 2 * goods.phyAtt); 
+				goods.phyDef = (int) (goods.phyDef * ((double)goods.modValueGreen/10000) + 6.5 * goods.phyDef);
+				goods.sptAtt = 0;
+				goods.sptDef = 0;
+			}
+			else
+			{
+				goods.phyAtt = 0;
+				goods.phyDef = 0;
+				goods.sptAtt = (int) (goods.sptAtt * ((double)goods.modValueGreen/10000) + 2 * goods.sptAtt); 
+				goods.sptDef = (int) (goods.sptDef * ((double)goods.modValueGreen/10000) + 6.5 * goods.sptDef);
+			}
+		}
+		setAttStr(goods, "phyAtt");
+		setAttStr(goods, "phyDef");
+		setAttStr(goods, "sptAtt");
+		setAttStr(goods, "sptDef");
+	}
+		
+	
+	
+	
+	/**
+	 *  分配属性点数(第一批 )力量、敏捷、体质、智慧、精神共round(2*x/3)点
+	 * @param goods 原始对象
+	 * @param equipQuality 要生成的装备品质
+	 */
+	private void disFirstGoodsAtt(GoodsEquip goods,int equipQuality)
+	{
+		int attPoint = 0;
+		if(equipQuality == 1)//绿色装备
+			attPoint = Math.round(2*goods.att/3);//到时根据策划定的公式改变
+		else if(equipQuality == 2)//蓝色装备
+			attPoint = att;
+		else if(equipQuality >= 3)//紫1装备(暂命名)
+			attPoint = att;
+		if(attPoint == 0)
+			return;
+		int count = (int)(Math.random()*3)+1;//要分配给几个属性(1.2.3.)
+		int firstPoint = -1,secondPoint = -1,thirdPoint = -1;
+		if(count == 1)//只分配给一个属性时
+		{
+			firstPoint = attPoint;
+		}
+		else if(count == 2)//要分配给两个属性
+		{
+			firstPoint = (int)(Math.random()*attPoint)+1;
+			secondPoint = attPoint - firstPoint;
+		}
+		else if(count == 3)//分配给三个属性
+		{
+			firstPoint = (int)(Math.random()*attPoint)+1;
+			secondPoint = (int)(Math.random()*(attPoint - firstPoint))+1;
+			thirdPoint = attPoint - firstPoint - secondPoint;
+		}
+		disFirstGoodsAtt(goods,firstPoint,secondPoint,thirdPoint);
+	}
+	
+	
+	/**
+	 * 分配属性点数(第二批)生命值、精力值、命中、闪避、精神抵抗、治疗值
+	 * @param goods 原始对象
+	 * @param firstPoint 第一次分配的属性值
+	 * @param secondPoint 第二次分配的属性值
+	 */
+	private void disSecondGoodsAtt(GoodsEquip goods,int equipQuality)
+	{
+		//以下对生命值、精力值、命中、闪避、精神抵抗、治疗值中添加(具体值根据策划公式)
+		//除了绿色装备只添加其中一项，蓝，紫，更高的都添加两项(暂定)
+
+//		System.out.println("firstNum=============="+firstNum);
+
+		if(isSecondAttZero(goods, 0))
+			return;
+
+		int firstNum = (int)(Math.random()*6)+1;//第一次要加的属性
+		if(equipQuality == 1)//绿色装备(只加一项)
+		{
+			secondWhichAdd(goods, 0, 1);
+		}
+		else if(equipQuality > 1)//比绿色装备高 级别的装备(加两项)
+		{
+			if(firstNum == 1)
+			{
+				if(goods.lifePoint <= 0)
+				{
+					disSecondGoodsAtt(goods,equipQuality);
+					return;
+				}
+				goods.lifePoint += getRandomValue(goods.lifePoint,equipQuality);
+				setAttStr(goods,"lifePoint");
+				if(isSecondAttZero(goods, 1))
+					return;
+				secondWhichAdd(goods, 1, equipQuality);
+			}
+			else if(firstNum == 2)
+			{
+				if(goods.magicPoint <= 0)
+				{
+					disSecondGoodsAtt(goods,equipQuality);
+					return;
+				}
+				goods.magicPoint += getRandomValue(goods.magicPoint,equipQuality);
+				setAttStr(goods,"magicPoint");
+				if(isSecondAttZero(goods, 2))
+					return;
+				secondWhichAdd(goods, 2, equipQuality);
+			}
+			else if(firstNum == 3)
+			{
+				if(goods.hit <= 0)
+				{
+					disSecondGoodsAtt(goods,equipQuality);return;
+				}
+				goods.hit += getRandomValue(goods.hit,equipQuality);
+				setAttStr(goods,"hit");
+				if(isSecondAttZero(goods, 3))
+					return;
+				secondWhichAdd(goods, 3, equipQuality);
+			}
+			else if(firstNum == 4)
+			{
+				if(goods.avoidance <= 0)
+				{
+					disSecondGoodsAtt(goods,equipQuality);return;
+				}
+				goods.avoidance += getRandomValue(goods.avoidance,equipQuality);
+				setAttStr(goods,"avoidance");
+				if(isSecondAttZero(goods, 4))
+					return;
+				secondWhichAdd(goods, 4, equipQuality);
+			}
+			else if(firstNum == 5)
+			{
+				if(goods.spiritStand <= 0)
+				{
+					disSecondGoodsAtt(goods,equipQuality);return;
+				}
+				goods.spiritStand += getRandomValue(goods.spiritStand,equipQuality);
+				setAttStr(goods,"spiritStand");
+				if(isSecondAttZero(goods, 5))
+					return;
+				secondWhichAdd(goods, 5, equipQuality);
+			}
+			else
+			{
+				if(goods.curePoint <= 0)
+				{
+					disSecondGoodsAtt(goods,equipQuality);return;
+				}
+				goods.curePoint += getRandomValue(goods.curePoint,equipQuality);
+				setAttStr(goods,"curePoint");
+				if(isSecondAttZero(goods, 6))
+					return;
+				secondWhichAdd(goods, 6, equipQuality);
+			}
+		}
+	}
+	
+	/**
+	 * 分配属性点数(第三批)3)	物理爆击率、精神爆击率、物理爆击参数、精神爆击参数、
+	 * 忽视防御的物理伤害、忽视防御的精神伤害、物理免伤、精神免伤
+	 * @param goods
+	 * @param equipQuality 要生成的品质
+	 */
+	public void disThirdGoodsAtt(GoodsEquip goods,int equipQuality)
+	{
+		if(equipQuality < 2)
+			return;
+		if(isThirdAttZero(goods, 0))
+			return;
+		int firstNum = (int)(Math.random()*8)+1;
+		if(equipQuality == 2)
+		{
+			thirdWhichAdd(goods,0,1);
+		}
+		else if(equipQuality >2)
+		{
+			if(firstNum == 1)
+			{
+				if(goods.phySmiteRate <= 0)
+				{
+					disThirdGoodsAtt(goods,equipQuality);return;
+				}
+				goods.phySmiteRate += getRandomValue(goods.phySmiteRate, 2);
+				setAttStr(goods,"phySmiteRate");
+				if(isThirdAttZero(goods, 1))
+					return;
+				thirdWhichAdd(goods,1,2);
+			}
+			else if(firstNum == 2)
+			{
+				if(goods.sptSmiteRate <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.sptSmiteRate += getRandomValue(goods.sptSmiteRate, 2);
+				setAttStr(goods,"sptSmiteRate");
+				if(isThirdAttZero(goods, 2))
+					return;
+				thirdWhichAdd(goods,2,2);
+			}
+			else if(firstNum == 3)
+			{
+				if(goods.phySmiteParm <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.phySmiteParm += getRandomValue(goods.phySmiteParm, 2);
+				setAttStr(goods,"phySmiteParm");
+				if(isThirdAttZero(goods, 3))
+					return;
+				thirdWhichAdd(goods,3,2);
+			}
+			else if(firstNum == 4)
+			{
+				if(goods.sptSmiteParm <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.sptSmiteParm += getRandomValue(goods.sptSmiteParm, 2);
+				setAttStr(goods,"sptSmiteParm");
+				if(isThirdAttZero(goods, 4))
+					return;
+				thirdWhichAdd(goods,4,2);
+			}
+			else if(firstNum == 5)
+			{
+				if(goods.noDefPhyHurt <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.noDefPhyHurt += getRandomValue(goods.noDefPhyHurt, 2);
+				setAttStr(goods,"noDefPhyHurt");
+				if(isThirdAttZero(goods, 5))
+					return;
+				thirdWhichAdd(goods,5,2);
+			}
+			else if(firstNum == 6)
+			{
+				if(goods.noDefSptHurt <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.noDefSptHurt += getRandomValue(goods.noDefSptHurt, 2);
+				setAttStr(goods,"noDefSptHurt");
+				if(isThirdAttZero(goods, 6))
+					return;
+				thirdWhichAdd(goods,6,2);
+			}
+			else if(firstNum == 7)
+			{
+				if(goods.phyHurtAvoid <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.phyHurtAvoid += getRandomValue(goods.phyHurtAvoid, 2);
+				setAttStr(goods,"phyHurtAvoid");
+				if(isThirdAttZero(goods, 7))
+					return;
+				thirdWhichAdd(goods,7,2);
+			}
+			else
+			{
+				if(goods.sptHurtAvoid <= 0)
+				{
+					disThirdGoodsAtt(goods, equipQuality);return;
+				}
+				goods.sptHurtAvoid += getRandomValue(goods.sptHurtAvoid, 2);
+				setAttStr(goods,"sptHurtAvoid");
+				if(isThirdAttZero(goods, 8))
+					return;
+				thirdWhichAdd(goods,8,2);
+			}
+		}
+	}
+	
+	/**
+	 * 第四批属性添加(第一步)
+	 * @param goods 原始装备
+	 * @param equipQuality 要生成的装备品质
+	 */
+	public void disFourthGoodsAtt(GoodsEquip goods)
+	{
+		if(isFourthAttZero(goods, 0))
+			return;
+		int firstNum = (int)(Math.random()*23)+1;//首先要添加的属性
+		switch(firstNum)
+		{
+			case 1: if(goods.killMonsterExp <= 0){disFourthGoodsAtt(goods); return;}
+ 				goods.killMonsterExp += getRandomValue(goods.killMonsterExp, 1);setAttStr(goods,"killMonsterExp");
+ 				if(isFourthAttZero(goods, 1))return; fourthWhichAdd(goods,1);break;
+			case 2:if(goods.killMonsterExpRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.killMonsterExpRate += getRandomValue(goods.killMonsterExpRate, 1);setAttStr(goods,"killMonsterExpRate"); 
+				if(isFourthAttZero(goods, 2))return;fourthWhichAdd(goods,2);break;
+			case 3:if(goods.suckBloob <= 0){disFourthGoodsAtt(goods); return;}
+				goods.suckBloob += getRandomValue(goods.suckBloob, 1);setAttStr(goods,"suckBloob");
+				if(isFourthAttZero(goods, 3))return;fourthWhichAdd(goods,2);break;
+			case 4:if(goods.suckMagic <= 0){disFourthGoodsAtt(goods); return;}
+				goods.suckMagic += getRandomValue(goods.suckMagic, 1);setAttStr(goods,"suckMagic");
+				if(isFourthAttZero(goods, 4))return;fourthWhichAdd(goods,2);break;
+			case 5:if(goods.hurtToMagic <= 0){disFourthGoodsAtt(goods); return;}
+				goods.hurtToMagic += getRandomValue(goods.hurtToMagic, 1);setAttStr(goods,"hurtToMagic");
+				if(isFourthAttZero(goods, 5))return;fourthWhichAdd(goods,2);break;
+			case 6:if(goods.toMortalHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toMortalHurt += getRandomValue(goods.toMortalHurt, 1);setAttStr(goods,"toMortalHurt");
+				if(isFourthAttZero(goods, 6))return;fourthWhichAdd(goods,2);break;
+			case 7:if(goods.toMortalHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toMortalHurtRate += getRandomValue(goods.toMortalHurtRate, 1);setAttStr(goods,"toMortalHurtRate");
+				if(isFourthAttZero(goods, 7))return;fourthWhichAdd(goods,2);break;
+			case 8:if(goods.toBeastHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toBeastHurt += getRandomValue(goods.toBeastHurt, 1);setAttStr(goods,"toBeastHurt");
+				if(isFourthAttZero(goods, 8))return;fourthWhichAdd(goods,2);break;
+			case 9:if(goods.toBeastHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toBeastHurtRate += getRandomValue(goods.toBeastHurtRate, 1);setAttStr(goods,"toBeastHurtRate");
+				if(isFourthAttZero(goods, 9))return;fourthWhichAdd(goods,2);break;
+			case 10:if(goods.toGoblinHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toGoblinHurt += getRandomValue(goods.toGoblinHurt, 1);setAttStr(goods,"toGoblinHurt");
+				if(isFourthAttZero(goods, 10))return;fourthWhichAdd(goods,2);break;
+			case 11:if(goods.toGoblinHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toGoblinHurtRate += getRandomValue(goods.toGoblinHurtRate, 1);setAttStr(goods,"toGoblinHurtRate");
+				if(isFourthAttZero(goods, 11))return;fourthWhichAdd(goods,2);break;
+			case 12:if(goods.toNymphHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toNymphHurt += getRandomValue(goods.toNymphHurt, 1);setAttStr(goods,"toNymphHurt");
+				if(isFourthAttZero(goods, 12))return;fourthWhichAdd(goods,2);break;
+			case 13:if(goods.toNymphHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toNymphHurtRate += getRandomValue(goods.toNymphHurtRate, 1);setAttStr(goods,"toNymphHurtRate");
+				if(isFourthAttZero(goods, 13))return;fourthWhichAdd(goods,2);break;
+			case 14:if(goods.toDeityHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toDeityHurt += getRandomValue(goods.toDeityHurt, 1);setAttStr(goods,"toDeityHurt");
+				if(isFourthAttZero(goods, 14))return;fourthWhichAdd(goods,2);break;
+			case 15:if(goods.toDeityHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toDeityHurtRate += getRandomValue(goods.toDeityHurtRate, 1);setAttStr(goods,"toDeityHurtRate");
+				if(isFourthAttZero(goods, 15))return;fourthWhichAdd(goods,2);break;
+			case 16:if(goods.toDemonHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toDemonHurt += getRandomValue(goods.toDemonHurt, 1);setAttStr(goods,"toDemonHurt");
+				if(isFourthAttZero(goods, 16))return;fourthWhichAdd(goods,2);break;
+			case 17:if(goods.toDemonHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toDemonHurtRate += getRandomValue(goods.toDemonHurtRate, 1);setAttStr(goods,"toDemonHurtRate");
+				if(isFourthAttZero(goods, 17))return;fourthWhichAdd(goods,2);break;
+			case 18:if(goods.toBigMonsterHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toBigMonsterHurt += getRandomValue(goods.toBigMonsterHurt, 1);setAttStr(goods,"toBigMonsterHurt");
+				if(isFourthAttZero(goods, 18))return;fourthWhichAdd(goods,2);break;
+			case 19:if(goods.toBigMonsterHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toBigMonsterHurtRate += getRandomValue(goods.toBigMonsterHurtRate, 1);setAttStr(goods,"toBigMonsterHurtRate");
+				if(isFourthAttZero(goods, 19))return;fourthWhichAdd(goods,2);break;
+			case 20:if(goods.toMidMonsterHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toMidMonsterHurt += getRandomValue(goods.toMidMonsterHurt, 1);setAttStr(goods,"toMidMonsterHurt");
+				if(isFourthAttZero(goods, 20))return;fourthWhichAdd(goods,2);break;
+			case 21:if(goods.toMidMonsterHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toMidMonsterHurtRate += getRandomValue(goods.toMidMonsterHurtRate, 1);setAttStr(goods,"toMidMonsterHurtRate");
+				if(isFourthAttZero(goods, 21))return;fourthWhichAdd(goods,2);break;
+			case 22:if(goods.toSmallMonsterHurt <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toSmallMonsterHurt += getRandomValue(goods.toSmallMonsterHurt, 1);setAttStr(goods,"toSmallMonsterHurt");
+				if(isFourthAttZero(goods, 22))return;fourthWhichAdd(goods,2);break;
+			case 23:if(goods.toSmallMonsterHurtRate <= 0){disFourthGoodsAtt(goods); return;}
+				goods.toSmallMonsterHurtRate += getRandomValue(goods.toSmallMonsterHurtRate, 1);setAttStr(goods,"toSmallMonsterHurtRate");
+				if(isFourthAttZero(goods, 23))return;fourthWhichAdd(goods,2);break;
+		}
+	}
+	
+	
+	/**
+	 * 第五批
+	 * @param goods
+	 * @param equipQuality
+	 */
+	public void disFifthGoodsAtt(GoodsEquip goods,int equipQuality)
+	{
+		/**紫色 2)	特定技能等级+1，1~3项随机：
+a)	武器上只会出现该职业的技能等级+1；
+b)	防具上只会出现该2种职业的技能等级+1；
+c)	项链、戒指、装饰上会出现各种技能等级+1；
+紫色 3)	所有技能等级+1；*/
+		if(equipQuality == 4)
+		{
+			int random = (int) (Math.random() * 3 + 1);
+			if(random == 1)
+				setAttStr(goods, "armSkill");
+			else if(random == 2)
+				setAttStr(goods, "armorsSkill");
+			else if(random == 3)
+				setAttStr(goods, "otherSkill");
+		}
+		else if(equipQuality == 5)
+		{
+			setAttStr(goods, "allSkill");
+		}
+	}
+	
+
+	
+	/**
+	 * 第四批属性的添加(第二步)
+	 * @param goods
+	 * @param checkNum
+	 */
+	public void fourthWhichAdd(GoodsEquip goods,int checkNum)
+	{
+		int secondNum = (int)(Math.random()*23)+1;//第二次要添加的属性
+		switch(secondNum)
+		{
+			case 1:setAtt(goods.killMonsterExp,secondNum,checkNum,goods,4,1);setAttStr(goods,"killMonsterExp");break;
+			case 2:setAtt(goods.killMonsterExpRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"killMonsterExpRate");break;
+			case 3:setAtt(goods.suckBloob,secondNum,checkNum,goods,4,1);setAttStr(goods,"suckBloob");break;
+			case 4:setAtt(goods.suckMagic,secondNum,checkNum,goods,4,1);setAttStr(goods,"suckMagic");break;
+			case 5:setAtt(goods.hurtToMagic,secondNum,checkNum,goods,4,1);setAttStr(goods,"hurtToMagic");break;
+			case 6:setAtt(goods.toMortalHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toMortalHurt");break;
+			case 7:setAtt(goods.toMortalHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toMortalHurtRate");break;
+			case 8:setAtt(goods.toBeastHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toBeastHurt");break;
+			case 9:setAtt(goods.toBeastHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toBeastHurtRate");break;
+			case 10:setAtt(goods.toGoblinHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toGoblinHurt");break;
+			case 11:setAtt(goods.toGoblinHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toGoblinHurtRate");break;
+			case 12:setAtt(goods.toNymphHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toNymphHurt");break;
+			case 13:setAtt(goods.toNymphHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toNymphHurtRate");break;
+			case 14:setAtt(goods.toDeityHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toDeityHurt");break;
+			case 15:setAtt(goods.toDeityHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toDeityHurtRate");break;
+			case 16:setAtt(goods.toDemonHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toDemonHurt");break;
+			case 17:setAtt(goods.toDemonHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toDemonHurtRate");break;
+			case 18:setAtt(goods.toBigMonsterHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toBigMonsterHurt");break;
+			case 19:setAtt(goods.toBigMonsterHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toBigMonsterHurtRate");break;
+			case 20:setAtt(goods.toMidMonsterHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toMidMonsterHurt");break;
+			case 21:setAtt(goods.toMidMonsterHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toMidMonsterHurtRate");break;
+			case 22:setAtt(goods.toSmallMonsterHurt,secondNum,checkNum,goods,4,1);setAttStr(goods,"toSmallMonsterHurt");break;
+			case 23:setAtt(goods.toSmallMonsterHurtRate,secondNum,checkNum,goods,4,1);setAttStr(goods,"toSmallMonsterHurtRate");break;
+		}
+	}
+	
+	/**
+	 * 第四批属性添加(方法拆截)
+	 * @param att 属性
+	 * @param secondNum 
+	 * @param checkNum
+	 * @param goods
+	 */
+	public void setAtt(int att,int secondNum,int checkNum,GoodsEquip goods,int step,int level)
+	{
+		if(att <= 0)
+			fourthWhichAdd(goods,checkNum);
+		else
+		{
+			if(checkNum != secondNum)
+				att += getRandomValue(att, level);
+			else 
+			{
+				if(step == 4)
+					fourthWhichAdd(goods,secondNum);
+				else if(step == 3)
+					thirdWhichAdd(goods,secondNum,level);
+				else if(step == 2)
+					secondWhichAdd(goods,secondNum,level);
+			}
+		}
+	}
+	
+	/**
+	 * 第三批中第二次添加
+	 * @param goods 装备
+	 * @param checkNum 第二次添加属性中避开第一次已经添加了的属性
+	 * @param level  决定取随机值的区间
+	 */
+	public void thirdWhichAdd(GoodsEquip goods,int checkNum,int level)
+	{
+		int secondNum = (int)(Math.random()*8)+1;
+		if(secondNum == 1)
+		{
+			if(goods.phySmiteRate <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.phySmiteRate,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"phySmiteRate");
+			}
+		}
+		else if(secondNum == 2)
+		{
+			if(goods.sptSmiteRate <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.sptSmiteRate,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"sptSmiteRate");
+			}
+		}
+		else if(secondNum == 3)
+		{
+			if(goods.phySmiteParm <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.phySmiteParm,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"phySmiteParm");
+			}
+		}
+		else if(secondNum == 4)
+		{
+			if(goods.sptSmiteParm <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.sptSmiteParm,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"sptSmiteParm");
+			}
+		}
+		else if(secondNum == 5)
+		{
+			if(goods.noDefPhyHurt <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.noDefPhyHurt,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"noDefPhyHurt");
+			}
+		}
+		else if(secondNum == 6)
+		{
+			if(goods.noDefSptHurt <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.noDefSptHurt,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"noDefSptHurt");
+			}
+		}
+		else if(secondNum == 7)
+		{
+			if(goods.phyHurtAvoid <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.phyHurtAvoid,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"phyHurtAvoid");
+			}
+		}
+		else if(secondNum == 8)
+		{
+			if(goods.sptHurtAvoid <= 0)
+				thirdWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.sptHurtAvoid,secondNum,checkNum,goods,3,level);
+				setAttStr(goods,"sptHurtAvoid");
+			}
+		}
+	}
+	
+	/**
+	 * 第二批中的第二次添加属性
+	 * @param goods
+	 * @param checkNum 第二次添加属性中避开第一次已经添加了的属性
+	 * @param level 决定取随机值的区间
+	 */
+	private void secondWhichAdd(GoodsEquip goods,int checkNum,int level)
+	{
+		int secondNum = (int)(Math.random()*6)+1;//首先添加的属性
+//		System.out.println("secondNum==========="+secondNum);
+		if(secondNum == 1)
+		{
+			if(goods.lifePoint <= 0)
+				secondWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.lifePoint,secondNum,checkNum,goods,2,level);
+				setAttStr(goods,"lifePoint");
+			}
+		}
+		else if(secondNum == 2)
+		{
+			if(goods.magicPoint <= 0)
+				secondWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.magicPoint,secondNum,checkNum,goods,2,level);
+				setAttStr(goods,"magicPoint");
+			}
+		}
+		else if(secondNum == 3)
+		{
+			if(goods.hit <= 0)
+				secondWhichAdd(goods,checkNum,level);
+			else
+			{	
+				setAtt(goods.hit,secondNum,checkNum,goods,2,level);
+				setAttStr(goods,"hit");
+			}
+		}
+		else if(secondNum == 4)
+		{
+			if(goods.avoidance <= 0)
+				secondWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.avoidance,secondNum,checkNum,goods,2,level);
+				setAttStr(goods,"avoidance");
+			}
+		}
+		else if(secondNum == 5)
+		{
+			if(goods.spiritStand <= 0)
+				secondWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.spiritStand,secondNum,checkNum,goods,2,level);
+				setAttStr(goods,"spiritStand");
+			}
+		}
+		else if(secondNum == 6)
+		{
+			if(goods.curePoint <= 0)
+				secondWhichAdd(goods,checkNum,level);
+			else
+			{
+				setAtt(goods.curePoint,secondNum,checkNum,goods,2,level);
+				setAttStr(goods,"curePoint");
+			}
+		}
+	}	
+	
+	/**
+	 * 在指定的区间获取一个随机值()
+	 * @param attValue 要获取随机值的原始值
+	 * @param equipQuality  装备品质
+	 * @return 随机值
+	 */
+	private int getRandomValue(int attValue,int level)
+	{
+		int max = 0,min = 0,result = 0;
+		if(level == 1)
+		{
+			min = attValue * 70;//增加下限的百分比
+			max = attValue * 130;//增加上限的百分比
+		}
+		else if(level == 2)
+		{
+			min = (int) (attValue * 70 * 1.2);//增加下限的百分比
+			max = (int) (attValue * 130 * 1.2);//增加上限的百分比
+		}
+		else if(level >= 3)
+		{
+			min = (int) (attValue * 70 * 1.5);//增加下限的百分比
+			max = (int) (attValue * 130 * 1.5);//增加上限的百分比
+		}
+		result = (int) Math.random()*(max-min)+min;
+		return result/100;
+	}
+	
+	
+	/**
+	 * 分配属性点数(方法裁解)(第一批)
+	 * @param goods  要生成装备的原始对象
+	 * @param firstPoint 第一次要添加的属性值
+	 * @param secondPoint 第二次要添加的属性值
+	 * @param thirdPoint 第三次要添加的属性值
+	 */
+	private void disFirstGoodsAtt(GoodsEquip goods,int firstPoint,int secondPoint,int thirdPoint)
+	{
+		//secondPoint=-1时表示只添加一个属性的值,thirdPoint=-1时表示只给其中两个属性添加
+		int firstNum = (int)(Math.random()*3)+1;//首先要具体分配给哪个属性
+		int n = (int)(Math.random()*2)+1;//接下来要先分配给哪个属性
+		if(firstNum == 1)
+		{
+			if(secondPoint != -1)
+			{
+				firstWhichAdd(goods,firstPoint,2);//第一次添加的属性(精神/敏捷)
+				if(n == 1)
+				{
+					firstWhichAdd(goods,secondPoint,1);//第二次添加的属性(力量/智慧)
+					if(thirdPoint != -1)
+					{
+						goods.physique += thirdPoint;//第三次添加的属性(体质)
+						setAttStr(goods,"physique");
+					}
+				}
+				else 
+				{
+					goods.physique += secondPoint;////第二次添加的属性(体质)
+					setAttStr(goods,"physique");
+					if(thirdPoint != -1)
+						firstWhichAdd(goods,thirdPoint,1);//第三次添加的属性(力量/智慧)
+				}
+			}
+			else
+				firstWhichAdd(goods, firstPoint, 0);//只加一个属性
+		}
+		else if(firstNum == 2)
+		{
+			if(secondPoint != -1)
+			{
+				firstWhichAdd(goods,firstPoint,1);//第一次添加的属性(力量/智慧)
+				if(n == 1)
+				{
+					goods.physique += secondPoint;//第二次添加的属性(体质)
+					setAttStr(goods,"physique");
+					if(thirdPoint != -1)
+						firstWhichAdd(goods,thirdPoint,2);//第三次添加的属性(精神/敏捷)
+				}
+				else 
+				{
+					firstWhichAdd(goods,secondPoint,2);//第二次添加的属性(精神/敏捷)
+					if(thirdPoint != -1)
+					{
+						goods.physique += thirdPoint;//第三次添加的属性(体质)
+						setAttStr(goods,"physique");
+					}
+				}
+			}
+			else
+				firstWhichAdd(goods, firstPoint, 0);//只加一个属性
+		}
+		else
+		{
+			goods.physique += firstPoint;////第一次添加的属性(体质)
+			setAttStr(goods,"physique");
+			if(secondPoint != -1)
+			{
+				if(n == 1)
+				{
+					firstWhichAdd(goods,secondPoint,2);//第二次添加的属性(精神/敏捷)
+					if(thirdPoint != -1)
+						firstWhichAdd(goods,thirdPoint,1);//第三次添加的属性(力量/智慧)
+				}
+				else 
+				{
+					firstWhichAdd(goods,secondPoint,1);//第二次添加的属性(力量/智慧)
+					if(thirdPoint != -1)
+						firstWhichAdd(goods,thirdPoint,2);//第三次添加的属性(精神/敏捷)
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * 根据职业判断添加什么属性(第一批)
+	 * @param goods 原始对象
+	 * @param point 属性值
+	 * @param type 类型(判断先添加哪个属性)
+	 */
+	private void firstWhichAdd(GoodsEquip goods,int point,int type)
+	{
+		String[] str = goods.job.split(":");
+		int goodsJob1 = -1,goodsJob2 = -1,goodsJob3 = -1;
+		if(str.length == 1)
+		{
+			goodsJob1 = Integer.parseInt(goods.job);
+		}
+		else if(str.length == 2)
+		{
+			goodsJob1 = Integer.parseInt(str[0]);
+			goodsJob2 = Integer.parseInt(str[1]);
+		}
+		else if(str.length == 3)
+		{
+			goodsJob1 = Integer.parseInt(str[0]);
+			goodsJob2 = Integer.parseInt(str[1]);
+			goodsJob3 = Integer.parseInt(str[2]);
+		}
+		
+		if(type == 1)
+		{
+			if(goodsJob1 == 1 || goodsJob1 == 2 || goodsJob2 == 1 || goodsJob2 == 2 || goodsJob3 == 1 || goodsJob3 == 2
+				|| goodsJob1 == 5 || goodsJob1 == 6 || goodsJob1 == 7 || goodsJob1 == 8
+				|| goodsJob2 == 5 || goodsJob2 == 6 || goodsJob2 == 7 || goodsJob2 == 8
+				|| goodsJob3 == 5 || goodsJob3 == 6 || goodsJob3 == 7 || goodsJob3 == 8)
+			{
+				goods.power += point;//职业为士兵和运动员才加力量
+				setAttStr(goods,"power");
+			}
+			if(goodsJob1 == 3 || goodsJob1 == 4 || goodsJob2 == 3 || goodsJob2 == 4 || goodsJob3 == 3 || goodsJob3 == 4
+					|| goodsJob1 == 9 || goodsJob1 == 10 || goodsJob1 == 11 || goodsJob1 == 12
+					|| goodsJob2 == 9 || goodsJob2 == 10 || goodsJob2 == 11 || goodsJob2 == 12
+					|| goodsJob3 == 9 || goodsJob3 == 10 || goodsJob3 == 11 || goodsJob3 == 12)
+			{
+				goods.wisdom += point;//职业为医护人员和超能力者才加智慧
+				setAttStr(goods,"wisdom");
+			}
+		}
+		else if(type == 2)
+		{
+			if(goodsJob1 != 2 && goodsJob2 != 2 && goodsJob3 != 2 && goodsJob2 != -1 && goodsJob3 != -1 &&
+					goodsJob1 != 7 && goodsJob1 != 8 && goodsJob2 != 7 && goodsJob2 != 8 && goodsJob3 != 7 && goodsJob3 != 8)
+			{
+				goods.spirit += point;//职业不为运动员才加精神
+				setAttStr(goods,"spirit");
+			}
+			else
+			{
+				goods.agility += point;//职业是运动员才加敏捷
+				setAttStr(goods,"agility");
+			}
+		}
+		else 
+		{
+			int firstNum = (int)(Math.random()*3)+1;//首先要具体分配给哪个属性
+			if(firstNum == 1)
+				firstWhichAdd(goods,point,2);
+			else if(firstNum == 2)
+				firstWhichAdd(goods,point,1);
+			else
+			{
+				goods.physique += point;
+				setAttStr(goods,"physique");
+			}
+		}
+	}
+	
+	
+	private boolean isSecondAttZero(GoodsEquip goods,int type)
+	{
+		//生命值、精力值、命中、闪避、精神抵抗、治疗值
+		boolean result = false;
+		if(type == 0)
+			result = (goods.lifePoint <= 0 && goods.magicPoint <= 0 && goods.hit <= 0 && goods.avoidance <= 0 && goods.spiritStand <= 0 && goods.curePoint <= 0);
+		else if(type == 1)
+			result = (goods.magicPoint <= 0 && goods.hit <= 0 && goods.avoidance <= 0 && goods.spiritStand <= 0 && goods.curePoint <= 0);
+		else if(type == 2)
+			result = (goods.lifePoint <= 0 && goods.hit <= 0 && goods.avoidance <= 0 && goods.spiritStand <= 0 && goods.curePoint <= 0);
+		else if(type == 3)
+			result = (goods.lifePoint <= 0 && goods.magicPoint <= 0 && goods.avoidance <= 0 && goods.spiritStand <= 0 && goods.curePoint <= 0);
+		else if(type == 4)
+			result = (goods.lifePoint <= 0 && goods.magicPoint <= 0 && goods.hit <= 0 && goods.spiritStand <= 0 && goods.curePoint <= 0);
+		else if(type == 5)
+			result = (goods.lifePoint <= 0 && goods.magicPoint <= 0 && goods.hit <= 0 && goods.avoidance <= 0 && goods.curePoint <= 0);
+		else if(type == 6)
+			result = (goods.lifePoint <= 0 && goods.magicPoint <= 0 && goods.hit <= 0 && goods.avoidance <= 0 && goods.spiritStand <= 0);
+		return result;
+	}
+	
+	private boolean isThirdAttZero(GoodsEquip goods,int type)
+	{
+		//物理爆击率、精神爆击率、物理爆击参数、精神爆击参数、
+		 //* 忽视防御的物理伤害、忽视防御的精神伤害、物理免伤、精神免伤
+		boolean result = false;
+		if(type == 0)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0 && goods.noDefPhyHurt <= 0
+					  && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 1)
+			result = (goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0 && goods.noDefPhyHurt <= 0
+					  && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 2)
+			result = (goods.phySmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0 && goods.noDefPhyHurt <= 0
+					  && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 3)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.sptSmiteParm <= 0 && goods.noDefPhyHurt <= 0
+					  && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 4)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.noDefPhyHurt <= 0
+					  && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 5)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0
+					  && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 6)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0 
+					&& goods.noDefPhyHurt <= 0 && goods.phyHurtAvoid <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 7)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0 
+					&& goods.noDefPhyHurt <= 0 && goods.noDefSptHurt <= 0 && goods.sptHurtAvoid <= 0);
+		else if(type == 8)
+			result = (goods.phySmiteRate <= 0 && goods.sptSmiteRate <= 0 && goods.phySmiteParm <= 0 && goods.sptSmiteParm <= 0 
+					&& goods.noDefPhyHurt <= 0 && goods.noDefSptHurt <= 0 && goods.phyHurtAvoid <= 0);
+		return result;
+	}
+	
+	private boolean isFourthAttZero(GoodsEquip goods,int type)
+	{
+		//4)	杀怪所得经验值增加、杀怪所得经验值增加%、吸血、吸蓝、所受伤害转化为精力消耗、对特定类型怪伤害增加、对特定类型怪伤害增加%、对特定体型怪伤害增加、对特定体型怪伤害
+		boolean result = false;
+		switch(type)
+		{
+			case 0:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+					    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+					    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+					    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+					    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+					    
+			case 1:result = (goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 2:result = (goods.killMonsterExp<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 3:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 4:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 5:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 6:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 7:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0&& goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 8:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0&& goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 9:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0&& goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 10:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 11:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 12:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 13:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 14:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 15:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 16:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 17:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 18:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 19:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 20:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 21:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toSmallMonsterHurt<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 22:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurtRate<=0);break;
+				    
+			case 23:result = (goods.killMonsterExp<=0 && goods.killMonsterExpRate<=0 && goods.suckBloob<=0 && goods.suckMagic<=0 && goods.hurtToMagic<=0
+				    && goods.toMortalHurt<=0 && goods.toMortalHurtRate<=0 && goods.toBeastHurt<=0 && goods.toBeastHurtRate<=0 && goods.toGoblinHurt<=0
+				    && goods.toGoblinHurtRate<=0 && goods.toNymphHurt<=0 && goods.toNymphHurtRate<0 && goods.toDeityHurt<=0 && goods.toDeityHurtRate<=0
+				    && goods.toDemonHurt<=0 && goods.toDemonHurtRate<=0 && goods.toBigMonsterHurt<=0 && goods.toBigMonsterHurtRate<=0
+				    && goods.toMidMonsterHurt<=0 && goods.toMidMonsterHurtRate<=0 && goods.toSmallMonsterHurt<=0);break;
+		}
+		return result;
+	}
+	
+	
+	private void setDefaultOne(GoodsEquip equip)
+	{
+		equip.power = 0;
+		equip.agility = 0;
+		equip.spirit = 0;
+		equip.wisdom = 0;
+		equip.physique = 0;
+		
+		equip.lifePoint = 0;
+		equip.magicPoint = 0;
+		equip.hit = 0;
+		equip.avoidance = 0;
+		equip.spiritStand = 0;
+		equip.curePoint = 0;
+
+	}
+	
+	private void setDefaultTwo(GoodsEquip equip)
+	{
+		equip.noDefPhyHurt = 0;
+		equip.noDefSptHurt = 0;
+		equip.phyHurtAvoid = 0;
+		equip.sptHurtAvoid = 0;
+		equip.phySmiteRate = 0;
+		equip.sptSmiteRate = 0;
+		equip.phySmiteParm = 0;
+		equip.sptSmiteParm = 0;
+	}
+	
+	private void setDefaultThree(GoodsEquip equip)
+	{
+		equip.killMonsterExp =0; 
+		equip.killMonsterExpRate = 0; 
+		equip.suckBloob = 0; 
+		equip.suckMagic = 0; 
+		equip.hurtToMagic = 0; 
+		equip.toMortalHurt = 0; 
+		equip.toMortalHurtRate = 0; 
+		equip.toBeastHurt = 0; 
+		equip.toBeastHurtRate = 0; 
+		equip.toGoblinHurt = 0; 
+		equip.toGoblinHurtRate = 0; 
+		equip.toNymphHurt = 0; 
+		equip.toNymphHurtRate = 0;
+		equip.toDeityHurt = 0; 
+		equip.toDeityHurtRate = 0;
+		equip.toDemonHurt = 0; 
+		equip.toDemonHurtRate = 0; 
+		equip.toBigMonsterHurt = 0; 
+		equip.toBigMonsterHurtRate = 0;
+		equip.toMidMonsterHurt = 0; 
+		equip.toMidMonsterHurtRate = 0; 
+		equip.toSmallMonsterHurt = 0;
+		equip.toSmallMonsterHurtRate = 0;
+	}
+	
+	public void setDefault(GoodsEquip equip,int quality)
+	{
+		if(quality == 0)
+		{
+			setDefaultOne(equip);
+			setDefaultTwo(equip);
+			setDefaultThree(equip);
+		}
+		else if(quality == 1)
+		{
+			setDefaultTwo(equip);
+			setDefaultThree(equip);
+			equip.point *= 110/100;
+			equip.money *= 110/100;
+		}
+		else if(quality == 2)
+		{
+			setDefaultThree(equip);
+			equip.point *= 130/100;
+			equip.money *= 130/100;
+		}
+		else if(quality == 3)
+		{
+			equip.point *= 160/100;
+			equip.money *= 160/100;
+		}
+		else
+		{
+			equip.point *= 200/100;
+			equip.money *= 200/100;
+		}
+	}
+
+
+	private void setAttStr(GoodsEquip equip,String str)
+	{
+		if(equip.attStr.indexOf(str) == -1)
+		{
+			if(equip.attStr.isEmpty())
+				equip.attStr += str;
+			else
+				equip.attStr += ":" + str;
+		}
+	}
+	
+	@Override
+	public boolean onUseGoodsBattle(PlayerController player,
+			PlayerController targetPlayer) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+		
+}

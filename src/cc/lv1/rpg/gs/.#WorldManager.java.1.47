@@ -1,0 +1,649 @@
+package cc.lv1.rpg.gs;
+
+
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.net.abs.NetConnection;
+import vin.rabbit.net.job.JobObserver;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.Utils;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+import cc.lv1.rpg.gs.dao.DatabaseAccessor;
+import cc.lv1.rpg.gs.data.PressureTest;
+import cc.lv1.rpg.gs.entity.ConfirmJob;
+import cc.lv1.rpg.gs.entity.container.PlayerContainer;
+import cc.lv1.rpg.gs.entity.controller.AreaController;
+import cc.lv1.rpg.gs.entity.controller.BattleController;
+import cc.lv1.rpg.gs.entity.controller.BusinessController;
+import cc.lv1.rpg.gs.entity.controller.FamilyController;
+import cc.lv1.rpg.gs.entity.controller.NpcController;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.controller.RoomController;
+import cc.lv1.rpg.gs.entity.controller.TeamController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.Storage;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.Shop;
+import cc.lv1.rpg.gs.gui.MainFrame;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.net.impl.SaveJob;
+import cc.lv1.rpg.gs.other.ErrorCode;
+/**
+ * 世界管理器，维护整个游戏世界
+ * @author dxw
+ *
+ */
+public class WorldManager extends PlayerContainer
+{
+	private long currentTime = 0;
+	
+	private static final long SAVEDATETIMER = 1000*60*5;
+	
+	private long saveTimer = 0;
+	
+	private int checkCount =0;
+	
+	private int areaLength ;
+	
+	private GameServer gameServer;
+	
+	private JobObserver jobObserver;
+	
+	private DatabaseAccessor databaseAccessor;
+	
+	private List familyList = new ArrayList(100);
+	
+	private List connections = new ArrayList(200);
+	
+	private int connectionMax = 0;
+	
+	private HashMap playerMap = new HashMap(1000);
+	
+	private List shopList = new ArrayList(200);
+	
+	/** 区域 */
+	private AreaController [] areaControllers = null;
+
+	public synchronized void addPlayerConntroller(PlayerController controller)
+	{
+		controller.setWorldManager(this);
+		controller.setOnline(true);
+		playerMap.put(controller.getName(), controller);
+		playerList.add(controller);
+	}
+	
+	public synchronized void removePlayerController(PlayerController controller)
+	{
+		controller.setWorldManager(null);
+		controller.setOnline(false);
+		playerMap.remove(controller.getName());
+		playerList.remove(controller);
+	}
+	
+	public void onConnectionOpened(NetConnection conn)
+	{
+		//checkSameIp(conn);
+
+		synchronized(conn)
+		{
+			connections.add(conn);
+		}
+		connectionMax++;
+	}
+	
+	public void onConnectionClosed(NetConnection conn)
+	{
+		Object controller = conn.getInfo();
+		if(controller instanceof PlayerController)
+		{
+			PlayerController target = (PlayerController) controller;
+			removePlayerController(target);
+			PlayerContainer container = target.getParent();
+
+			if(container != null)
+			{
+				container.removePlayer(target);
+			}
+			if(target.getTeam() != null)
+			{
+				target.getTeam().playerLeaveTeam(target);
+			}
+			
+			FamilyController family = target.getFamily();
+			if(family !=null)
+			{
+				family.removePlayer(target);
+			}
+			
+			getJobObserver().addJob(GameServer.JOB_DATABASEJOB,
+					new SaveJob(this,target.getPlayer()));
+		}
+		
+		synchronized(conn)
+		{
+			connections.remove(conn);
+		}
+	}
+	
+	public void update()
+	{
+		long timeMillis = System.currentTimeMillis();
+		if(timeMillis - currentTime > 1000)
+		{
+			currentTime = System.currentTimeMillis();
+		}
+		
+		for(int i = 0 ; i < areaLength ; i ++)
+		{
+			areaControllers[i].update(timeMillis);
+		}
+		
+		
+		int count = confirmations.size();
+		for (int i = 0; i < count; i++)
+		{
+			ConfirmJob job = (ConfirmJob)confirmations.get(i);
+			if (job.getLifeTime() == -0xffff)
+			{
+				confirmations.remove(i--);
+				count--;
+				continue;
+			}
+			job.setLifeTime(job.getLifeTime() - 500);
+			if (!job.isAlive())
+			{
+				confirmations.remove(i--);
+				count--;
+				job.cancel();
+			}
+		}
+		
+		
+		if(timeMillis > saveTimer +SAVEDATETIMER)
+		{
+			saveTimer = timeMillis;
+			for (int i = 0; i != playerList.size(); i++)
+			{
+				PlayerController target= (PlayerController)playerList.get(i);
+				
+				if(target == null)
+					continue;
+				
+				getJobObserver().addJob(GameServer.JOB_DATABASEJOB,
+						new SaveJob(this,target.getPlayer()));
+			}
+			
+			
+			if(++checkCount >= 1)
+			{
+				checkCount = 0;
+				for (int i = 0; i != connections.size(); i++)
+				{
+					NetConnection  net = (NetConnection)connections.get(i);
+					
+					if(net == null)
+						continue;
+					
+					if(timeMillis > net.getPingTime()+SAVEDATETIMER*2)
+					{
+						MainFrame.println("Close Net With : "+net.getIP());
+						MainFrame.println("Net Info : " + net.getInfo());
+						MainFrame.println("LastPing : "+Utils.getCurrentTime(net.getPingTime()));
+						MainFrame.println("Current : "+Utils.getCurrentTime(timeMillis));
+						MainFrame.println("--------------------------------");
+						net.close();
+					}
+				}
+				
+				PressureTest.getInstance().addData(timeMillis, playerList.size(),connectionMax);
+			}
+		}
+	}
+
+	/**
+	 * 检查当前账号的用户是否在线，在返回当前用户连接，不在则返回空
+	 * @param accountName
+	 * @return
+	 */
+	public NetConnection checkPlayerIsOnline(String accountName)
+	{
+		for(int i = 0 ; i != connections.size() ; i ++)
+		{
+			NetConnection nc = (NetConnection)connections.get(i);
+			Object playerInfo = nc.getInfo();
+			
+			if(playerInfo == null)
+				continue;
+			
+			if(playerInfo instanceof Player)
+			{
+				Player player = (Player)playerInfo;
+				if(player.accountName.equals(accountName))
+					return nc;
+				continue;
+			}
+			
+			if(playerInfo instanceof PlayerController)
+			{
+				PlayerController target= (PlayerController)playerInfo;
+				if(target.getPlayer().accountName.equals(accountName))
+					return nc;
+				continue;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 玩家进入游戏世界
+	 * @param player
+	 * @param conn
+	 */
+	public void processEnterGame(Player player,NetConnection conn)
+	{
+		PlayerController target = new PlayerController(player);
+		target.setNetConnection(conn);
+		if(player.familyId != 0)
+		{
+			FamilyController family = getFamilyById(player.familyId);
+			if(family == null)
+			{
+				target.sendAlert(ErrorCode.ALERT_FAMILY_NOT_EXIST);
+
+				player.familyId = 0;
+				player.familyName = "";
+			}
+			else
+			{
+				if(family.isInFamily(target.getName()))
+				{
+					target.setFamilyController(family);
+					family.addPlayer(target);
+				}
+				else
+				{
+					target.getPlayer().familyId = 0;
+					target.getPlayer().familyName = "";
+				}
+
+			}
+		}
+		
+		conn.setInfo(target);
+		addPlayerConntroller(target);	
+	}
+
+
+	public void clientMessageChain(AppMessage msg)
+	{
+		NetConnection netConnection = (NetConnection)msg.getSource();
+		Object playerInfo = netConnection.getInfo();
+
+		int markType = msg.getMarkType();
+		
+		if(!(playerInfo instanceof PlayerController))
+			return;
+		
+		PlayerController target = (PlayerController)playerInfo;
+		
+		if(!target.isOnline())
+			return;
+	
+		if(target.getCampState() == 1 && msg.getType() != SMsg.C_PLAYER_CAMP_SET_COMMAND)//玩家正在选择阵营，其它指令全部屏蔽
+		{
+			target.sendAlert(ErrorCode.ALERT_CHOOSE_CAMP_ING);
+			return;
+		}
+		
+		if(markType == SMsg.T_PLAYER_COMMAND)
+		{
+			target.clientMessageChain(msg);
+		}
+		else if(markType == SMsg.T_ROOM_COMMAND)
+		{
+			Object parent = target.getParent();
+			
+			if(parent != null && msg.getType() != SMsg.C_ROOM_ADD_COMMAND)
+			{
+				if(parent instanceof RoomController)
+				{
+					((RoomController)parent).clientMessageChain(target,msg);
+				}
+			}
+			else
+			{
+				int areaId = msg.getBuffer().readInt();
+				int roomId = msg.getBuffer().readInt();
+                
+				AreaController area = getAreaById(areaId);
+				
+				if(area == null)
+					return;
+				RoomController room = area.getRoomById(roomId);
+				
+				if(room == null)
+					return;
+				
+				room.clientMessageChain(target,msg);
+			}
+		}
+		else if(markType == SMsg.T_NPC_COMMAND)
+		{
+			Object parent = target.getParent();
+			
+			if(parent == null)
+				return;
+			
+			if(!(parent instanceof RoomController))
+				return;
+			
+			int npcId = msg.getBuffer().readInt();
+			
+			NpcController npc = ((RoomController)parent).getNpc(npcId);
+			
+			if(npc == null)
+				return;
+			
+			npc.clientMessageChain(target,msg);
+		}
+		else if(markType == SMsg.T_BAG_COMMAND)
+		{
+			Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+			bag.clientMessageChain(target, msg);
+		}
+		else if(markType == SMsg.T_SHOP_COMMAND)
+		{
+			int shopId = msg.getBuffer().readInt();
+			Shop shop = getShop(shopId);
+			if(shop == null)
+				return;
+			shop.clientMessageChain(target, msg);
+		}
+		else if(markType == SMsg.T_STORAGE_COMMAND)
+		{
+			Storage storage = (Storage) target.getPlayer().getExtPlayerInfo("storage");
+			storage.clientMessageChain(target, msg);
+		}
+		else if(markType == SMsg.T_BATTLE_COMMAND)
+		{
+			Object parent = target.getParent();
+
+			if(parent == null)
+				return;
+		
+			if(!(parent instanceof BattleController))
+				return;
+			
+			NetConnection conn = target.getNetConnection();
+			long time = conn.getPingTime();
+			
+			if(time < 4000 + target.currentTimeMsg)
+			{
+				//target.resetPlayer();
+				//target.close();
+				return;
+			}
+			target.currentTimeMsg = time;
+
+			((BattleController)parent).clientMessageChain(target,msg);
+		}
+		else if(markType == SMsg.T_TEAM_COMMAND)
+		{
+			TeamController team = target.getTeam();
+			if(team == null)
+				return;
+			team.clientMessageChain(target, msg);
+		}
+		else if(markType == SMsg.T_BUSINESS_COMMAND)
+		{
+			Object parent = target.getParent();
+
+			if(parent == null)
+				return;
+			
+			if(!(parent instanceof BusinessController))
+				return;
+
+			((BusinessController)parent).clientMessageChain(target,msg);
+		}
+
+	}
+	
+	
+	
+	public GameServer getGameServer()
+	{
+		return gameServer;
+	}
+
+	public void setGameServer(GameServer gameServer)
+	{
+		this.gameServer = gameServer;
+	}
+
+	public JobObserver getJobObserver()
+	{
+		return jobObserver;
+	}
+
+	public void setJobObserver(JobObserver jobObserver)
+	{
+		this.jobObserver = jobObserver;
+	}
+
+	public DatabaseAccessor getDatabaseAccessor()
+	{
+		return databaseAccessor;
+	}
+
+	public void setDatabaseAccessor(DatabaseAccessor databaseAccessor)
+	{
+		this.databaseAccessor = databaseAccessor;
+	}
+
+	public void setAreaController(AreaController[] areaControllers)
+	{
+		this.areaControllers = areaControllers;
+		areaLength = areaControllers.length;
+	}
+	
+	public AreaController getAreaById(int areaId)
+	{
+		for (int i = 0; i < areaLength; i++)
+		{
+			if(areaControllers[i].id == areaId)
+				return areaControllers[i];
+		}
+		return null;
+	}
+	
+	public AreaController[] getAreaControllers()
+	{
+		return areaControllers;
+	}
+
+	public PlayerController getPlayerController(String name)
+	{
+		return (PlayerController)playerMap.get(name);
+	}
+	
+	public PlayerController getPlayerControllerById(int id)
+	{
+		for (int i = 0; i < playerList.size(); i++)
+		{
+			PlayerController player = (PlayerController) playerList.get(i);
+			if(player.getPlayer().id == id)
+				return player;
+		}
+		return null;
+	}
+
+	public Shop getShop(int shopId) {
+		for (int i = 0; i < shopList.size(); i++) 
+		{
+			Shop shop = (Shop) shopList.get(i);
+			if(shop.id == shopId)
+			{
+				return shop;
+			}
+		}
+		return null;
+	}
+
+	public void setShopList(Shop shop)
+	{
+		this.shopList.add(shop);
+	}
+
+	private List confirmations = new ArrayList();
+	
+	public void addConfirmJob(ConfirmJob job)
+	{
+		confirmations.add(job);
+	}
+	
+	public ConfirmJob getConfirmation(String name)
+	{
+		int count = confirmations.size();
+		for (int i = 0; i < count; i++)
+		{
+			ConfirmJob job = (ConfirmJob)confirmations.get(i);
+			if (job.getName().equals(name))
+				return job;
+		}
+		return null;
+	}
+
+	
+	public void addFamily(FamilyController family)
+	{
+		familyList.add(family);
+	}
+	
+	public void removeFamily(FamilyController family)
+	{
+		familyList.remove(family);
+	}
+	
+	public FamilyController getFamilyById(int id)
+	{
+		int size = familyList.size();
+		for (int i = 0; i < size; i++)
+		{
+			FamilyController family = (FamilyController)familyList.get(i);
+			if(family.id == id)
+				return family;
+		}
+		return null;
+	}
+	
+	public FamilyController getFamilyByName(String name)
+	{
+		int size = familyList.size();
+		for (int i = 0; i < size; i++)
+		{
+			FamilyController family = (FamilyController)familyList.get(i);
+			if(family.name.equals(name))
+				return family;
+		}
+		return null;
+	}
+	
+	public boolean isFamilyHaved(String name)
+	{
+		return getFamilyByName(name) != null;
+	}
+	
+	public void saveTo(ByteBuffer buffer)
+	{
+		int size = familyList.size();
+		
+		buffer.writeInt(size);
+		
+		for (int i = 0; i < size; i++)
+		{
+			FamilyController family = (FamilyController)familyList.get(i);
+			family.saveTo(buffer);
+		}
+		
+	}
+	
+	
+	public void loadFrom(ByteBuffer buffer)
+	{
+		int size = buffer.readInt();
+//		System.out.println("读取家族数量...."+size);
+		for (int i = 0; i < size; i++)
+		{
+			FamilyController family = new FamilyController();
+			family.setWorldManager(this);
+			family.loadFrom(buffer);
+			addFamily(family);
+		}
+	}
+	
+	
+
+	
+	public NetConnection getConnByIpAndPort(String ipAPort)
+	{
+		for (int i = 0; i != connections.size(); i++)
+		{
+			NetConnection net =(NetConnection)connections.get(i);
+			
+			if(net == null)
+				continue;
+			
+			if(net.getIP().equals(ipAPort))
+			{
+				return net;
+			}
+		}
+		return null;
+	}
+	
+	
+	private void checkSameIp(NetConnection conn)
+	{
+		ArrayList list = getSameConnectionsByIp(conn.getIP().split(":")[0]);
+		
+		if(list != null)
+		{
+			conn.setInfo(list);
+		}
+	}
+	
+	
+	public ArrayList getSameConnectionsByIp(String ip)
+	{
+		ArrayList list = new ArrayList();
+		
+		for (int i = 0; i != connections.size(); i++)
+		{
+			NetConnection net =(NetConnection)connections.get(i);
+			
+			if(net == null)
+				continue;
+			
+			if(net.getIP().split(":")[0].equals(ip))
+			{
+				list.add(net);
+			}
+		}
+		if(list.size() <= 0)
+			return null;
+		return list;
+	}
+
+	public int getConnectionSize()
+	{
+		return connections.size();
+	}
+	
+	public List getConnections()
+	{
+		return connections;
+	}
+	
+}

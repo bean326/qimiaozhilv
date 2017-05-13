@@ -1,0 +1,364 @@
+package cc.lv1.rpg.gs.entity.impl;
+
+
+import cc.lv1.rpg.gs.GameServer;
+import cc.lv1.rpg.gs.WorldManager;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsEquip;
+import cc.lv1.rpg.gs.entity.impl.goods.GoodsProp;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.net.impl.PayJob;
+import cc.lv1.rpg.gs.net.impl.SaveJob;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import vin.rabbit.util.collection.impl.HashMap;
+
+
+public class Shop extends RPGameObject{
+	
+	public static final int REBATE = 50;
+	/** 物品列表 */
+	private List goodsList = new ArrayList(60);
+	
+	private HashMap saleRate;
+	
+	private HashMap buyRate;
+	
+	private HashMap honourMap;
+
+	public Shop(int shopId,List list,HashMap sr,HashMap br,HashMap honour)
+	{
+		id = shopId;
+		goodsList = list;
+		saleRate = sr;
+		buyRate = br;
+		honourMap = honour;
+	}
+	
+	public int goodsCount()
+	{
+		return goodsList.size();
+	}
+	
+	public List getGoodsList()
+	{
+		return goodsList;
+	}
+	
+	public int getBuyRebate(int goodsId)
+	{
+		String str = buyRate.get(goodsId).toString();
+		return Integer.parseInt(str);
+	}
+	
+	public void setBuyRate(int goodsId,int rate)
+	{
+		buyRate.put(goodsId, rate);
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		int count = goodsList.size();
+		buffer.writeInt(id);
+		buffer.writeInt(count);
+		for (int i = 0; i < count; i++) {
+			Goods goods = (Goods) goodsList.get(i);
+			goods.writeTo(buffer);
+			int br = Integer.parseInt(buyRate.get(goods.id).toString()) ;
+			buffer.writeInt(br);
+			int honour = Integer.parseInt(honourMap.get(goods.id).toString()) ;
+			buffer.writeInt(honour);
+		}
+	}
+	
+	
+	
+	/**
+	 * 打开商城
+	 * @param target
+	 */
+	private void openShop(PlayerController target)
+	{
+		ByteBuffer buffer = new ByteBuffer();
+		writeTo(buffer);
+		target.getNetConnection().sendMessage(new SMsg(SMsg.S_OPEN_SHOP_COMMAND,buffer));
+	}
+	
+	
+	/**
+	 * 购买商品
+	 * @param target 玩家
+	 * @param buffer 接收参数
+	 */
+	private void buyGoods(PlayerController target, ByteBuffer buffer)
+	{
+		int goodsId = buffer.readInt();//物品ID
+		int count = buffer.readInt();//要购买的物品数量
+		if(count <=0 || goodsId <= 0)
+			return;
+		//判断商店是否有这个物品
+		Object goodsObject = getGoodsById(goodsId);
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		if(count > goods.repeatNumber)
+		{
+			//数量超出限制 
+			target.sendAlert(ErrorCode.ALERT_GOODS_COUNT_OVERRUN);
+			return;
+		}
+		//判断玩家的钱够不够买商品
+		int br = Integer.parseInt(buyRate.get(goods.id).toString());
+		int needPoint = (int) (goods.point * ((double)br/100) * count);
+		int needMoney = (int) (goods.money * ((double)br/100) * count);
+		int honour = Integer.parseInt(honourMap.get(goods.id).toString()) ;
+		int needHonour = (int) (honour * ((double)br/100) * count);
+		
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		if(id == 1000000000)
+		{
+			if(bag.money + bag.equipMoney < needMoney)
+			{
+				//玩家的钱不够了
+				target.sendAlert(ErrorCode.ALERT_SHOP_NO_MONEY);
+				return;
+			}
+		}
+		else if(id == 2000000000)
+		{
+			if(target.getHonour() < needHonour)
+			{
+				//玩家的荣誉值不够了
+				target.sendAlert(ErrorCode.ALERT_SHOP_NO_HONOUR);
+				return;
+			}
+		}
+		else
+		{
+			if(bag.point < needPoint || bag.money < needMoney)
+			{
+				//玩家的钱不够了
+				target.sendAlert(ErrorCode.ALERT_SHOP_NO_POINT);
+				return;
+			}
+		}
+		
+		
+//		if(bag.getGoods(goods) == null && bag.getNullLocation() == -1)
+//		{
+//			target.sendAlert(ErrorCode.ALERT_BAG_IS_FULL);
+//			return;
+//		}
+		Goods newGoods = null;
+		if(goods instanceof GoodsEquip)
+		{
+			GoodsEquip n = (GoodsEquip) DataFactory.getInstance().getGameObject(goods.id);
+			GoodsEquip newEquip = (GoodsEquip) Goods.cloneObject(n);
+			if(id == 1000000000 || id == 2000000000)
+			{
+				newGoods = newEquip.makeNewBetterEquip(newEquip.taskColor==-1?0:newEquip.taskColor);
+			}
+			else
+			{
+				newGoods = newEquip.makeNewBetterEquip(0);
+			}
+			if(id == 1000000000)
+				newGoods.setBindMode(Goods.MONEYSHOPBIND);
+			else
+				newGoods.setBindMode(Goods.COMMONSHOPBIND);
+		}
+		else
+		{
+			newGoods = (Goods) Goods.cloneObject(goods);
+			newGoods.id = goods.id;
+			newGoods.name = goods.name;
+			newGoods.type = goods.type;
+			newGoods.repeatNumber = goods.repeatNumber;
+			newGoods.iconId = goods.iconId;
+			newGoods.goodsCount = count;
+		}
+		newGoods.objectIndex = GameServer.getInstance().getDatabaseAccessor().getGoodsObjIndex();
+		
+		if(!bag.isCanAddGoodsToBag(target, newGoods))
+		{
+			target.sendAlert(ErrorCode.ALERT_BAG_IS_FULL);
+			return;
+		}
+		
+		if(id != 2000000000)
+		{
+			if(id == 1000000000)
+			{
+				if(bag.equipMoney >= needMoney)
+					bag.equipMoney -= needMoney;
+				else
+				{
+					needMoney -= bag.equipMoney;
+					bag.equipMoney = 0;
+					bag.money -= needMoney;
+				}
+				
+				GameServer.getInstance().getWorldManager().getJobObserver().addJob(GameServer.JOB_DATABASEJOB,
+						new PayJob(target,2,0,needMoney,GameServer.getInstance().id+":"+target.getName()+":"+newGoods.name));
+			}
+			else
+			{
+				bag.point -= needPoint;
+			}	
+		}
+		else
+			target.setHonour(target.getHonour() - needHonour);
+
+		bag.sendAddGoods(target, newGoods);
+		
+		
+		
+		target.getWorldManager().getJobObserver().addJob(GameServer.JOB_DATABASEJOB,
+					new SaveJob(target.getWorldManager(),target.getPlayer()));
+	}
+	
+	/**
+	 * 玩家出售商品
+	 * @param target
+	 * @param buffer
+	 */
+	private void saleGoods(PlayerController target,ByteBuffer buffer)
+	{
+//		if(id == 2000000000)
+//		{
+//			target.sendAlert(ErrorCode.ALERT_SHOP_NOT_SALE);
+//			return;
+//		}
+		int goodsId = buffer.readInt();
+		int count = buffer.readInt();
+		String objectIndex = buffer.readUTF();
+		Bag bag = (Bag) target.getPlayer().getExtPlayerInfo("bag");
+		Object goodsObject = null;
+		if(objectIndex.isEmpty() && goodsId != 0)
+			goodsObject = bag.getGoodsById(goodsId);
+		else
+		    goodsObject = bag.getGoodsByObjectIndex(Long.parseLong(objectIndex));
+		if(goodsObject == null || !(goodsObject instanceof Goods))
+		{
+			//物品不存在
+			target.sendAlert(ErrorCode.ALERT_GOODS_NOT_EXIST);
+			return;
+		}
+		Goods goods = (Goods) goodsObject;
+		int bagGoodsCount = bag.getGoodsCount(goods.id);
+		if(count > bagGoodsCount)
+		{
+			//想要出售的物品超出玩家背包中同类物品的总数
+			target.sendAlert(ErrorCode.ALERT_GOODS_COUNT_OVERRUN);
+			return;
+		}
+		
+		boolean result = false;
+		
+		if(id == 1000000000)
+		{
+			if(goods.type != 1)
+			{
+				target.sendAlert(ErrorCode.ALERT_SHOP_NOT_SALE);
+				return;
+			}
+			if(goods.money == 0)
+			{
+				target.sendAlert(ErrorCode.ALERT_SHOP_NOT_SALE);
+				return;
+			}
+			if(goods.money > 0)
+			{
+				int saleMoney = (int) (goods.money * ((double)REBATE/100) * count);
+				bag.equipMoney += saleMoney;
+				target.sendGetGoodsInfo(1,false, "\u51FA\u552E"+goods.name+",\u5F97\u5230"+saleMoney+"\u4EE3\u91D1\u5238.");
+				result = true;
+			}
+		}
+		else
+		{
+			int sr = 30;
+			if(saleRate.get(goods.id) != null)
+				sr = Integer.parseInt(saleRate.get(goods.id).toString());
+			int salePoint = (int) (goods.point * ((double)sr/100) * count);
+			bag.point += salePoint;
+			result = true;
+		}
+		
+		if(result)
+		{
+			if(goods.repeatNumber <= 1)
+				bag.removeGoods(target, goods.objectIndex, count);
+			else
+				bag.deleteGoods(target, goods.id, count);
+
+		    ByteBuffer buff = new ByteBuffer(16);
+			buff.writeInt(goods.id);
+			buff.writeInt(count);
+			buff.writeInt((int) bag.point);
+			buff.writeInt((int) bag.money);
+			buff.writeInt((int) bag.equipMoney);
+			target.getNetConnection().sendMessage(new SMsg(SMsg.S_SALE_GOODS_COMMAND,buff));
+		}
+	}
+	
+	
+	
+	 /**
+	  * 根据ID获取物品
+	  * @param id
+	  * @return
+	  */
+	private Goods getGoodsById(int id)
+	{
+		for (int i = 0; i < goodsList.size(); i++) 
+		{
+			Goods goods = (Goods) goodsList.get(i);
+			if(goods.id == id)
+				return goods;
+		}
+		return null;
+	}
+	
+
+	
+	
+	/**
+	 * 与商店有关的客户端消息通道
+	 * @param target
+	 * @param msg
+	 */
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		int type = msg.getType();
+		ByteBuffer buffer = msg.getBuffer();
+	
+		if(type == SMsg.C_BUY_GOODS_COMMAND)
+		{
+			buyGoods(target,buffer);
+		}
+		else if(type == SMsg.C_SALE_GOODS_COMMAND)
+		{
+			saleGoods(target,buffer);
+		}
+		else if(type == SMsg.C_OPEN_SHOP_COMMAND)
+		{
+			openShop(target);
+		}
+	}
+	
+	
+	
+
+	
+}

@@ -1,0 +1,550 @@
+package cc.lv1.rpg.gs.entity.controller;
+
+import cc.lv1.rpg.gs.entity.ext.Bag;
+import cc.lv1.rpg.gs.entity.ext.EquipSet;
+import cc.lv1.rpg.gs.entity.ext.PVPInfo;
+import cc.lv1.rpg.gs.entity.ext.SkillTome;
+import cc.lv1.rpg.gs.entity.impl.Goods;
+import cc.lv1.rpg.gs.entity.impl.battle.MonsterBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.PlayerBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.SpriteBattleTmp;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.net.SMsg;
+import cc.lv1.rpg.gs.other.ErrorCode;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+
+/**
+ * 玩家 vs 玩家
+ * @author dxw
+ *
+ */
+public class PVPController extends BattleController
+{
+
+	protected List targetPlayerList = new ArrayList(4);
+	
+	private PlayerController[] players;
+	
+	private PlayerController[] targetPlayers;
+	
+	private int playerLength;
+	
+	private int targetPlayerLength;
+	
+	public void update(long timeMillis)
+	{
+		super.update(timeMillis);
+		
+		for (int i = 0; i < targetPlayers.length; i++) 
+		{
+			if(targetPlayers[i] == null)
+				continue;
+			targetPlayers[i].update(timeMillis);
+			
+			PlayerBattleTmp pbt = (PlayerBattleTmp) targetPlayers[i].getAttachment();
+			
+			if(pbt == null)
+				continue;
+			
+			pbt.update(timeMillis);
+		}
+	}
+	
+	public void clientMessageChain(PlayerController target, AppMessage msg)
+	{
+		if(isFinish)
+		{
+//			System.out.println("isFinish "+ isFinish);
+			return;
+		}
+		
+		int type = msg.getType();
+		
+		if(type == SMsg.C_BATTLE_ACTION_COMMAND)
+		{
+			int actionType = msg.getBuffer().readByte();
+	
+			if(actionType == BattleController.SKILLPROCESSOR) //释放技能
+			{
+				processSkill(target,msg);
+			}
+			else if(actionType ==2) //释放道具
+			{
+				if(!target.checkWGcdTimer(0))
+					return;
+				processGoods(target,msg);
+			}
+			else if(actionType == 3) //逃跑
+			{
+				removePlayer(target);
+			}
+		}
+		else
+		{
+			super.clientMessageChain(target, msg);
+		}
+	}
+	
+
+	protected void processSkill(PlayerController target, AppMessage msg)
+	{
+		if(!target.isOnline())
+			return;
+		if(target.getAttachment().isDead())
+			return;
+		
+		int skillId = msg.getBuffer().readInt(); //发送技能的id
+		int targetIndex = msg.getBuffer().readByte(); //发送目标的index
+		
+		if(targetIndex < 0)
+			return;
+		
+		SkillTome skillTome= (SkillTome)target.getPlayer().getExtPlayerInfo("skillTome");
+		ActiveSkill skill  = skillTome.getActiveSkill(skillId);
+		if(skill == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_SKILL_NOT_EXIST);
+			return;
+		}
+		
+		if(!target.checkWGcdTimer(skill.CDTimer))
+		{
+			return;
+		}
+		
+		EquipSet equipSet = (EquipSet) target.getPlayer().getExtPlayerInfo("equipSet");
+		if(!equipSet.checkEquip(skill.weaponType))
+		{
+			target.sendAlert(ErrorCode.ALERT_NO_SKILL_NEEDARM);
+			return;
+		}
+		
+		if(!skill.checkMagicEnough(target))
+		{
+			target.sendAlert(ErrorCode.ALERT_PLAYER_MAGIC_NOTENOUTH);
+			return;
+		}
+		
+		SpriteBattleTmp sbt = target.getAttachment();
+		
+		if(sbt == null)
+		{
+			target.sendAlert(ErrorCode.ALERT_INIT_BATTLE_FAIL);
+			return;
+		}
+		
+		if(sbt.isLocked())
+		{
+			target.sendAlert(ErrorCode.ALERT_PLAYER_IS_LOCKED);
+			return;
+		}
+		
+		if(skill.targetType[0] == ActiveSkill.TARGET_TYPE_PLAYERS)//己方
+		{
+		    if(sbt.getTeamNo() == BattleController.TEAM2)
+			{
+		    	if(targetIndex >= targetPlayerLength)
+				{
+		    		target.sendAlert(ErrorCode.ALERT_OBJECT_INDEX_OVERRUN);
+					return;
+				}
+				sbt.setSkillTarget(targetPlayers[targetIndex]);
+			}
+			else
+			{
+				if(targetIndex >= playerLength)
+				{
+					target.sendAlert(ErrorCode.ALERT_OBJECT_INDEX_OVERRUN);
+					return;
+				}
+				sbt.setSkillTarget(players[targetIndex]);
+			}
+		}
+		else if(skill.targetType[0] == ActiveSkill.TARGET_TYPE_MONSTERS) //2：敌方
+		{
+			if(sbt.getTeamNo() == BattleController.TEAM2)
+			{
+				if(targetIndex >= playerLength)
+				{
+					target.sendAlert(ErrorCode.ALERT_OBJECT_INDEX_OVERRUN);
+					return;
+				}
+				sbt.setSkillTarget(players[targetIndex]);
+			}
+			else
+			{
+				if(targetIndex >= targetPlayerLength)
+				{
+					target.sendAlert(ErrorCode.ALERT_OBJECT_INDEX_OVERRUN);
+					return;
+				}
+				sbt.setSkillTarget(targetPlayers[targetIndex]);
+			}
+		}
+		else if(skill.targetType[0] == ActiveSkill.TARGET_TYPE_ONESELF)//3.自己
+		{
+			sbt.setSkillTarget(target);
+		}
+		else
+		{
+			System.out.println("PVPController 199 other target Object");
+			return;
+		}
+		
+		sbt.processActiveSkill(skill);
+		
+		//测试打印********************************************************************************
+//		int length = players.length;
+//		for (int i = 0; i < length; i++)
+//		{
+//			if(players[i] == null)
+//				continue;
+//	
+//			System.out.println(players[i].getName()+" HP "+players[i].getPlayer().hitPoint+" / "+players[i].getPlayer().maxHitPoint);
+//			System.out.println(players[i].getName()+" MP "+players[i].getPlayer().magicPoint+" / "+players[i].getPlayer().maxMagicPoint);
+//		}
+//		
+//		length = targetPlayers.length;
+//		for (int i = 0; i < length; i++)
+//		{
+//			if(targetPlayers[i] == null)
+//				continue;
+//			System.out.println(targetPlayers[i].getName()+" HP "+targetPlayers[i].getPlayer().hitPoint+" / "+targetPlayers[i].getPlayer().maxHitPoint);
+//			System.out.println(targetPlayers[i].getName()+" MP "+targetPlayers[i].getPlayer().magicPoint+" / "+targetPlayers[i].getPlayer().maxMagicPoint);
+//		}
+		//测试打印********************************************************************************
+		
+	}
+
+	public void setFighters(PlayerController[] players, SpriteController[] sprite)
+	{
+		PlayerController [] targetPlayers = (PlayerController[])sprite;
+		
+		super.setFighters(players, targetPlayers);
+		
+		this.players = players;
+		this.targetPlayers = targetPlayers;
+		this.playerLength = players.length;
+		this.targetPlayerLength = targetPlayers.length;
+		
+		
+		 PlayerBattleTmp pt = null;
+		 
+		 int length = players.length;
+		 int i = 0;
+		 for( ; i < length ; i ++)
+		 {
+			 if(players[i] == null)
+				 continue;
+			 
+			 pt = new PlayerBattleTmp();
+			 pt.setBattle(this);
+			 pt.setPlayer(players[i]);
+			 pt.setTeamNo(BattleController.TEAM1);
+			 pt.setIndex(i);
+			 players[i].setAttachment(pt);
+			 playerList.add(players[i]); 
+		 }
+		 
+		 length = targetPlayers.length;
+		 for(i = 0; i < length ; i ++)
+		 {
+			 if(targetPlayers[i] == null)
+				 continue;
+			 
+			 pt = new PlayerBattleTmp();
+			 pt.setBattle(this);
+			 pt.setPlayer(targetPlayers[i]);
+			 pt.setTeamNo(BattleController.TEAM2);
+			 pt.setIndex(i);
+			 targetPlayers[i].setAttachment(pt);
+			 targetPlayerList.add(targetPlayers[i]); 
+		 }
+		 
+	}
+	
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		int i = 0;
+		buffer.writeByte(BattleController.TEAM1);
+//		System.out.println("send one team info:");
+//		System.out.println("length "+playerLength);
+		buffer.writeByte(playerLength);//玩家数量
+		for (i = 0; i < playerLength; i++)
+		{
+			buffer.writeByte(i);
+			buffer.writeInt(players[i].getID());
+//			System.out.println("   player index"+i+" id:"+players[i].getID()+" name:"+players[i].getName());
+		}
+		buffer.writeByte(BattleController.TEAM2);
+//		System.out.println("send two team info:");
+//		System.out.println("length "+targetPlayerLength);
+		buffer.writeByte(targetPlayerLength);
+		for (i = 0; i < targetPlayerLength; i++) 
+		{
+			buffer.writeByte(i);
+			EquipSet es = (EquipSet) targetPlayers[i].getPlayer().getExtPlayerInfo("equipSet");
+			buffer.writeInt(targetPlayers[i].getID());
+			buffer.writeUTF(targetPlayers[i].getName());
+			buffer.writeInt(targetPlayers[i].getPlayer().iconId);
+			buffer.writeInt(targetPlayers[i].getPlayer().modelId);
+			buffer.writeInt(targetPlayers[i].getPlayer().modelMotionId);
+			buffer.writeInt(targetPlayers[i].getPlayer().level);
+			buffer.writeInt(targetPlayers[i].getPlayer().hitPoint);
+//			buffer.writeInt(es.maxHitPoint);
+			buffer.writeInt(es.getTotalAtt("maxHitPoint")+targetPlayers[i].getPlayer().maxHitPoint);
+			buffer.writeInt(targetPlayers[i].getPlayer().magicPoint);
+//			buffer.writeInt(es.maxMagicPoint);
+			buffer.writeInt(es.getTotalAtt("maxMagicPoint")+targetPlayers[i].getPlayer().maxMagicPoint);
+//			System.out.println("   player index"+i+" id:"+targetPlayers[i].getID()+" name:"+targetPlayers[i].getName());
+		}
+	}
+	
+	public void uninit()
+	{
+		if(targetPlayers.length <= 0)
+			return;
+		for (int i = 0; i != targetPlayerLength; i++) 
+		{
+			PlayerBattleTmp pbt = (PlayerBattleTmp) targetPlayers[i].getAttachment();
+			removeEffect(pbt.getEffectList(),pbt);
+			targetPlayers[i].setParent(room);
+			if(targetPlayers[i].getPlayer().hitPoint <=0 )
+				targetPlayers[i].getPlayer().hitPoint =1;
+		}
+		super.uninit();
+	}
+
+	public PlayerController[] getPlayers()
+	{
+		return players;
+	}
+
+	public PlayerController[] getTargetPlayers()
+	{
+		return targetPlayers;
+	}
+	
+	public List getTargetPlayerList()
+	{
+		return targetPlayerList;
+	}
+	
+	/**
+	 * 检测状态
+	 */
+	public void checkDeadState()
+	{
+		if(!isPlayerDead() && !isTargetPlayerDead())
+			return;
+		
+		int loseTeam = 0;
+		if(isTargetPlayerDead())
+			loseTeam = targetPlayers[0].getAttachment().getTeamNo();
+		else if(isPlayerDead())
+			loseTeam =  players[0].getAttachment().getTeamNo();
+		
+		dispathWinOrLose(playerList,loseTeam);
+		dispathWinOrLose(targetPlayerList,loseTeam);
+		
+		if(targetPlayers[0].getPlayer().camp == players[0].getPlayer().camp)
+		{
+			if(loseTeam == targetPlayers[0].getAttachment().getTeamNo())
+				setSameCampPKInfo(players,targetPlayers);
+			else
+				setSameCampPKInfo(targetPlayers,players);
+		}
+		else
+		{
+			if(loseTeam == targetPlayers[0].getAttachment().getTeamNo())
+				setDiffCampPKInfo(players,targetPlayers);
+			else
+				setDiffCampPKInfo(targetPlayers,players);
+		}
+		
+		isFinish = true;
+	}
+	
+	public void dispathWinOrLose(List players,int loseTeam)
+	{
+		for(int i = 0 ; i < players.size() ; i ++)
+		{
+			PlayerController everyone = (PlayerController)players.get(i);
+			
+			ByteBuffer buffer = new ByteBuffer(1);
+			
+			if(everyone.getAttachment().getTeamNo() == loseTeam)
+			{
+				buffer.writeBoolean(false);
+			}
+			else
+			{
+				buffer.writeBoolean(true);
+			}
+			SMsg appmsg = new SMsg(SMsg.S_BATTLE_PLAYER_BATTLERESULT,buffer);
+			everyone.getNetConnection().sendMessage(appmsg);
+		}
+	}
+	
+	public boolean isPlayerDead()
+	{
+		for (int i = 0; i < playerLength; i++)
+		{
+			if(!players[i].getAttachment().isDead())
+				return false;
+		}
+		return true;
+	}
+	public boolean isTargetPlayerDead()
+	{
+		for (int i = 0; i < targetPlayerLength; i++)
+		{
+			if(!targetPlayers[i].getAttachment().isDead())
+				return false;
+		}
+		return true;
+	}
+	
+	public void dispatchIsBattleWithoutRoom(boolean isBattle,PlayerController target)
+	{
+		if(target == null)
+		{
+			PlayerController player = null;
+			int length = players.length;
+			for (int i = 0; i < length; i++)
+			{
+				if(players[i] != null)
+				{
+					player = players[i];
+					break;
+				}
+			}
+			
+			if(player!= null)
+				super.dispatchIsBattleWithoutRoom(isBattle,player);
+			
+			player = null;
+			length = targetPlayers.length;
+			for (int i = 0; i < length; i++)
+			{
+				if(targetPlayers[i] != null)
+				{
+					player = targetPlayers[i];
+					break;
+				}
+			}
+			
+			if(player== null)
+				return;
+			
+			super.dispatchIsBattleWithoutRoom(isBattle,player);
+		}
+		else
+		{
+			super.dispatchIsBattleWithoutRoom(isBattle, target);
+		}
+	}
+	
+	/**
+	 * 转发容器内所有的消息
+	 * @param appMsg
+	 */
+	public void dispatchMsg(int sMsg,ByteBuffer buff)
+	{
+		for(int i = 0 ; i != targetPlayerList.size() ; i ++)
+		{
+			PlayerController target = (PlayerController)targetPlayerList.get(i);
+			ByteBuffer buffer;
+			if(sMsg == SMsg.S_ROOM_PVP_COMMAND)
+			{
+				buffer = new ByteBuffer(64);
+				write(buffer);
+			}
+			else
+			{
+				buffer = new ByteBuffer(buff.getBytes());
+			}
+			target.getNetConnection().sendMessage(new AppMessage(sMsg,buffer));
+		}
+		super.dispatchMsg(sMsg, buff);
+	}
+	
+	public void write(ByteBuffer buffer)
+	{
+		int i = 0;
+		buffer.writeByte(BattleController.TEAM2);
+		buffer.writeByte(targetPlayerLength);//玩家数量
+		for (i = 0; i < targetPlayerLength; i++)
+		{
+			buffer.writeByte(i);
+			buffer.writeInt(targetPlayers[i].getID());
+		}
+		buffer.writeByte(BattleController.TEAM1);
+		buffer.writeByte(playerLength);
+		for (i = 0; i < playerLength; i++) 
+		{
+			buffer.writeByte(i);
+			EquipSet es = (EquipSet) players[i].getPlayer().getExtPlayerInfo("equipSet");
+			buffer.writeInt(players[i].getID());
+			buffer.writeUTF(players[i].getName());
+			buffer.writeInt(players[i].getPlayer().iconId);
+			buffer.writeInt(players[i].getPlayer().modelId);
+			buffer.writeInt(players[i].getPlayer().modelMotionId);
+			buffer.writeInt(players[i].getPlayer().level);
+			buffer.writeInt(players[i].getPlayer().hitPoint);
+//			buffer.writeInt(es.maxHitPoint);
+			buffer.writeInt(es.getTotalAtt("maxHitPoint")+players[i].getPlayer().maxHitPoint);
+			buffer.writeInt(players[i].getPlayer().magicPoint);
+//			buffer.writeInt(es.maxMagicPoint);
+			buffer.writeInt(es.getTotalAtt("maxMagicPoint")+players[i].getPlayer().maxMagicPoint);
+		}
+	}
+	
+
+	/**
+	 * 设置PK信息(相同阵营)
+	 * @param winPlayers
+	 * @param losePlayers
+	 */
+	public void setSameCampPKInfo(PlayerController[] winPlayers,PlayerController[] losePlayers)
+	{
+		for (int i = 0; i < winPlayers.length; i++) 
+		{
+			PVPInfo pvp = (PVPInfo) winPlayers[i].getPlayer().getExtPlayerInfo("PVPInfo");
+			pvp.setWinInfo();
+		}
+		
+		for (int i = 0; i < losePlayers.length; i++) 
+		{
+			PVPInfo pvp = (PVPInfo) losePlayers[i].getPlayer().getExtPlayerInfo("PVPInfo");
+			pvp.setLoseInfo();
+		}
+	}
+	
+	/**
+	 * 设置PK信息(不同阵营)
+	 * @param winPlayers
+	 * @param losePlayers
+	 */
+	public void setDiffCampPKInfo(PlayerController[] winPlayers,PlayerController[] losePlayers)
+	{
+		PVPInfo pvp = null;
+		for (int i = 0; i < winPlayers.length; i++) 
+		{
+			pvp = (PVPInfo) winPlayers[i].getPlayer().getExtPlayerInfo("PVPInfo");
+			pvp.setCampWinInfo();
+		}
+		
+		for (int i = 0; i < losePlayers.length; i++) 
+		{
+			pvp = (PVPInfo) losePlayers[i].getPlayer().getExtPlayerInfo("PVPInfo");
+			pvp.setCampLoseInfo();
+		}
+	}
+
+
+}

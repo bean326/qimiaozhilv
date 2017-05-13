@@ -1,0 +1,111 @@
+package cc.lv1.rpg.gs.entity.container;
+
+import vin.rabbit.comm.GameObject;
+import vin.rabbit.net.AppMessage;
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.entity.RPGameObject;
+import cc.lv1.rpg.gs.entity.controller.PlayerController;
+
+/**
+ * 主角容器   容在区域房间战斗
+ * @author dxw
+ *
+ */
+public class PlayerContainer extends RPGameObject
+{
+	
+	protected List playerList = new ArrayList(8);
+	
+	protected List battleList = new ArrayList(4);
+	
+	public void copyTo(GameObject gameobject)
+	{
+		super.copyTo(gameobject);
+	}
+	
+	public PlayerController getPlayer(String name)
+	{
+		int length = playerList.size();
+		for (int i = 0; i < length; i++)
+		{
+			PlayerController controller = (PlayerController) playerList.get(i);
+			if (controller.getName().equals(name))
+				return controller;
+		}
+		return null;
+	}
+
+	public PlayerController getPlayer(int id)
+	{
+		int length = playerList.size();
+		for (int i = 0; i < length; i++)
+		{
+			PlayerController controller = (PlayerController) playerList.get(i);
+			if (controller.getPlayer().id == id)
+				return controller;
+		}
+		return null;
+	}
+	
+	public List getPlayerList()
+	{
+		return playerList;
+	}
+
+	public int getPlayerCount()
+	{
+		return playerList.size();
+	}
+	
+	public void addPlayer(PlayerController target)
+	{
+		playerList.add(target);
+	}
+	
+	public void removePlayer(PlayerController target)
+	{
+		playerList.remove(target);
+	}
+	
+	/**
+	 * 转发容器内所有的消息
+	 * @param appMsg
+	 */
+	public void dispatchMsg(int sMsg,ByteBuffer buff)
+	{
+		for(int i = 0 ; i != playerList.size() ; i ++)
+		{
+			PlayerController target = (PlayerController)playerList.get(i);
+			ByteBuffer buffer = new ByteBuffer(buff.getBytes());
+			target.getNetConnection().sendMessage(new AppMessage(sMsg,buffer));
+		}
+	}
+	
+	/**
+	 * 转发范围容器内所有的消息
+	 * @param appMsg
+	 */
+	public void dispatchScopeMsg(int sMsg,ByteBuffer buff)
+	{
+		for(int i = 0 ; i != playerList.size() ; i ++)
+		{
+			PlayerController target = (PlayerController)playerList.get(i);
+			ByteBuffer buffer = new ByteBuffer(buff.getBytes());
+			target.getNetConnection().sendMessage(new AppMessage(sMsg,buffer));
+		}
+	}
+	
+	public void update(long currentMillis)
+	{
+		for(int i = 0 ; i != playerList.size() ; i ++)
+		{
+			PlayerController target = (PlayerController)playerList.get(i);
+			target.update(currentMillis);
+		}
+	}
+	
+	
+	
+}

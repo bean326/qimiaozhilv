@@ -1,0 +1,57 @@
+<dialog>
+
+<!--该NPC名为 爱神 -->
+<!-- default为NPC默认的对话 -->
+	<default>
+	<s01>
+		<words>
+			<color>FFFFFF</color>
+			<!-- #号前面的表示是男玩家的对话，#号后面表示是女玩家的对话,不分男女就把#号删除，写上对话 -->
+			<text textId="15000301">//结婚戒指可在万能管家或者淘宝获得。申请结婚方须完成“爱的考验”。结婚双方须在同一个队伍中，等级2000以上。</text>
+		</words>
+		<options>
+			 <item textId="15010301" text="结婚" command="marry" />
+                         <item textId="15010302" text="离婚" command="cancelMarry" />
+			 <item textId="15010303" text="礼服兑换" command="changeMarryCoat" />
+		</options>
+	</s01>
+	</default>		
+	<t1072000018>
+		 <s00>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001801">任务:爱的考验</text>
+			</words>
+			<options>
+			</options>
+		</s00>
+	  	 <s01>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001802">想要结婚吗？来接受考验吧！/ 完成这个考验才能跟心爱的人一起结婚哦！每天只能完成一次！/ 每次结婚只需要完成一次考验任务！！！</text>
+			</words>
+			<options>
+				<item textId="10000002" text="接受任务" command="accept:1072000018" />
+				<item textId="10000003" text="不接任务" command="" />
+			</options>
+		 </s01>
+		  <s02>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001802">想要结婚吗？来接受考验吧！/ 完成这个考验才能跟心爱的人一起结婚哦！每天只能完成一次！/ 每次结婚只需要完成一次考验任务！！！</text>
+			</words>
+			<options>
+				<item textId="65535" text="按钮变灰" command="1072000018" />
+			</options>
+		 </s02>
+		  <s03>
+			<words>
+				<color>FFFFFF</color>
+				<text textId="200001802">想要结婚吗？来接受考验吧！/ 完成这个考验才能跟心爱的人一起结婚哦！每天只能完成一次！/ 每次结婚只需要完成一次考验任务！！！</text>
+			</words>
+			<options>
+				<item textId="10000006" text="完成任务" command="finish:1072000018" />
+			</options>
+		 </s03>
+   </t1072000018>
+</dialog>

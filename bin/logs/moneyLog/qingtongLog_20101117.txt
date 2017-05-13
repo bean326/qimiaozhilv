@@ -1,0 +1,3 @@
+account	name	count	point	money	daijin	goods
+all	all	1	600000	0	0	нч
+bean01	bean01	1	600000	0	0	нч

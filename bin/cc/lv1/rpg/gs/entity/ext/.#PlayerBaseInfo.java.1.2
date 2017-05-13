@@ -1,0 +1,117 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import vin.rabbit.comm.i.IClientHandle;
+import vin.rabbit.util.ByteBuffer;
+
+/**
+ * 玩家基本资料
+ * @author dxw
+ *
+ */
+public class PlayerBaseInfo implements IClientHandle
+{
+	
+	/** 帮会id */
+	public int guildId;
+	
+	/** 帮会职位 */
+	public int guildPosition;
+	
+	/** 力量 */
+	public int power;
+
+	/** 敏捷 */
+	public int nimble;
+	
+	/** 精神 */
+	public int spirit;
+	
+	/** 智慧 */
+	public int wisdom;
+	
+	/** 体质 */
+	public int physique;
+	
+	
+	/** 速度 */
+	public int speed;
+	
+	/** 命中 */
+	public int htt;
+	
+	/** 闪避 */
+	public int shirkFlash;
+	
+	
+	/** 精神抵抗率 */
+	public int spiritResistance;
+	
+	/** 物理攻击 */
+	public int phsAtt;
+	
+	/** 物理防御 */
+	public int phsDef;
+	
+	/** 精神攻击 */
+	public int sptAtt;
+	
+	/** 精神防御 */
+	public int sptDef;
+	
+	/** 治疗值 */
+	public int curePoint;
+	
+	/** 物理爆击率 */
+	public int phsBHit;
+	
+	/** 精神爆击率 */
+	public int sptBHit;
+	
+	/** 物理爆击伤害参数 */
+	public int phsBHitParam;
+	
+	/** 精神爆击伤害参数 */
+	public int sptBHitParam;
+	
+	/** 忽视防御物伤 */
+	public int ignoreDefPhs;
+	
+	/** 忽视防御精伤 */
+	public int ignoreDefSpt;
+	
+	/** 物理免伤 */
+	public int toAvoidPhs;
+	
+	/** 精神免伤 */
+	public int toAvoidSpt;
+
+	
+	public void readFrom(ByteBuffer buffer)
+	{
+
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildPosition);
+		buffer.writeInt(power);
+		buffer.writeInt(nimble);
+		buffer.writeInt(spirit);
+		buffer.writeInt(wisdom);
+		buffer.writeInt(physique);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+		buffer.writeInt(guildId);
+	}
+
+
+}

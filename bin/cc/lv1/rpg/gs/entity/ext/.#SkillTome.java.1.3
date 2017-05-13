@@ -1,0 +1,319 @@
+package cc.lv1.rpg.gs.entity.ext;
+
+import vin.rabbit.util.ByteBuffer;
+import vin.rabbit.util.collection.i.List;
+import vin.rabbit.util.collection.impl.ArrayList;
+import cc.lv1.rpg.gs.data.DataFactory;
+import cc.lv1.rpg.gs.entity.impl.Player;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.ActiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.PassiveSkill;
+import cc.lv1.rpg.gs.entity.impl.battle.skill.Skill;
+/**
+ * 技能组
+ * @author dxw
+ *
+ */
+public class SkillTome extends PlayerExtInfo
+{
+
+	/**
+	 * 主动技能
+	 */
+	private ActiveSkill [] activeSkills = new ActiveSkill[0];
+	
+	/**
+	 * 被动技能
+	 */
+	private PassiveSkill [] passiveSkills = new PassiveSkill[0];
+	
+	/**
+	 * 当前职业可以学习的公共技能
+	 */
+	private Skill [] pubSkills = null;
+	
+	/**
+	 * 当前职业可以学习的职业技能
+	 */
+	private Skill [] proSkills = null;
+	
+	
+	public SkillTome()
+	{
+
+	}
+	
+	public void writeTo(ByteBuffer buffer)
+	{
+		buffer.writeInt(pubSkills.length);
+		
+		for (int i = 0; i < pubSkills.length; i++)
+		{
+			buffer.writeInt(pubSkills[i].id);
+			buffer.writeInt(pubSkills[i].iconId);
+			buffer.writeUTF(pubSkills[i].name);
+			buffer.writeInt(pubSkills[i].level);
+		}
+		
+		buffer.writeInt(proSkills.length);
+		for (int i = 0; i < proSkills.length; i++)
+		{
+			buffer.writeInt(proSkills[i].id);
+			buffer.writeInt(proSkills[i].iconId);
+			buffer.writeUTF(proSkills[i].name);
+			buffer.writeInt(proSkills[i].level);
+		}
+	}
+	
+	public void writeActiveSkill(ByteBuffer buffer)
+	{
+		int skillLength = activeSkills.length;
+		
+		buffer.writeInt(skillLength);
+		for(int i = 0 ; i < skillLength ; i ++)
+		{
+			//activeSkills[i].writeBattleTo(buffer);
+			buffer.writeInt(activeSkills[i].id);
+			//.writeTo(buffer);
+		}
+	}
+	
+	public void writePassiveSkill(ByteBuffer buffer)
+	{
+		int skillLength = passiveSkills.length;
+		for(int i = 0 ; i < skillLength ; i ++)
+		{
+			passiveSkills[i].writeTo(buffer);
+		}
+	}
+	
+	public void initBaseSkill(int []skillIds,Player player)
+	{
+		int length = skillIds.length;
+		
+		activeSkills = new ActiveSkill[length];
+		
+		DataFactory dataFactory = DataFactory.getInstance();
+		
+		
+		List skills = dataFactory.getSkillList();
+		List pubSkillList = new ArrayList();
+		List proSkillList = new ArrayList();
+		
+		int size = skills.size();
+		for (int i = 0; i < size; i++)
+		{
+			Skill skill = (Skill)skills.get(i);
+			if(skill instanceof ActiveSkill)
+			{
+				ActiveSkill as = ((ActiveSkill)skill);
+				
+				boolean isPubSkill = true;
+
+				for (int j = 0; j < as.profession.length; j++)
+				{
+					if(j == 0)
+					{
+						if(as.profession[j] != 0)
+							isPubSkill = false;
+					}
+					else
+					{
+						if(as.profession[j] == 0)
+							break;
+					}
+					
+					if(isPubSkill)
+					{
+						pubSkillList.add(as);
+						break;
+					}
+					else
+					{
+						int count = player.profession+3;
+
+						if(as.profession[j] == player.profession 
+							|| as.profession[j] == player.profession+count
+							|| as.profession[j] == player.profession+count+1)
+							proSkillList.add(as);
+					}
+				}
+			}
+		}
+		
+		Object[] objs = pubSkillList.toArray();
+		pubSkills = new Skill[objs.length];
+		for (int i = 0; i < objs.length; i++)
+		{
+			pubSkills[i] = (Skill)objs[i];
+		}
+		
+		objs = proSkillList.toArray();
+		proSkills = new Skill[objs.length];
+		for (int i = 0; i < objs.length; i++)
+		{
+			proSkills[i] = (Skill)objs[i];
+		}
+		
+		
+		for(int i = 0 ; i < length ; i ++)
+		{
+			activeSkills[i] = new ActiveSkill();
+			ActiveSkill skill = (ActiveSkill)dataFactory.getGameObject(skillIds[i]); // 得到基本战斗技能
+			skill.copyTo(activeSkills[i]);
+			System.out.println("创建角色获得技能  "+activeSkills[i].id+" "+activeSkills[i].name);
+		}
+
+	}
+	
+	public String getName()
+	{
+		return "skillTome";
+	}
+
+
+	public void loadFrom(ByteBuffer buffer)
+	{
+		int length = buffer.readInt();
+		DataFactory dataFactory = DataFactory.getInstance();
+		for(int i = 0 ; i < length ; i ++)
+		{
+			int skillId = buffer.readInt();
+			Skill skill = (Skill)dataFactory.getGameObject(skillId);
+			addSkill(skill);
+		}
+		
+
+		length = buffer.readInt();
+		pubSkills = new Skill[length];
+		
+		for (int i = 0; i < length; i++)
+		{
+			pubSkills[i] = (Skill)dataFactory
+			.getGameObject(buffer.readInt());
+		}
+		
+		length = buffer.readInt();
+		proSkills = new Skill[length];
+		for (int i = 0; i < length; i++)
+		{
+			proSkills[i] = (Skill)dataFactory
+			.getGameObject(buffer.readInt());
+		}
+	}
+
+
+	public void saveTo(ByteBuffer buffer)
+	{
+		int length = activeSkills.length + passiveSkills.length;
+		buffer.writeInt(length);
+		int aLength = activeSkills.length;
+		int pLength = passiveSkills.length;
+		
+		for(int i = 0 ; i < aLength ; i ++)
+		{
+			buffer.writeInt(activeSkills[i].id);
+		}
+		
+		for(int i = 0 ; i < pLength ; i ++)
+		{
+			buffer.writeInt(passiveSkills[i].id);
+		}
+		
+		
+		buffer.writeInt(pubSkills.length);
+		
+		for (int i = 0; i < pubSkills.length; i++)
+		{
+			buffer.writeInt(pubSkills[i].id);
+		}
+		
+		buffer.writeInt(proSkills.length);
+		
+		for (int i = 0; i < proSkills.length; i++)
+		{
+			buffer.writeInt(proSkills[i].id);
+		}
+	}
+
+	public void addSkill(Skill extInfo)
+	{
+		if(extInfo instanceof ActiveSkill)
+		{
+			ActiveSkill [] infos = new ActiveSkill[activeSkills.length+1];
+			for (int i = 0; i < activeSkills.length; i++)
+				infos[i] = activeSkills[i];
+			infos[activeSkills.length] = (ActiveSkill)extInfo;
+			activeSkills = infos;
+		}
+		else if(extInfo instanceof PassiveSkill)
+		{
+			PassiveSkill [] infos = new PassiveSkill[passiveSkills.length+1];
+			for (int i = 0; i < passiveSkills.length; i++)
+				infos[i] = passiveSkills[i];
+			infos[passiveSkills.length] = (PassiveSkill)extInfo;
+			passiveSkills = infos;
+		}
+	}
+	
+	/**
+	 * 获取主动技能
+	 * @param id
+	 * @return
+	 */
+	public ActiveSkill getActiveSkill(int id)
+	{
+		int length = activeSkills.length;
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(id == activeSkills[i].id)
+				return activeSkills[i];
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取被动技能
+	 * @param id
+	 * @return
+	 */
+	public PassiveSkill getPassiveSkill(int id)
+	{
+		int length = passiveSkills.length;
+		for(int i = 0 ; i < length ; i ++)
+		{
+			if(id == passiveSkills[i].id)
+				return passiveSkills[i];
+		}
+		return null;
+	}
+	
+	
+	public Skill getSkill(int id)
+	{
+		Skill skill = null;
+		int length = 0;
+		length = pubSkills.length;
+		for (int i = 0; i < length; i++) 
+		{
+			if(pubSkills[i].id == id)
+			{
+				skill = pubSkills[i];
+				break;
+			}
+		}
+		if(skill == null)
+		{
+			length = proSkills.length;
+			for (int i = 0; i < length; i++) 
+			{
+				if(proSkills[i].id == id)
+				{
+					skill = proSkills[i];
+					break;
+				}
+			}
+		}
+		return skill;
+	}
+		
+}
